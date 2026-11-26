@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import type { File as SublayFile } from "../../interfaces/models/File";
+import { SublayError } from "../../errors/SublayError";
 
 // Type guard to detect if it's a real browser File
 function isBrowserFile(file: UniversalFile): file is BrowserFile {
@@ -53,14 +54,14 @@ function useUploadFile(): UseUploadFileValues {
       onProgress,
     }: UploadFileProps): Promise<SublayFile> => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!file) {
-        throw new Error("No file provided.");
+        throw new SublayError("No file provided.");
       }
       if (pathParts !== undefined && !Array.isArray(pathParts)) {
-        throw new Error("Invalid arguments. pathParts must be an array.");
+        throw new SublayError("Invalid arguments. pathParts must be an array.");
       }
 
       setUploading(true);

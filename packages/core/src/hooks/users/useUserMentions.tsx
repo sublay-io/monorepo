@@ -6,6 +6,7 @@ import useMentionSuggestions, {
   DEFAULT_MENTION_PATTERN,
   escapeRegex,
 } from "../utils/useMentionSuggestions";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UseUserMentionsProps {
   content: string;
@@ -76,7 +77,7 @@ const useUserMentions = ({
   };
 
   const addMention = (user: User) => {
-    if (!user.username) throw new Error("User has no username set");
+    if (!user.username) throw new SublayError("User has no username set");
     setMentions((prevMentions) => {
       // Check if the user already exists based on id
       if (prevMentions.some((mention) => mention.id === user.id)) {

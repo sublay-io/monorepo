@@ -7,6 +7,8 @@ import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { SpaceReputationContextParams } from "../../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
+import { toSublayError } from "../../../errors/SublayError";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface MessageFilters {
   /**
@@ -74,10 +76,7 @@ export interface FetchManyChatMessagesResponse {
  * not a message the server can page from (`chat/invalid-cursor`).
  */
 export function isInvalidChatCursorError(err: unknown): boolean {
-  return (
-    (err as { response?: { data?: { code?: unknown } } })?.response?.data
-      ?.code === "chat/invalid-cursor"
-  );
+  return toSublayError(err).code === "chat/invalid-cursor";
 }
 
 /**
@@ -107,8 +106,8 @@ function useFetchManyChatMessages(): (
         spaceReputation,
       } = props;
 
-      if (!projectId) throw new Error("No project specified");
-      if (!conversationId) throw new Error("No conversation specified");
+      if (!projectId) throw new SublayError("No project specified");
+      if (!conversationId) throw new SublayError("No conversation specified");
 
       const params: Record<string, any> = {
         limit,

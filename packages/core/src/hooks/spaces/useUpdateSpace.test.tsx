@@ -221,7 +221,7 @@ describe("useUpdateSpace", () => {
 
     await expect(
       result.current({ spaceId: "space-1", update: { name: "New name" } }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when no space ID is passed", async () => {

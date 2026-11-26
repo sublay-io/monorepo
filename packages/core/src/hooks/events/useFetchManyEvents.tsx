@@ -10,6 +10,7 @@ import {
 } from "../../interfaces/models/Event";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 import { toIsoString } from "../../utils/dates";
+import { SublayError } from "../../errors/SublayError";
 
 // Serialize nested filter objects into bracket notation (mirrors
 // useFetchManyEntities so the server's qs parser reconstructs them).
@@ -91,7 +92,7 @@ function useFetchManyEvents(): (
   const fetchManyEvents = useCallback(
     async (props?: FetchManyEventsProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const params: Record<string, any> = {};

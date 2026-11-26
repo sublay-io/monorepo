@@ -42,6 +42,8 @@ export class SublayError extends Error {
 
 const UNKNOWN_ERROR_MESSAGE = "Unknown error";
 
+const ABORT_NAMES = new Set(["AbortError", "CanceledError"]);
+
 type ErrorBody = { error?: unknown; code?: unknown; param?: unknown };
 
 const nonEmptyString = (value: unknown): string | undefined =>
@@ -82,7 +84,8 @@ function readHttpFailure(
  * - an HTTP error response: `message` is the body's `error`, plus its `code`
  *   and `param` and the response `status`;
  * - anything else (a network error, a thrown `Error`, a string): `message` is
- *   taken from it, with no `code`.
+ *   taken from it, with no `code`. An aborted request keeps its `name`
+ *   (`"AbortError"` or `"CanceledError"`).
  *
  * `cause` is set to `err`.
  */
@@ -119,7 +122,12 @@ export function toSublayError(err: unknown): SublayError {
       nonEmptyString((err as { message?: unknown }).message) ??
       nonEmptyString((err as { error?: unknown }).error) ??
       UNKNOWN_ERROR_MESSAGE;
-    return new SublayError(message, { cause: err });
+    const error = new SublayError(message, { cause: err });
+    // An aborted request stays recognisable as one: `name` stays
+    // `"AbortError"` (fetch, RTK Query) or `"CanceledError"` (axios).
+    const name = (err as { name?: unknown }).name;
+    if (typeof name === "string" && ABORT_NAMES.has(name)) error.name = name;
+    return error;
   }
 
   return new SublayError(
@@ -165,3 +173,23 @@ export function fromSublayErrorRecord(record: SublayErrorRecord): SublayError {
     })
   );
 }
+
+/**
+ * The raw response body behind a failure, for the fields a few endpoints send
+ * beyond `error` / `code` / `param` (a `verificationId`, a conflicting row).
+ * Reads a `SublayError`'s `cause`, or the error itself. Internal.
+ */
+export function errorResponseBody(err: unknown): unknown {
+  const source = err instanceof SublayError ? err.cause : err;
+  return readHttpFailure(source)?.body ?? null;
+}
+
+/**
+ * For `.catch()` after an RTK Query `.unwrap()`: rethrows the failure as a
+ * `SublayError`. The base query itself keeps returning RTK's plain error
+ * objects, because RTK Query stores them in the Redux state, which must stay
+ * serializable (an app's own store included). Internal.
+ */
+export const rethrowAsSublayError = (err: unknown): never => {
+  throw toSublayError(err);
+};

@@ -17,7 +17,7 @@ icon: "plug"
 
 <CodeGroup>
 ```tsx React
-import { useRequestAccountDeletion } from "@sublay/react-js";
+import { useRequestAccountDeletion, SublayError } from "@sublay/react-js";
 
 function DeleteAccountButton({ onCodeSent }: { onCodeSent: () => void }) {
   const requestAccountDeletion = useRequestAccountDeletion();
@@ -26,9 +26,9 @@ function DeleteAccountButton({ onCodeSent }: { onCodeSent: () => void }) {
     try {
       await requestAccountDeletion();
       onCodeSent(); // reveal the "enter your code" step
-    } catch (err: any) {
-      // e.g. auth/no-email-on-file
-      console.error(err.response?.data?.error ?? "Could not start deletion.");
+    } catch (err) {
+      // A SublayError: err.code is e.g. "auth/no-email-on-file"
+      console.error(err instanceof SublayError ? err.message : "Could not start deletion.");
     }
   };
 

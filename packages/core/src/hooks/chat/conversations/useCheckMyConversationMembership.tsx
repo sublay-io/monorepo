@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../../projects/useProject";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import type { CheckMyConversationMembershipResponse } from "../../../interfaces/models/ConversationMember";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface CheckMyConversationMembershipProps {
   conversationId: string;
@@ -24,11 +25,11 @@ function useCheckMyConversationMembership(): (
   const checkMyConversationMembership = useCallback(
     async ({ conversationId }: CheckMyConversationMembershipProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!conversationId) {
-        throw new Error("Please pass a conversationId");
+        throw new SublayError("Please pass a conversationId");
       }
 
       const response = await axios.get<CheckMyConversationMembershipResponse>(

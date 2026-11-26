@@ -8,6 +8,7 @@ import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 import { SpaceReputationUserParams } from "../../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../../interfaces/UserSearch";
 import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface FetchConnectionsParams
   extends SpaceReputationUserParams,
@@ -27,11 +28,11 @@ function useFetchConnections(): (props?: FetchConnectionsParams) => Promise<Pagi
     ): Promise<PaginatedResponse<AcceptedConnectionRow>> => {
       const { page = 1, limit = 20, query, searchFields, spaceReputation } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!user) {
-        throw new Error("No user is logged in");
+        throw new SublayError("No user is logged in");
       }
 
       const response = await axios.get<PaginatedResponse<AcceptedConnectionRow>>(

@@ -7,7 +7,7 @@ import {
 } from "../../store/api/notificationPreferencesApi";
 import { handleError } from "../../utils/handleError";
 import type { PushEventType } from "../../interfaces/PushEventType";
-import { SublayError, toSublayError } from "../../errors/SublayError";
+import { SublayError, toSublayError, rethrowAsSublayError } from "../../errors/SublayError";
 
 export interface UseNotificationPreferencesValues {
   /**
@@ -52,11 +52,11 @@ function useNotificationPreferences(): UseNotificationPreferencesValues {
   const updatePreferences = useCallback(
     async ({ disabledTypes }: { disabledTypes: PushEventType[] }): Promise<void> => {
       if (!projectId || !user) {
-        throw new Error("No project ID or authenticated user available");
+        throw new SublayError("No project ID or authenticated user available");
       }
 
       try {
-        await updateMutation({ projectId, disabledTypes }).unwrap();
+        await updateMutation({ projectId, disabledTypes }).unwrap().catch(rethrowAsSublayError);
       } catch (err) {
         handleError(err, "Failed to update notification preferences");
         throw err;

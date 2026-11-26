@@ -6,6 +6,7 @@ import { updateEntityInLists } from "../../store/slices/entityListsSlice";
 import { Entity } from "../../interfaces/models/Entity";
 import { Comment } from "../../interfaces/models/Comment";
 import { ReactionType } from "../../interfaces/models/Reaction";
+import { SublayError } from "../../errors/SublayError";
 
 export interface AddReactionProps {
   targetType: "entity" | "comment";
@@ -23,15 +24,15 @@ function useAddReaction(): (props: AddReactionProps) => Promise<Entity | Comment
       const { targetType, targetId, reactionType } = props;
 
       if (!targetId) {
-        throw new Error("No target ID provided");
+        throw new SublayError("No target ID provided");
       }
 
       if (!reactionType) {
-        throw new Error("No reaction type provided");
+        throw new SublayError("No reaction type provided");
       }
 
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       // Determine endpoint based on targetType

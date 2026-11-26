@@ -3,6 +3,7 @@ import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { DraftIncludeParam, Entity } from "../../interfaces/models/Entity";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
+import { SublayError } from "../../errors/SublayError";
 
 interface FetchDraftsParams {
   page?: number;
@@ -21,7 +22,7 @@ function useFetchDrafts(): (params?: FetchDraftsParams) => Promise<PaginatedResp
   const fetchDrafts = useCallback(
     async (params?: FetchDraftsParams) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const queryParams: Record<string, any> = {};

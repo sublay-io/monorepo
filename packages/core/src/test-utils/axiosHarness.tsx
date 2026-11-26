@@ -13,6 +13,7 @@ import type {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
+import { toSublayError } from "../errors/SublayError";
 
 import axiosPublic, { axiosPrivate } from "../config/axios";
 import { resetAuthGate } from "../config/authGate";
@@ -102,11 +103,13 @@ export function mockAxiosInstance(instance: AxiosInstance): AxiosMockHandle {
     mockResponse(method, data, status = 200) {
       spies[method].mockResolvedValueOnce(toAxiosResponse(data, status));
     },
+    // Rejected as the real instance methods reject: with the axios error
+    // turned into a `SublayError` (see `config/axios.ts`).
     mockError(method, status, data) {
-      spies[method].mockRejectedValueOnce(toAxiosError(status, data));
+      spies[method].mockRejectedValueOnce(toSublayError(toAxiosError(status, data)));
     },
     mockNetworkError(method, message = "Network Error") {
-      spies[method].mockRejectedValueOnce(toNetworkError(message));
+      spies[method].mockRejectedValueOnce(toSublayError(toNetworkError(message)));
     },
     calls(method) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

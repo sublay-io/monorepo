@@ -87,6 +87,7 @@ import {
   mintAccountAccessToken,
   type GetSublayState,
 } from "./mintAccountAccessToken";
+import { SublayError } from "../../errors/SublayError";
 
 export interface PushReconcileContext {
   dispatch: AppDispatch;
@@ -143,7 +144,7 @@ async function resolveAccessToken(
   if (userId === sublay.accounts.activeAccountId) {
     const token = await getAuthorizedTokenForAccount(sublay.auth.accessToken);
     if (!token) {
-      throw new Error(
+      throw new SublayError(
         `No live access token for the active account ${userId}; cannot reconcile its push binding.`
       );
     }

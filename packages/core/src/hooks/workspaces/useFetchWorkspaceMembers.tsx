@@ -6,6 +6,7 @@ import {
   WorkspaceRosterEntry,
   WorkspaceRosterCountsResponse,
 } from "../../interfaces/models/Workspace";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchWorkspaceMembersProps {
   workspaceId: string;
@@ -57,10 +58,10 @@ function useFetchWorkspaceMembers(): FetchWorkspaceMembers {
       WorkspaceRosterEntry[] | WorkspaceRosterCountsResponse
     > => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!workspaceId) {
-        throw new Error("Please pass a workspaceId");
+        throw new SublayError("Please pass a workspaceId");
       }
 
       const params: Record<string, any> = {};

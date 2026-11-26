@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useSublayDispatch } from "../../store/hooks";
 import { signOutAllThunk } from "../../store/slices/authThunks";
 import useProject from "../projects/useProject";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UseSignOutAllReturn {
   signOutAll: () => Promise<void>;
@@ -13,13 +14,13 @@ export default function useSignOutAll(): UseSignOutAllReturn {
 
   const signOutAll = useCallback(async () => {
     if (!projectId) {
-      throw new Error("No projectId available.");
+      throw new SublayError("No projectId available.");
     }
 
     const result = await dispatch(signOutAllThunk({ projectId }));
 
     if (signOutAllThunk.rejected.match(result)) {
-      throw new Error(result.payload as string);
+      throw new SublayError(result.payload as string);
     }
   }, [dispatch, projectId]);
 

@@ -68,7 +68,7 @@ Returns a `Promise<ReputationGrant>` — the created [ReputationGrant](/v8/data-
 
 The hook validates locally before the round trip and throws for a missing `projectId`, a missing `recipientId` or `amount`, or a half-filled target (`targetType` without `targetId`, or vice versa).
 
-Server rejections surface as the axios error, most usefully:
+Server rejections surface as a [`SublayError`](/v8/hooks/overview#sublayerror) carrying the `status` and `code`, most usefully:
 
 | Status | Code | Meaning |
 |--------|------|---------|

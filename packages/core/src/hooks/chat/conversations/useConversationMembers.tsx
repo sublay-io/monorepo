@@ -9,6 +9,7 @@ import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
 import { SpaceReputationContextParams } from "../../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface UseConversationMembersProps extends SpaceReputationContextParams {
   conversationId: string;
@@ -91,8 +92,8 @@ function useConversationMembers({
 
   const addMember = useCallback(
     async ({ userId }: { userId: string }): Promise<ConversationMember> => {
-      if (!projectId) throw new Error("No projectId available.");
-      if (!conversationId) throw new Error("No conversationId provided.");
+      if (!projectId) throw new SublayError("No projectId available.");
+      if (!conversationId) throw new SublayError("No conversationId provided.");
       try {
         const response = await axios.post(
           `/${projectId}/chat/conversations/${conversationId}/members`,
@@ -156,8 +157,8 @@ function useConversationMembers({
       userId: string;
       role: ConversationMemberRole;
     }): Promise<ConversationMember> => {
-      if (!projectId) throw new Error("No projectId available.");
-      if (!conversationId) throw new Error("No conversationId provided.");
+      if (!projectId) throw new SublayError("No projectId available.");
+      if (!conversationId) throw new SublayError("No conversationId provided.");
       try {
         const response = await axios.patch(
           `/${projectId}/chat/conversations/${conversationId}/members/${userId}/role`,

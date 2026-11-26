@@ -231,7 +231,7 @@ describe("useFetchManyReputationGrants", () => {
     });
 
     await expect(result.current({ recipientId: "user-2" })).rejects.toMatchObject(
-      { response: { status: 403 } }
+      { status: 403 }
     );
   });
 });

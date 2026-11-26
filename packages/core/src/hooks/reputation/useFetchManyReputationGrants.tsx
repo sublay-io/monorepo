@@ -10,6 +10,7 @@ import {
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 interface FetchManyReputationGrantsBaseProps
   extends SpaceReputationContextParams {
@@ -66,7 +67,7 @@ function useFetchManyReputationGrants(): (
   const fetchManyReputationGrants = useCallback(
     async (props?: FetchManyReputationGrantsProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const { recipientId, senderId, targetType, targetId } = props ?? {};
@@ -74,7 +75,7 @@ function useFetchManyReputationGrants(): (
       // Both server-side rules, mirrored locally so a malformed filter fails
       // before the round trip rather than as a 400.
       if (Boolean(targetType) !== Boolean(targetId)) {
-        throw new Error("targetType and targetId must be supplied together.");
+        throw new SublayError("targetType and targetId must be supplied together.");
       }
 
       const shapes = [
@@ -84,12 +85,12 @@ function useFetchManyReputationGrants(): (
       ].filter(Boolean).length;
 
       if (shapes === 0) {
-        throw new Error(
+        throw new SublayError(
           "One filter is required: recipientId, senderId, or targetType + targetId."
         );
       }
       if (shapes > 1) {
-        throw new Error(
+        throw new SublayError(
           "Filters are mutually exclusive: supply recipientId, senderId, or targetType + targetId — not more than one."
         );
       }

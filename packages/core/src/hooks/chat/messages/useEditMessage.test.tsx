@@ -92,7 +92,7 @@ describe("useEditMessage", () => {
 
     await expect(
       result.current({ conversationId: "conversation-1", messageId: "message-1", content: "edited" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when there is no projectId", async () => {

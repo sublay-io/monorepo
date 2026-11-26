@@ -253,10 +253,10 @@ carries **two independent boolean discriminants**, because the three failures it
 three different responses.
 
 Check with `instanceof` before reading those flags, because not every rejection is one:
-`removeAccount` rejects with the **underlying error, unchanged**, when the server refuses to unbind
-the account's push notifications — that is the atomic-removal refusal described under
-[Removing an Account](#removing-an-account), and it is reported as the server sent it.
-`switchAccount` and `removeAccount` also throw a plain `Error` when no `projectId` is configured.
+`removeAccount` rejects with a plain `SublayError` carrying the server's `code` when the server
+refuses to unbind the account's push notifications — that is the atomic-removal refusal described
+under [Removing an Account](#removing-an-account). `switchAccount` and `removeAccount` also throw a
+code-less `SublayError` when no `projectId` is configured.
 
 <ResponseField name="AccountTransitionError.credentialRejected" type="boolean">
   `true` when the **server refused** the stored credential — expired, revoked, reuse-detected,

@@ -121,7 +121,7 @@ describe("useUploadFile", () => {
     const file = new File(["binary"], "doc.pdf", { type: "application/pdf" });
 
     await expect(result.current.uploadFile({ file, pathParts: ["uploads"] })).rejects.toMatchObject({
-      response: { status: 500 },
+      status: 500,
     });
   });
 

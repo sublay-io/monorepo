@@ -87,9 +87,11 @@ The 409 body carries `ownedWorkspaces: { id: string | null; name: string | null 
 ```tsx
 try {
   await removeWorkspaceMemberFromSubtree({ workspaceId, targetUserId });
-} catch (err: any) {
-  const body = err.response?.data;
-  if (body?.code === "workspace/owns-descendants") {
+} catch (err) {
+  // `SublayError` is exported by @sublay/react-js. The extra fields of this 409 are in the response body, which the
+  // SublayError keeps as its `cause` (the HTTP client's error).
+  const body = (err as any).cause?.response?.data;
+  if (err instanceof SublayError && err.code === "workspace/owns-descendants") {
     const named = body.ownedWorkspaces.filter((w: any) => w.id !== null);
     const hidden = body.ownedCount - named.length;
     console.warn(

@@ -7,6 +7,7 @@ import {
   TopCommentsParams,
 } from "../../interfaces/models/Entity";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchEntityByShortIdProps extends TopCommentsParams {
   shortId: string;
@@ -20,11 +21,11 @@ function useFetchEntityByShortId(): (props: FetchEntityByShortIdProps) => Promis
   const fetchEntityByShortId = useCallback(
     async ({ shortId, include, topCommentsLimit, topCommentsSortByReaction }: FetchEntityByShortIdProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!shortId) {
-        throw new Error("Please pass shortId");
+        throw new SublayError("Please pass shortId");
       }
 
       const response = await axios.get(`/${projectId}/entities/by-short-id`, {

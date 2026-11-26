@@ -28,6 +28,7 @@ import type { KeywordsFilters } from "../../interfaces/entity-filters/KeywordsFi
 import type { NsfwFilter } from "../../interfaces/NsfwFilter";
 import type { SpaceReputationContextObject } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError, rethrowAsSublayError } from "../../errors/SublayError";
 
 interface FetchEntitiesOptions {
   page: number;
@@ -116,7 +117,7 @@ export function useEntityListActions(): UseEntityListActionsValues {
       isCurrent: () => boolean = () => true
     ): Promise<Entity[] | null> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       if (!options.sortBy) {
@@ -158,7 +159,7 @@ export function useEntityListActions(): UseEntityListActionsValues {
           topCommentsSortByReaction: options.topCommentsSortByReaction,
           spaceReputationId: reputationParams.spaceReputationId,
           spaceReputationDescendants: reputationParams.spaceReputationDescendants,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // A newer load (or a reset) replaced this one: it writes nothing.
         if (!isCurrent()) return null;
@@ -201,7 +202,7 @@ export function useEntityListActions(): UseEntityListActionsValues {
       options: CreateEntityOptions
     ): Promise<Entity | undefined> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       try {
@@ -216,7 +217,7 @@ export function useEntityListActions(): UseEntityListActionsValues {
           metadata: options.metadata,
           sourceId: options.sourceId,
           spaceId: options.spaceId,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // Add to the list
         dispatch(
@@ -240,14 +241,14 @@ export function useEntityListActions(): UseEntityListActionsValues {
   const deleteEntity = useCallback(
     async (listId: string, options: DeleteEntityOptions): Promise<void> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       try {
         await deleteEntityMutation({
           projectId,
           entityId: options.entityId,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // Remove from the list
         dispatch(removeEntity({ listId, entityId: options.entityId }));

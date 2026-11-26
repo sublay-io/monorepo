@@ -3,6 +3,7 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { UploadImageOptions } from "../../interfaces/models/Image";
 import type { File as SublayFile } from "../../interfaces/models/File";
+import { SublayError } from "../../errors/SublayError";
 
 // Type guard to detect browser File vs React Native file object
 function isBrowserFile(file: UniversalFile): file is BrowserFile {
@@ -55,11 +56,11 @@ function useUploadImage(): UseUploadImageValues {
     }: UploadImageProps): Promise<SublayFile> => {
       // Validate required inputs
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!file) {
-        throw new Error("No file provided.");
+        throw new SublayError("No file provided.");
       }
 
       setUploading(true);

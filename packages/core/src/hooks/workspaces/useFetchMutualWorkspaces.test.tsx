@@ -73,7 +73,7 @@ describe("useFetchMutualWorkspaces", () => {
     axiosPrivate.mockError("get", 500, { message: "Internal error" });
 
     await expect(result.current({ userId: "user-2" })).rejects.toMatchObject({
-      response: { status: 500 },
+      status: 500,
     });
   });
 

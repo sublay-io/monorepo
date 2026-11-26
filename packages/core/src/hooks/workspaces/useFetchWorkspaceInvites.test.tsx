@@ -65,7 +65,7 @@ describe("useFetchWorkspaceInvites", () => {
     });
 
     await expect(result.current({ workspaceId: "w1" })).rejects.toMatchObject({
-      response: { status: 403 },
+      status: 403,
     });
   });
 });

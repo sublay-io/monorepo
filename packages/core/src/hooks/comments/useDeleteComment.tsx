@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
+import { SublayError } from "../../errors/SublayError";
 
 export interface DeleteCommentProps {
   commentId: string;
@@ -13,11 +14,11 @@ function useDeleteComment(): (props: DeleteCommentProps) => Promise<void> {
   const deleteComment = useCallback(
     async ({ commentId }: DeleteCommentProps) => {
       if (!commentId) {
-        throw new Error("No comment ID passed");
+        throw new SublayError("No comment ID passed");
       }
 
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       await axios.delete(`/${projectId}/comments/${commentId}`);

@@ -50,7 +50,7 @@ describe("useCancelEvent", () => {
 
     await expect(
       result.current({ eventId: "event-1" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when no event ID is passed", async () => {

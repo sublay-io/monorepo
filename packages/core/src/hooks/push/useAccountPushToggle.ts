@@ -70,7 +70,7 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
 
   const setEnabled = useCallback(
     async ({ userId, enabled }: SetAccountPushEnabledParams) => {
-      if (!projectId) throw new Error("No projectId available");
+      if (!projectId) throw new SublayError("No projectId available");
 
       const getState = () => store.getState();
       // Typed with the same discriminant `useSwitchAccount` and

@@ -3,6 +3,7 @@ import { ReportReasonKey } from "../../constants/reportReasons";
 import { ReportTargetType } from "../../interfaces/models/Report";
 import useProject from "../projects/useProject";
 import { useUser } from "../user";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UseCreateReportProps {
   targetType: ReportTargetType;
@@ -69,11 +70,11 @@ function useCreateReport({ targetType: reportType }: UseCreateReportProps):
     details,
   }: CreateReportProps): Promise<CreateReportResponse> => {
     if (!projectId) {
-      throw new Error("Project ID is required");
+      throw new SublayError("Project ID is required");
     }
 
     if (!user) {
-      throw new Error("No user is logged in");
+      throw new SublayError("No user is logged in");
     }
 
     const response = await axios.post<CreateReportResponse>(
@@ -135,7 +136,7 @@ function useCreateReport({ targetType: reportType }: UseCreateReportProps):
     return createMessageReport;
   }
 
-  throw new Error("Invalid report type");
+  throw new SublayError("Invalid report type");
 }
 
 export default useCreateReport;

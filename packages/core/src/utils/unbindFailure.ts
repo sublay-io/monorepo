@@ -1,4 +1,5 @@
 import { getSublayLogLevel } from "./handleError";
+import { toSublayError } from "../errors/SublayError";
 
 /**
  * Did `/auth/sign-out` refuse *the push unbind*?
@@ -93,8 +94,7 @@ export const PUSH_UNBIND_SKIPPED_CODE = "auth/push-unbind-status-unknown";
  * report above — is false.
  */
 export function isUnbindFailure(error: unknown): boolean {
-  const code = (error as { response?: { data?: { code?: unknown } } } | null)
-    ?.response?.data?.code;
+  const { code } = toSublayError(error);
 
   return (
     typeof code === "string" &&

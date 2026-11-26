@@ -38,7 +38,7 @@ describe("useFetchUserByForeignId", () => {
 
     await expect(
       result.current({ foreignId: "ext-1" }),
-    ).rejects.toMatchObject({ response: { status: 404 } });
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it("throws before making a request when no foreign ID is passed", async () => {

@@ -72,7 +72,7 @@ describe("useResendWorkspaceInvite", () => {
     await expect(
       result.current({ workspaceId: "w1", inviteId: "i1" })
     ).rejects.toMatchObject({
-      response: { status: 409, data: { code: "workspace/not-pending" } },
+      status: 409, code: "workspace/not-pending",
     });
   });
 });

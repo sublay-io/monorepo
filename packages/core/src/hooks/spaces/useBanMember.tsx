@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { SpaceMember } from "../../interfaces/models/SpaceMember";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface BanMemberProps {
   spaceId: string;
@@ -18,11 +19,11 @@ function useBanMember(): (props: BanMemberProps) => Promise<SpaceMember> {
   const banMember = useCallback(
     async ({ spaceId, userId, reason }: BanMemberProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId || !userId) {
-        throw new Error("spaceId and userId are required");
+        throw new SublayError("spaceId and userId are required");
       }
 
       const response = await axios.post(

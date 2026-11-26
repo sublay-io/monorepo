@@ -1,3 +1,4 @@
+import { SublayError } from "../errors/SublayError";
 export type SortDirection = "asc" | "desc";
 
 export type SortType = "auto" | "numeric" | "text" | "boolean" | "timestamp";
@@ -20,7 +21,7 @@ export type EntityListSortByOptions =
  */
 export function validateMetadataPropertyName(propertyName: string): void {
   if (!/^[a-zA-Z0-9_]+$/.test(propertyName)) {
-    throw new Error(
+    throw new SublayError(
       `Invalid metadata property name: '${propertyName}'. Only alphanumeric characters and underscores are allowed.`
     );
   }
@@ -36,7 +37,7 @@ export function validateSortBy(sortBy: string): void {
   if (sortBy.startsWith("metadata.")) {
     const propertyName = sortBy.substring(9); // Remove "metadata." prefix
     if (propertyName.length === 0) {
-      throw new Error(
+      throw new SublayError(
         "Invalid metadata sort: property name cannot be empty after 'metadata.'"
       );
     }
@@ -53,7 +54,7 @@ export function validateSortBy(sortBy: string): void {
 export function validateSortType(sortType: string): void {
   const validTypes: SortType[] = ["auto", "numeric", "text", "boolean", "timestamp"];
   if (!validTypes.includes(sortType as SortType)) {
-    throw new Error(
+    throw new SublayError(
       `Invalid sortType: '${sortType}'. Must be one of: ${validTypes.join(", ")}`
     );
   }

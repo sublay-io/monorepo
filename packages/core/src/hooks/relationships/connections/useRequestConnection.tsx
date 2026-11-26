@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import type { ConnectionRequestParams, ConnectionRow } from "../../../interfaces/models/Connection";
+import { SublayError } from "../../../errors/SublayError";
 
 /**
  * Request a connection with `userId`. Answers 201 with the new pending row,
@@ -19,11 +20,11 @@ function useRequestConnection(): (props: ConnectionRequestParams) => Promise<Con
     async (props: ConnectionRequestParams): Promise<ConnectionRow> => {
       const { userId, message } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!userId) {
-        throw new Error("No user ID was provided");
+        throw new SublayError("No user ID was provided");
       }
 
       // `user` on the returned row is the receiver; `type` is "sent".

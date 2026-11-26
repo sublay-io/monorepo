@@ -23,7 +23,7 @@ import {
   CommentsSortByOptions,
 } from "../../interfaces/CommentsSortByOptions";
 import { handleError } from "../../utils/handleError";
-import { SublayError, toSublayError } from "../../errors/SublayError";
+import { SublayError, toSublayError, errorResponseBody } from "../../errors/SublayError";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import {
   CommentStore,
@@ -134,8 +134,7 @@ export const CommentSectionInternalContext =
 
 /** Dev-mode hint when the section's own request is over the server's row budget. */
 function reportBudgetError(err: unknown) {
-  const data = (err as { response?: { data?: Record<string, unknown> } })
-    ?.response?.data;
+  const data = errorResponseBody(err) as Record<string, unknown> | null;
   if (data?.code === "comment/reply-budget-exceeded" && isDevBuild()) {
     console.error(
       `[Sublay] This comment section's request could return up to ${String(

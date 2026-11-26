@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface SetSpaceEntityNsfwProps {
   spaceId: string;
@@ -34,11 +35,11 @@ function useSetSpaceEntityNsfw(): (
   const setSpaceEntityNsfw = useCallback(
     async ({ spaceId, entityId, nsfw }: SetSpaceEntityNsfwProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId || !entityId) {
-        throw new Error("spaceId and entityId are required.");
+        throw new SublayError("spaceId and entityId are required.");
       }
 
       const response = await axios.patch(

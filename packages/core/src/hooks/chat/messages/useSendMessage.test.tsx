@@ -252,7 +252,7 @@ describe("useSendMessage", () => {
     axiosPrivate.mockError("post", 500, { message: "Internal error" });
 
     await expect(result.current({ content: "hi" })).rejects.toMatchObject({
-      response: { status: 500 },
+      status: 500,
     });
 
     const messages = selectMessages("conversation-1")(store.getState());

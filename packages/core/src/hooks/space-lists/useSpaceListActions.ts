@@ -25,6 +25,7 @@ import type {
 } from "../../interfaces/models/Space";
 import type { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
+import { SublayError, rethrowAsSublayError } from "../../errors/SublayError";
 
 export interface FetchSpacesOptions {
   page: number;
@@ -80,7 +81,7 @@ export function useSpaceListActions() {
       isCurrent: () => boolean = () => true
     ): Promise<Space[] | null> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       if (!options.sortBy) {
@@ -100,7 +101,7 @@ export function useSpaceListActions() {
           searchFields: options.searchFields,
           parentSpaceId: options.parentSpaceId,
           limit: options.limit,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // A newer load (or a reset) replaced this one: it writes nothing.
         if (!isCurrent()) return null;
@@ -143,7 +144,7 @@ export function useSpaceListActions() {
       options: CreateSpaceOptions
     ): Promise<SpaceWithPermissions | undefined> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       try {
@@ -152,7 +153,7 @@ export function useSpaceListActions() {
         const newSpace = await createSpaceMutation({
           projectId,
           ...createData,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // Optimistically add to the list
         dispatch(
@@ -180,18 +181,18 @@ export function useSpaceListActions() {
   const deleteSpace = useCallback(
     async (listId: string, options: DeleteSpaceOptions): Promise<void> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       if (!options.spaceId) {
-        throw new Error("Space ID is required");
+        throw new SublayError("Space ID is required");
       }
 
       try {
         await deleteSpaceMutation({
           projectId,
           spaceId: options.spaceId,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // Remove from the list
         dispatch(

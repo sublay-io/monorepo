@@ -37,7 +37,7 @@ describe("useCheckUsernameAvailability", () => {
 
     await expect(
       result.current({ username: "newuser" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when no username is passed", async () => {

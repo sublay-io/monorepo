@@ -7,6 +7,7 @@ import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import { SpaceReputationUserParams } from "../../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../../interfaces/UserSearch";
 import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface FetchFollowersByUserIdParams
   extends SpaceReputationUserParams,
@@ -23,11 +24,11 @@ function useFetchFollowersByUserId(): (params: FetchFollowersByUserIdParams) => 
   const fetchFollowersByUserId = useCallback(
     async ({ userId, page = 1, limit = 20, query, searchFields, spaceReputation }: FetchFollowersByUserIdParams) => {
       if (!userId) {
-        throw new Error("No userId provided.");
+        throw new SublayError("No userId provided.");
       }
 
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const params: Record<string, any> = {

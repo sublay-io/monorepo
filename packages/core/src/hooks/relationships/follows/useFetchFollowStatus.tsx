@@ -3,6 +3,7 @@ import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
 import type { FollowStatus } from "../../../interfaces/models/Follow";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface FetchFollowStatusProps {
   userId: string;
@@ -17,19 +18,19 @@ function useFetchFollowStatus(): (props: FetchFollowStatusProps) => Promise<Foll
     async (props: FetchFollowStatusProps) => {
       const { userId } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!user) {
-        throw new Error("No user is logged in");
+        throw new SublayError("No user is logged in");
       }
 
       if (!userId) {
-        throw new Error("No user ID was provided");
+        throw new SublayError("No user ID was provided");
       }
 
       if (userId === user.id) {
-        throw new Error("Users don't follow themselves");
+        throw new SublayError("Users don't follow themselves");
       }
 
       const response = await axios.get<FollowStatus>(

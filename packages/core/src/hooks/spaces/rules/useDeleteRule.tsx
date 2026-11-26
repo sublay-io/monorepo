@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../../projects/useProject";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface DeleteRuleProps {
   spaceId: string;
@@ -14,15 +15,15 @@ function useDeleteRule(): (props: DeleteRuleProps) => Promise<void> {
   const deleteRule = useCallback(
     async ({ spaceId, ruleId }: DeleteRuleProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId) {
-        throw new Error("Please pass a spaceId");
+        throw new SublayError("Please pass a spaceId");
       }
 
       if (!ruleId) {
-        throw new Error("Please pass a ruleId");
+        throw new SublayError("Please pass a ruleId");
       }
 
       await axios.delete(

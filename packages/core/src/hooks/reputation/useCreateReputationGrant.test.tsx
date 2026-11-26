@@ -226,6 +226,6 @@ describe("useCreateReputationGrant", () => {
 
     await expect(
       result.current({ recipientId: "user-2", amount: 5 })
-    ).rejects.toMatchObject({ response: { status: 409 } });
+    ).rejects.toMatchObject({ status: 409 });
   });
 });

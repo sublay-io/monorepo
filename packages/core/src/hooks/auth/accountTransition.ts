@@ -22,7 +22,7 @@ import {
   type MintedAccountLease,
 } from "../push/mintAccountAccessToken";
 import { isCredentialRejection } from "../../utils/credentialRejection";
-import { SublayError, toSublayError } from "../../errors/SublayError";
+import { SublayError, toSublayError, errorResponseBody } from "../../errors/SublayError";
 
 /**
  * The account-transition core.
@@ -351,9 +351,10 @@ function failTransition({
 
 /** The server's reason, when it gave one, else the error's own message. */
 function readFailureReason(error: unknown): string {
-  const data = (
-    error as { response?: { data?: { error?: unknown; message?: unknown } } }
-  )?.response?.data;
+  const data = errorResponseBody(error) as {
+    error?: unknown;
+    message?: unknown;
+  } | null;
 
   if (typeof data?.error === "string" && data.error) return data.error;
   if (typeof data?.message === "string" && data.message) return data.message;

@@ -48,7 +48,7 @@ describe("useUpdateComment", () => {
 
     await expect(
       result.current({ commentId: "comment-1", content: "updated" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when neither content nor metadata is provided", async () => {

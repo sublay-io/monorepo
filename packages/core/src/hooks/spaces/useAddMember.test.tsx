@@ -42,7 +42,7 @@ describe("useAddMember", () => {
 
     await expect(
       result.current({ spaceId: "space-1", userId: "user-2" }),
-    ).rejects.toMatchObject({ response: { status: 409 } });
+    ).rejects.toMatchObject({ status: 409 });
   });
 
   it("throws before making a request when required fields are missing", async () => {

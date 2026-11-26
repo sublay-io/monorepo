@@ -14,16 +14,20 @@ For higher-level integration guidance, see the [SDK Reference](/v8/sdk/getting-s
 Every hook follows the same rules for its flags, errors and functions.
 
 - **Flags.** A fact about the data starts with `is`, `has` or `can` (`isMember`, `isFollowing`, `hasMore`, `canPost`). Something in progress right now is the bare "-ing" word: `loading`, `uploading`, `updating`, `switching`, `removing`, `streaming`.
-- **Errors.** Every `error` a hook returns is a [`SublayError`](#sublayerror) or `null`.
+- **Errors.** Every `error` a hook returns is a [`SublayError`](#sublayerror) or `null`, and every function a hook returns rejects with a `SublayError` when it fails.
 - **Action hooks** return one function that takes one object: `const createEntity = useCreateEntity(); createEntity({ title })`. A hook with live state of its own returns an object with the function, its "-ing" flag and that state instead: `const { uploadImage, uploading, progress } = useUploadImage()`, and the same for [`useUploadFile`](/v8/hooks/storage/use-upload-file).
 - **Setters** on a data hook take their one value directly, like React's `setState`: `setSortBy("top")`, `setRsvp("going")`, `setShowReplyBanner(true)`.
 
 ### SublayError
 
-`SublayError` extends `Error` and is exported from `@sublay/core` (and so from `@sublay/react-js`, `@sublay/react-native` and `@sublay/expo`).
+`SublayError` extends `Error` and is exported from `@sublay/core` (and so from `@sublay/react-js`, `@sublay/react-native` and `@sublay/expo`). It is what a hook's `error` field holds and what a hook's functions reject with: a request the server refused, a request that never got an answer, and a check the SDK makes before sending (for example a call made with no project, which has no `code`).
 
 <ResponseField name="message" type="string">
   When the server answered, the `error` text of its response. Otherwise what went wrong on the way: no network, a timeout, or a failure inside the SDK.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  `"SublayError"`, or the subclass's name (`"SuspendedError"`, `"AccountTransitionError"`). An aborted request keeps its abort name: `"CanceledError"` or `"AbortError"`.
 </ResponseField>
 
 <ResponseField name="code" type="string | undefined">
@@ -39,7 +43,7 @@ Every hook follows the same rules for its flags, errors and functions.
 </ResponseField>
 
 <ResponseField name="cause" type="unknown">
-  The original thrown value, such as the HTTP client's error.
+  The original thrown value, such as the HTTP client's error. A few error responses carry fields beyond `error`, `code` and `param` (each hook's page lists them); they are in that response's body, `cause.response.data`.
 </ResponseField>
 
 Branch on `code`, which stays the same when the server rewords a message:
@@ -51,7 +55,22 @@ if (error?.code === "space/banned") return <p>You can't join this space.</p>;
 if (error) return <p>{error.message}</p>;
 ```
 
-`toSublayError(err)` turns any caught value into a `SublayError` the same way, for errors you catch yourself (an action hook's rejection, for example). A `SublayError` is returned unchanged. [`SuspendedError`](/v8/sdk/moderation/suspensions) and [`AccountTransitionError`](/v8/sdk/authentication/multi-account#telling-a-dead-account-from-a-dead-network) are `SublayError`s with fields of their own.
+The same works for a function's rejection:
+
+```tsx
+import { SublayError, useJoinSpace } from "@sublay/react-js";
+
+const joinSpace = useJoinSpace();
+
+try {
+  await joinSpace({ spaceId });
+} catch (err) {
+  if (err instanceof SublayError && err.code === "space/banned") showBanned();
+  else throw err;
+}
+```
+
+`toSublayError(err)` turns any other caught value into a `SublayError` the same way (a `SublayError` is returned unchanged), for code that mixes the SDK's calls with your own. [`SuspendedError`](/v8/sdk/moderation/suspensions) and [`AccountTransitionError`](/v8/sdk/authentication/multi-account#telling-a-dead-account-from-a-dead-network) are `SublayError`s with fields of their own.
 
 ## List hooks
 

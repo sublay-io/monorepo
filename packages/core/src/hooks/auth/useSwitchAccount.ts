@@ -29,7 +29,7 @@ export default function useSwitchAccount(): UseSwitchAccountReturn {
 
   const switchAccount = useCallback(
     async ({ userId }: { userId: string }) => {
-      if (!projectId) throw new Error("No projectId available");
+      if (!projectId) throw new SublayError("No projectId available");
 
       // FROM THE LIVE STORE, not from the render snapshot this callback closes
       // over. The snapshot is exactly what goes stale — an account added after

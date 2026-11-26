@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 /**
  * An action a space moderator takes on a report. Which ones a report accepts
@@ -57,11 +58,11 @@ function useHandleSpaceReport(): (
       reason,
     }: HandleSpaceReportProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId || !reportId) {
-        throw new Error("spaceId and reportId are required");
+        throw new SublayError("spaceId and reportId are required");
       }
 
       // The server answers 204 with no body.

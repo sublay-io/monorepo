@@ -196,7 +196,7 @@ describe("useConversationMembers", () => {
     axiosPrivate.mockError("post", 500, { message: "Internal error" });
 
     await expect(result.current.addMember({ userId: "user-2" })).rejects.toMatchObject({
-      response: { status: 500 },
+      status: 500,
     });
     expect(result.current.members).toEqual([]);
   });

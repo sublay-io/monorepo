@@ -5,6 +5,7 @@ import { Conversation } from "../../../interfaces/models/Conversation";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface CreateDirectConversationProps {
   userId: string;
@@ -32,8 +33,8 @@ function useCreateDirectConversation(): (
     async ({
       userId,
     }: CreateDirectConversationProps): Promise<CreateDirectConversationResult> => {
-      if (!projectId) throw new Error("No projectId available.");
-      if (!userId) throw new Error("Please pass a userId.");
+      if (!projectId) throw new SublayError("No projectId available.");
+      if (!userId) throw new SublayError("Please pass a userId.");
 
       try {
         const response = await axios.post(

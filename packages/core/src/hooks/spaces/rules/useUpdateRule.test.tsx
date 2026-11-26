@@ -53,7 +53,7 @@ describe("useUpdateRule", () => {
 
     await expect(
       result.current({ spaceId: "space-1", ruleId: "rule-1", update: { title: "Be kind" } }),
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    ).rejects.toMatchObject({ status: 403 });
   });
 
   it("throws before making a request when no rule ID is passed", async () => {

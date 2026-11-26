@@ -7,6 +7,7 @@ import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import { SpaceReputationUserParams } from "../../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../../interfaces/UserSearch";
 import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface FetchConnectionsByUserIdParams
   extends SpaceReputationUserParams,
@@ -26,11 +27,11 @@ function useFetchConnectionsByUserId(): (props: FetchConnectionsByUserIdParams) 
     ): Promise<PaginatedResponse<AcceptedConnectionRow>> => {
       const { userId, page = 1, limit = 20, query, searchFields, spaceReputation } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!userId) {
-        throw new Error("No user ID was provided");
+        throw new SublayError("No user ID was provided");
       }
 
       const params: Record<string, any> = {

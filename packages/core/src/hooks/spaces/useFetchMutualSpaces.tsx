@@ -3,6 +3,7 @@ import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { Space, SpaceIncludeParam } from "../../interfaces/models/Space";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchMutualSpacesProps {
   /** The OTHER user — spaces shared with this user are returned. */
@@ -21,7 +22,7 @@ function useFetchMutualSpaces(): (
   const fetchMutualSpaces = useCallback(
     async (params: FetchMutualSpacesProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const { userId, include, ...rest } = params;

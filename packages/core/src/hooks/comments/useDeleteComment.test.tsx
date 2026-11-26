@@ -29,7 +29,7 @@ describe("useDeleteComment", () => {
 
     await expect(
       result.current({ commentId: "comment-1" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when no comment ID is passed", async () => {

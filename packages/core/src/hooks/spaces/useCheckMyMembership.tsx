@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import { CheckMyMembershipResponse } from "../../interfaces/models/Space";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface CheckMyMembershipProps {
   spaceId: string;
@@ -14,11 +15,11 @@ function useCheckMyMembership(): (props: CheckMyMembershipProps) => Promise<Chec
   const checkMyMembership = useCallback(
     async ({ spaceId }: CheckMyMembershipProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId) {
-        throw new Error("Please pass a spaceId");
+        throw new SublayError("Please pass a spaceId");
       }
 
       const response = await axios.get<CheckMyMembershipResponse>(

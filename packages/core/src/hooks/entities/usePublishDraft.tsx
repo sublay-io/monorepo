@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { Entity } from "../../interfaces/models/Entity";
+import { SublayError } from "../../errors/SublayError";
 
 export interface PublishDraftProps {
   entityId: string;
@@ -14,11 +15,11 @@ function usePublishDraft(): (props: PublishDraftProps) => Promise<Entity> {
   const publishDraft = useCallback(
     async ({ entityId }: PublishDraftProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!entityId) {
-        throw new Error("No entityId provided.");
+        throw new SublayError("No entityId provided.");
       }
 
       const response = await axios.post<Entity>(

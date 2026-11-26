@@ -26,6 +26,7 @@ import {
   type FileListUpload,
   type ImageListUpload,
 } from "../../../utils/uploads";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface SendMessageParams extends SpaceReputationContextParams {
   content?: string;
@@ -81,8 +82,8 @@ function useSendMessage({
       files,
       spaceReputation,
     }: SendMessageParams): Promise<SendMessageResult> => {
-      if (!projectId) throw new Error("No projectId available.");
-      if (!conversationId) throw new Error("No conversationId provided.");
+      if (!projectId) throw new SublayError("No projectId available.");
+      if (!conversationId) throw new SublayError("No conversationId provided.");
 
       // Body fields like everything else on a POST: JSON keys, or form fields
       // on a multipart send.

@@ -58,7 +58,7 @@ describe("useFetchCommentReactions", () => {
 
     await expect(
       result.current({ commentId: "comment-1", page: 1 }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when page is 0", async () => {

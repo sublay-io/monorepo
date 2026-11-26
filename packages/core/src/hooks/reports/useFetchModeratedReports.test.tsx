@@ -80,7 +80,7 @@ describe("useFetchModeratedReports", () => {
 
     await expect(
       result.current({ page: 1, limit: 20 }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when there is no project", async () => {

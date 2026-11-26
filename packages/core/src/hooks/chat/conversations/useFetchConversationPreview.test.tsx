@@ -43,7 +43,7 @@ describe("useFetchConversationPreview", () => {
 
     await expect(
       result.current({ conversationId: "conversation-1" })
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    ).rejects.toMatchObject({ status: 403 });
   });
 
   it("throws before making a request when no conversation ID is passed", async () => {

@@ -51,7 +51,7 @@ describe("useRemoveHost", () => {
 
     await expect(
       result.current({ eventId: "event-1", userId: "user-1" }),
-    ).rejects.toMatchObject({ response: { status: 400 } });
+    ).rejects.toMatchObject({ status: 400 });
   });
 
   it("throws before making a request when there is no project", async () => {

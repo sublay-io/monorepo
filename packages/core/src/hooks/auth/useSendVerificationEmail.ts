@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
+import { SublayError } from "../../errors/SublayError";
 
 // Code mode + tokenFormat: "hex" — hex always produces a fixed 64-character
 // string and ignores tokenLength entirely, so pairing it with a human-typed
@@ -56,7 +57,7 @@ function useSendVerificationEmail(): (props: SendVerificationEmailProps) => Prom
   const sendVerificationEmail = useCallback(
     async (props: SendVerificationEmailProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       await axios.post(

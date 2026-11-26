@@ -8,6 +8,7 @@ import {
   WorkspaceListSortDir,
 } from "../../interfaces/models/Workspace";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchMutualWorkspacesProps {
   /** The OTHER user — workspaces both this user and the caller can open are returned. */
@@ -46,10 +47,10 @@ function useFetchMutualWorkspaces(): (
   const fetchMutualWorkspaces = useCallback(
     async (params: FetchMutualWorkspacesProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!params?.userId) {
-        throw new Error("Please pass a userId");
+        throw new SublayError("Please pass a userId");
       }
 
       const { userId, page, limit, include, relation, sortDir } = params;

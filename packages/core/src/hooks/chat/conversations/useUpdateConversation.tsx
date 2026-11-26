@@ -3,6 +3,7 @@ import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { Conversation } from "../../../interfaces/models/Conversation";
 import { appendImageSlot, type ImageSlotUpload } from "../../../utils/uploads";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface UpdateConversationParams {
   conversationId: string;
@@ -33,8 +34,8 @@ function useUpdateConversation(): (
       avatarFile,
       ...rest
     }: UpdateConversationParams): Promise<Conversation> => {
-      if (!projectId) throw new Error("No projectId available.");
-      if (!conversationId) throw new Error("Please pass a conversationId.");
+      if (!projectId) throw new SublayError("No projectId available.");
+      if (!conversationId) throw new SublayError("Please pass a conversationId.");
 
       const path = `/${projectId}/chat/conversations/${conversationId}`;
 

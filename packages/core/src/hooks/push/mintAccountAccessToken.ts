@@ -107,6 +107,7 @@ import {
 import { persistAccountMapFor } from "../../config/accountStorage";
 import { readJwtExp } from "../../utils/jwt";
 import type { AuthUser } from "../../interfaces/models/User";
+import { SublayError } from "../../errors/SublayError";
 
 export type GetSublayState = () => { sublay: SublayState };
 
@@ -119,7 +120,7 @@ export interface MintAccountAccessTokenArgs {
 }
 
 /** Raised when a mint cannot be completed. Never carries the token itself. */
-export class AccountTokenMintError extends Error {
+export class AccountTokenMintError extends SublayError {
   constructor(message: string) {
     super(message);
     this.name = "AccountTokenMintError";

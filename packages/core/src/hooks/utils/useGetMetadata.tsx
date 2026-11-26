@@ -3,6 +3,7 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { isAbsoluteUrl } from "../../utils/isAbsoluteUrl";
 import { UrlMetadata } from "../../interfaces/UrlMetadata";
+import { SublayError } from "../../errors/SublayError";
 
 export interface GetMetadataProps {
   url: string;
@@ -15,17 +16,17 @@ function useGetMetadata(): (props: GetMetadataProps) => Promise<UrlMetadata> {
   const getMetadata = useCallback(
     async ({ url }: GetMetadataProps): Promise<UrlMetadata> => {
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!url) {
-        throw new Error("Please specify a URL");
+        throw new SublayError("Please specify a URL");
       }
 
       const isAbsolute = isAbsoluteUrl(url);
 
       if (!isAbsolute) {
-        throw new Error("Please provide an absolute URL");
+        throw new SublayError("Please provide an absolute URL");
       }
 
       const response = await axios.get<UrlMetadata>(

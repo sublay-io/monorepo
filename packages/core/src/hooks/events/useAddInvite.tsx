@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { Event } from "../../interfaces/models/Event";
+import { SublayError } from "../../errors/SublayError";
 
 export interface AddInviteProps {
   eventId: string;
@@ -25,7 +26,7 @@ function useAddInvite(): (props: AddInviteProps) => Promise<Event> {
   const addInvite = useCallback(
     async ({ eventId, userId }: AddInviteProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const response = await axios.post(

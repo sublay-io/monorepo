@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
+import { SublayError } from "../../errors/SublayError";
 
 /**
  * Step 1 of self-service account deletion. Emails the signed-in user a one-time
@@ -17,7 +18,7 @@ function useRequestAccountDeletion(): () => Promise<void> {
 
   const requestAccountDeletion = useCallback(async () => {
     if (!projectId) {
-      throw new Error("No projectId available.");
+      throw new SublayError("No projectId available.");
     }
 
     await axios.post(

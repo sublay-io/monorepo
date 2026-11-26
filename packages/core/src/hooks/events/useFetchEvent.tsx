@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { Event, EventIncludeParam } from "../../interfaces/models/Event";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchEventProps {
   eventId: string;
@@ -16,10 +17,10 @@ function useFetchEvent(): (props: FetchEventProps) => Promise<Event> {
   const fetchEvent = useCallback(
     async ({ eventId, include }: FetchEventProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!eventId) {
-        throw new Error("Please pass an eventId");
+        throw new SublayError("Please pass an eventId");
       }
 
       const params: Record<string, any> = {};

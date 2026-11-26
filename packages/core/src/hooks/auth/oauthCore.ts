@@ -2,7 +2,7 @@ import type { AppDispatch } from "../../store/types";
 import { setTokens, setInitialized } from "../../store/slices/authSlice";
 import { completeOAuthSignInThunk } from "../../store/slices/authThunks";
 import { getAuthorizedTokenForAccount } from "../../config/authGate";
-import { SublayError } from "../../errors/SublayError";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 /**
  * Platform-agnostic OAuth helpers shared by the web (`@sublay/react-js`) and
@@ -75,7 +75,7 @@ export async function requestOAuthAuthorizationUrl({
     // anything could wait.
     const token = await getAuthorizedTokenForAccount(accessToken ?? null);
     if (!token) {
-      throw new Error("Must be authenticated to link an OAuth provider.");
+      throw new SublayError("Must be authenticated to link an OAuth provider.");
     }
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -84,7 +84,7 @@ export async function requestOAuthAuthorizationUrl({
     method: "POST",
     headers,
     body: JSON.stringify({ provider, redirectAfterAuth }),
-  });
+  }).catch((err: unknown) => Promise.reject(toSublayError(err)));
 
   if (!response.ok) {
     const data = (await response.json().catch(() => null)) as {

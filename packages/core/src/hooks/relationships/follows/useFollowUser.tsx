@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import type { FollowRow } from "../../../interfaces/models/Follow";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface FollowUserProps {
   userId: string;
@@ -19,11 +20,11 @@ function useFollowUser(): (props: FollowUserProps) => Promise<FollowRow> {
     async (props: FollowUserProps) => {
       const { userId } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!userId) {
-        throw new Error("No user ID was provided");
+        throw new SublayError("No user ID was provided");
       }
 
       // `user` on the returned row is the followed user.

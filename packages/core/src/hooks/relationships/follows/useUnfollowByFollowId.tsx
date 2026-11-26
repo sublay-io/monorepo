@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface UnfollowByFollowIdProps {
   followId: string;
@@ -16,15 +17,15 @@ function useUnfollowByFollowId(): (props: UnfollowByFollowIdProps) => Promise<vo
     async (props: UnfollowByFollowIdProps) => {
       const { followId } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!user) {
-        throw new Error("No user is logged in");
+        throw new SublayError("No user is logged in");
       }
 
       if (!followId) {
-        throw new Error("No follow ID was provided");
+        throw new SublayError("No follow ID was provided");
       }
 
       await axios.delete(`/${projectId}/follows/${followId}`);

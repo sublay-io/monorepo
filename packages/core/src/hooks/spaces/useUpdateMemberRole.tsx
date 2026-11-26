@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import { SpaceMember, SpaceMemberRole } from "../../interfaces/models/SpaceMember";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UpdateMemberRoleProps {
   spaceId: string;
@@ -17,11 +18,11 @@ function useUpdateMemberRole(): (props: UpdateMemberRoleProps) => Promise<SpaceM
   const updateMemberRole = useCallback(
     async ({ spaceId, userId, role }: UpdateMemberRoleProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId || !userId || !role) {
-        throw new Error("spaceId, userId, and role are required");
+        throw new SublayError("spaceId, userId, and role are required");
       }
 
       const response = await axios.patch(

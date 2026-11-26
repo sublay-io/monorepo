@@ -7,6 +7,7 @@ import useRemoveConnectionByUserId from "./useRemoveConnectionByUserId";
 import useGetConnectionStatus from "./useFetchConnectionStatus";
 import useUser from "../../user/useUser";
 import type { ConnectionRow } from "../../../interfaces/models/Connection";
+import { errorResponseBody, toSublayError } from "../../../errors/SublayError";
 
 export interface UseConnectionManagerProps {
   userId: string;
@@ -104,8 +105,11 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
         // `userId` sent the signed-in user a request meanwhile: the 409 body
         // carries that row, so the state shows it (ready to accept) while the
         // call still fails.
-        const body = (error as any)?.response?.data;
-        if (body?.code === "connection/request-received" && body.connection) {
+        const body = errorResponseBody(error) as { connection?: unknown } | null;
+        if (
+          toSublayError(error).code === "connection/request-received" &&
+          body?.connection
+        ) {
           setConnection(body.connection as ConnectionRow);
         }
         console.error("Failed to send connection request:", error);

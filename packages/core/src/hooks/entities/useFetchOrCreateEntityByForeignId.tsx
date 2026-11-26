@@ -7,6 +7,7 @@ import {
   TopCommentsParams,
 } from "../../interfaces/models/Entity";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchOrCreateEntityByForeignIdProps extends TopCommentsParams {
   foreignId: string;
@@ -43,11 +44,11 @@ function useFetchOrCreateEntityByForeignId(): (
       topCommentsSortByReaction,
     }: FetchOrCreateEntityByForeignIdProps): Promise<FetchOrCreateEntityByForeignIdResult> => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!foreignId) {
-        throw new Error("Please pass foreignId");
+        throw new SublayError("Please pass foreignId");
       }
 
       const response = await axios.get(`/${projectId}/entities/by-foreign-id`, {

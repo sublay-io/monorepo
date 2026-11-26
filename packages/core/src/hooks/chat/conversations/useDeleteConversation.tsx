@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface DeleteConversationProps {
   conversationId: string;
@@ -14,8 +15,8 @@ function useDeleteConversation(): (
 
   const deleteConversation = useCallback(
     async ({ conversationId }: DeleteConversationProps): Promise<void> => {
-      if (!projectId) throw new Error("No projectId available.");
-      if (!conversationId) throw new Error("Please pass a conversationId.");
+      if (!projectId) throw new SublayError("No projectId available.");
+      if (!conversationId) throw new SublayError("Please pass a conversationId.");
 
       await axios.delete(
         `/${projectId}/chat/conversations/${conversationId}`

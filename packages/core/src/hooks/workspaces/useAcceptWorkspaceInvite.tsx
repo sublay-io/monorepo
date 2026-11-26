@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { WorkspaceMemberStanding } from "../../interfaces/models/Workspace";
+import { SublayError } from "../../errors/SublayError";
 
 export interface AcceptWorkspaceInviteProps {
   inviteId: string;
@@ -27,10 +28,10 @@ function useAcceptWorkspaceInvite(): (
   const acceptWorkspaceInvite = useCallback(
     async ({ inviteId }: AcceptWorkspaceInviteProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!inviteId) {
-        throw new Error("Please pass an inviteId");
+        throw new SublayError("Please pass an inviteId");
       }
 
       const response = await axios.post<WorkspaceMemberStanding>(

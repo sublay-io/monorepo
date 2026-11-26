@@ -30,6 +30,7 @@
 
 import { refreshAccessToken } from "./refreshAccessToken";
 import { readJwtExp, readJwtSub } from "../utils/jwt";
+import { SublayError } from "../errors/SublayError";
 
 /** How close to `exp` a token may get before we rotate it pre-emptively. */
 const EXPIRY_SKEW_MS = 60_000;
@@ -321,7 +322,7 @@ export async function getAuthorizedTokenForAccount(
   const sendingAs = readJwtSub(token);
 
   if (startedAs && sendingAs && startedAs !== sendingAs) {
-    throw new Error(ACCOUNT_SWITCHED_MESSAGE);
+    throw new SublayError(ACCOUNT_SWITCHED_MESSAGE);
   }
 
   return token;

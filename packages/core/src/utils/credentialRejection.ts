@@ -1,3 +1,4 @@
+import { toSublayError } from "../errors/SublayError";
 /**
  * Whether the server refused the credential itself, as opposed to the request
  * failing to complete.
@@ -15,13 +16,9 @@
  * path (`authThunks.ts`). Both feed the same `needsReauth` marker.
  */
 export function isCredentialRejection(error: unknown): boolean {
-  const response = (
-    error as
-      | { response?: { status?: number; data?: { code?: unknown } } }
-      | null
-      | undefined
-  )?.response;
-  const status = response?.status;
+  // `toSublayError` reads a raw axios error and passes a `SublayError` (what
+  // the SDK's requests reject with) through, so both are read the same way.
+  const { status, code } = toSublayError(error);
   if (status === 401 || status === 403) return true;
-  return status === 404 && response?.data?.code === "auth/user-not-found";
+  return status === 404 && code === "auth/user-not-found";
 }

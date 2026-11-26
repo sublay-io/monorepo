@@ -47,7 +47,7 @@ describe("useFetchComment", () => {
 
     await expect(
       result.current({ commentId: "comment-1" }),
-    ).rejects.toMatchObject({ response: { status: 404 } });
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it("throws before making a request when no comment ID is passed", async () => {

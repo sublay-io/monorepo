@@ -14,6 +14,7 @@ import {
   resetAxiosMocks,
 } from "../test-utils";
 import { armAuthGate, syncAuthGate, setAuthGateRefresher } from "./authGate";
+import { SublayError } from "../errors/SublayError";
 
 const mockedUseAuth = vi.mocked(useAuth);
 
@@ -133,7 +134,7 @@ describe("useAxiosPrivate", () => {
     renderHook(() => useAxiosPrivate());
 
     await expect(axiosPrivate.get("/a")).rejects.toMatchObject({
-      response: { status: 403, data: { code: "project/plan-required" } },
+      status: 403, code: "project/plan-required",
     });
     expect(requestNewAccessToken).not.toHaveBeenCalled();
     expect(adapter).toHaveBeenCalledTimes(1);
@@ -150,7 +151,7 @@ describe("useAxiosPrivate", () => {
     renderHook(() => useAxiosPrivate());
 
     await expect(axiosPrivate.get("/a")).rejects.toMatchObject({
-      response: { status: 403 },
+      status: 403,
     });
     expect(requestNewAccessToken).toHaveBeenCalledTimes(1);
   });
@@ -207,6 +208,32 @@ describe("useAxiosPrivate", () => {
       );
     });
 
+    it("still refreshes on a bare 401, and a retry that fails rejects as a SublayError", async () => {
+      // The conversion happens at the instance's methods, after the
+      // interceptors: they see the raw 401 and refresh.
+      const requestNewAccessToken = vi.fn().mockResolvedValue("fresh-token");
+      mockedUseAuth.mockReturnValue({
+        accessToken: null,
+        requestNewAccessToken,
+      } as never);
+      const adapter = vi.fn(async (config: InternalAxiosRequestConfig) => {
+        if (config.sent) {
+          throw axiosErrorWithStatus(500, { error: "Boom.", code: "server/error" }, config);
+        }
+        throw axiosErrorWithStatus(401, undefined, config);
+      });
+      stubAxiosAdapter(axiosPrivate, adapter);
+
+      renderHook(() => useAxiosPrivate());
+
+      const err = await axiosPrivate.get("/x").catch((e: unknown) => e);
+      expect(requestNewAccessToken).toHaveBeenCalledTimes(1);
+      expect(adapter).toHaveBeenCalledTimes(2);
+      expect(adapter.mock.calls[1][0].headers.Authorization).toBe("Bearer fresh-token");
+      expect(err).toBeInstanceOf(SublayError);
+      expect(err).toMatchObject({ message: "Boom.", code: "server/error", status: 500 });
+    });
+
     it("does NOT refresh on a 401 that carries a semantic code", async () => {
       // Controllers raise coded 401s (auth/session-ended,
       // auth/invalid-credentials, auth/token-reuse-detected).
@@ -225,7 +252,7 @@ describe("useAxiosPrivate", () => {
       renderHook(() => useAxiosPrivate());
 
       await expect(axiosPrivate.get("/x")).rejects.toMatchObject({
-        response: { status: 401 },
+        status: 401,
       });
       expect(requestNewAccessToken).not.toHaveBeenCalled();
     });
@@ -243,7 +270,7 @@ describe("useAxiosPrivate", () => {
       renderHook(() => useAxiosPrivate());
 
       await expect(axiosPrivate.get("/x")).rejects.toMatchObject({
-        response: { status: 401 },
+        status: 401,
       });
       expect(requestNewAccessToken).toHaveBeenCalledTimes(1);
     });
@@ -263,7 +290,7 @@ describe("useAxiosPrivate", () => {
       renderHook(() => useAxiosPrivate());
 
       await expect(axiosPrivate.get("/x")).rejects.toMatchObject({
-        response: { status: 401 },
+        status: 401,
       });
       expect(requestNewAccessToken).toHaveBeenCalledTimes(1);
       expect(adapter).toHaveBeenCalledTimes(2);

@@ -44,7 +44,7 @@ describe("useAcceptConnection", () => {
 
     await expect(
       result.current({ connectionId: "connection-1" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when no connection ID is passed", async () => {

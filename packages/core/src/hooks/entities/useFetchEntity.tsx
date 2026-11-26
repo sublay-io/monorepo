@@ -9,6 +9,7 @@ import {
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchEntityProps
   extends SpaceReputationContextParams,
@@ -24,11 +25,11 @@ function useFetchEntity(): (props: FetchEntityProps) => Promise<Entity> {
   const fetchEntity = useCallback(
     async ({ entityId, include, topCommentsLimit, topCommentsSortByReaction, spaceReputation }: FetchEntityProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!entityId) {
-        throw new Error("Please pass an entityId");
+        throw new SublayError("Please pass an entityId");
       }
 
       const params: Record<string, any> = {

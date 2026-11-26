@@ -8,6 +8,7 @@ import {
   WorkspaceListSortDir,
 } from "../../interfaces/models/Workspace";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchManyWorkspacesParams {
   page?: number;
@@ -62,7 +63,7 @@ function useFetchManyWorkspaces(): (
   const fetchManyWorkspaces = useCallback(
     async (params?: FetchManyWorkspacesParams) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const queryParams: Record<string, any> = {};

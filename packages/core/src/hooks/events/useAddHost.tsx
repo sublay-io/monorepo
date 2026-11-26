@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { Event } from "../../interfaces/models/Event";
+import { SublayError } from "../../errors/SublayError";
 
 export interface AddHostProps {
   eventId: string;
@@ -23,7 +24,7 @@ function useAddHost(): (props: AddHostProps) => Promise<Event> {
   const addHost = useCallback(
     async ({ eventId, userId }: AddHostProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const response = await axios.post(

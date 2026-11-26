@@ -9,6 +9,7 @@ import {
   type FetchMockHandle,
 } from "../../test-utils";
 import { useTable } from "./useTable";
+import { SublayError } from "../../errors/SublayError";
 import { renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { baseApi } from "../../store/api/baseApi";
@@ -200,6 +201,27 @@ describe("useTable", () => {
 
     const patchCall = fetchHandle.calls().find((c) => c.method === "PATCH");
     expect(patchCall?.url).toContain("/db/Events/1");
+  });
+
+  it("a refused row write rejects with a SublayError", async () => {
+    const { result } = renderHookWithStore(() => useTable("Events"));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    fetchHandle.fetchMock.mockResolvedValueOnce(
+      jsonResponse({ error: "name is required.", code: "database/invalid-row", param: "name" }, 400),
+    );
+
+    let err: unknown;
+    await act(async () => {
+      err = await result.current.updateRow({ rowId: "1", data: { name: null } }).catch((e: unknown) => e);
+    });
+
+    expect(err).toBeInstanceOf(SublayError);
+    expect(err).toMatchObject({
+      message: "name is required.",
+      code: "database/invalid-row",
+      param: "name",
+      status: 400,
+    });
   });
 
   it("deleteRow issues a DELETE and resolves with nothing", async () => {

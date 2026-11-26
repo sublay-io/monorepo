@@ -91,7 +91,7 @@ describe("useCreateSpace", () => {
     axiosPrivate.mockError("post", 500, { message: "Internal error" });
 
     await expect(result.current({ name: "Design" })).rejects.toMatchObject({
-      response: { status: 500 },
+      status: 500,
     });
   });
 

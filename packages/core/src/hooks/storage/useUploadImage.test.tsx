@@ -274,7 +274,7 @@ describe("useUploadImage", () => {
 
     await expect(
       result.current.uploadImage({ file,  mode: "original-aspect", sizes: { full: 1080 } }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
 
     await waitFor(() => expect(result.current.uploading).toBe(false));
   });

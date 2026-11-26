@@ -3,6 +3,7 @@ import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
 import type { BlockStatus } from "../../../interfaces/models/Block";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface FetchBlockStatusProps {
   userId: string;
@@ -17,19 +18,19 @@ function useFetchBlockStatus(): (props: FetchBlockStatusProps) => Promise<BlockS
     async (props: FetchBlockStatusProps) => {
       const { userId } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!user) {
-        throw new Error("No user is logged in");
+        throw new SublayError("No user is logged in");
       }
 
       if (!userId) {
-        throw new Error("No user ID was provided");
+        throw new SublayError("No user ID was provided");
       }
 
       if (userId === user.id) {
-        throw new Error("Users don't block themselves");
+        throw new SublayError("Users don't block themselves");
       }
 
       // The acting user's OUTBOUND state only — do *I* block `:userId`. It

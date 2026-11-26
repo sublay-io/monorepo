@@ -349,6 +349,7 @@ describe("sign-up and sign-in rejections carry the server's error", () => {
       message: "Username already taken",
       code: "auth/username-taken",
       param: "username",
+      status: 409,
     });
   });
 

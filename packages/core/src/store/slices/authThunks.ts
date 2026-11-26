@@ -40,6 +40,8 @@ import type {
   EmailVerificationOptions,
   EmailVerificationRequiredResult,
 } from "../../interfaces/EmailVerification";
+import { toSublayError, errorResponseBody } from "../../errors/SublayError";
+import { SublayError } from "../../errors/SublayError";
 
 // Account-management endpoints (change/set password, confirm account deletion)
 // run behind requireUserAuth on the server. The shared default axios instance
@@ -434,20 +436,12 @@ async function refuseAtAccountLimit({
  * with.
  */
 function toAuthRejection(error: unknown): AuthRejection {
-  const data = (error as { response?: { data?: unknown } } | null | undefined)
-    ?.response?.data as
-    | { error?: unknown; code?: unknown; param?: unknown; verificationId?: unknown }
-    | undefined;
-  const rejection: AuthRejection = {
-    message:
-      typeof data?.error === "string" && data.error
-        ? data.error
-        : error instanceof Error
-          ? error.message
-          : "Unknown error",
-  };
-  if (typeof data?.code === "string") rejection.code = data.code;
-  if (typeof data?.param === "string") rejection.param = data.param;
+  const failure = toSublayError(error);
+  const data = errorResponseBody(error) as { verificationId?: unknown } | null;
+  const rejection: AuthRejection = { message: failure.message };
+  if (failure.code !== undefined) rejection.code = failure.code;
+  if (failure.param !== undefined) rejection.param = failure.param;
+  if (failure.status !== undefined) rejection.status = failure.status;
   if (typeof data?.verificationId === "string") {
     rejection.verificationId = data.verificationId;
   }
@@ -624,7 +618,7 @@ export const signOutThunk = createAsyncThunk(
     const pushDevice = state.sublay.accounts.deviceIdentifier;
 
     if (!refreshToken) {
-      throw new Error("No refresh token");
+      throw new SublayError("No refresh token");
     }
 
     try {
@@ -1243,7 +1237,7 @@ export const initializeAuthThunk = createAsyncThunk(
         // outside this thunk and is not exported from `index.ts`, so nothing
         // downstream rethrows its payload as a user-facing message.
         if (verified.payload === ACCOUNT_LIMIT_MESSAGE) {
-          throw new Error(ACCOUNT_LIMIT_MESSAGE);
+          throw new SublayError(ACCOUNT_LIMIT_MESSAGE);
         }
       }
 

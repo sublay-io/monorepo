@@ -28,6 +28,7 @@ import {
   markPushBindingsForRebind,
   pushIdentifiersEqual,
 } from "./reconcilePushBindings";
+import { SublayError, rethrowAsSublayError } from "../../errors/SublayError";
 
 export interface UsePushRegistrationValues {
   /**
@@ -113,7 +114,7 @@ function usePushRegistration(
 
   const register = useCallback(async (): Promise<boolean> => {
     if (!projectId || !user) {
-      throw new Error("No project ID or authenticated user available");
+      throw new SublayError("No project ID or authenticated user available");
     }
 
     try {
@@ -123,7 +124,7 @@ function usePushRegistration(
       const identifier = await adapter.getDeviceIdentifier({ projectId });
       if (!identifier) return false;
 
-      await registerPushDevice({ projectId, ...identifier }).unwrap();
+      await registerPushDevice({ projectId, ...identifier }).unwrap().catch(rethrowAsSublayError);
 
       // Read BEFORE the write below overwrites it. Whether this device's token
       // actually changed is what decides if the other accounts' bindings are
@@ -231,7 +232,7 @@ function usePushRegistration(
 
   const unregister = useCallback(async (): Promise<void> => {
     if (!projectId || !user) {
-      throw new Error("No project ID or authenticated user available");
+      throw new SublayError("No project ID or authenticated user available");
     }
 
     try {
@@ -260,7 +261,7 @@ function usePushRegistration(
       // writes "on" only after its bind succeeds.
       dispatch(setAccountPushEnabled({ userId: user.id, enabled: false }));
 
-      await deregisterPushDevice({ projectId, ...identifier }).unwrap();
+      await deregisterPushDevice({ projectId, ...identifier }).unwrap().catch(rethrowAsSublayError);
 
       // The device identifier is NOT cleared here. It is device state, and one
       // account unregistering must not disable removal-deregistration, the
@@ -301,7 +302,7 @@ function usePushRegistration(
       // housekeeping.
       if (current && activeAccountIdRef.current) {
         try {
-          await deregisterPushDevice({ projectId, ...current }).unwrap();
+          await deregisterPushDevice({ projectId, ...current }).unwrap().catch(rethrowAsSublayError);
         } catch (error) {
           handleError(error, "Failed to unbind the previous push device token");
         }

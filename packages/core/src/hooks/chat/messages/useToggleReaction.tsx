@@ -6,6 +6,7 @@ import { selectUser as selectAuthUser } from "../../../store/slices/authSlice";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface ToggleReactionParams {
   conversationId: string;
@@ -37,7 +38,7 @@ function useToggleReaction(): (
       messageId,
       emoji,
     }: ToggleReactionParams): Promise<ToggleReactionResult> => {
-      if (!projectId) throw new Error("No projectId available.");
+      if (!projectId) throw new SublayError("No projectId available.");
 
       try {
         const response = await axios.post(

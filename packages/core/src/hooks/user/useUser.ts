@@ -124,11 +124,11 @@ function useUser(_: UseUserProps = {}): UseUserValues {
   const handleUpdateUser = useCallback(
     async (update: UpdateUserParams): Promise<AuthUser> => {
       if (!user) {
-        throw new Error("No user available to update");
+        throw new SublayError("No user available to update");
       }
 
       if (!projectId) {
-        throw new Error("No projectId available");
+        throw new SublayError("No projectId available");
       }
 
       // Pass current user for optimistic update reversion if needed

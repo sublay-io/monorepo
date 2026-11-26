@@ -3,6 +3,7 @@ import axios from "../../config/axios";
 import useProject from "../projects/useProject";
 import { useSublayDispatch } from "../../store/hooks";
 import { updateUserOptimistic } from "../../store/slices/userSlice";
+import { SublayError } from "../../errors/SublayError";
 
 export interface VerifyEmailProps {
   /** The link token or the emailed 6-digit code. */
@@ -23,11 +24,11 @@ function useVerifyEmail(): (props: VerifyEmailProps) => Promise<void> {
   const verifyEmail = useCallback(
     async ({ token, verificationId }: VerifyEmailProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!token?.trim()) {
-        throw new Error("Verification token is required.");
+        throw new SublayError("Verification token is required.");
       }
 
       await axios.post(`/${projectId}/auth/verify-email`, {

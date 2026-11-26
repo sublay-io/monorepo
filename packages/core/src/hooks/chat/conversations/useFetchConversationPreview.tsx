@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { ConversationPreview } from "../../../interfaces/models/Conversation";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface FetchConversationPreviewProps {
   conversationId: string;
@@ -26,8 +27,8 @@ function useFetchConversationPreview(): (
     async ({
       conversationId,
     }: FetchConversationPreviewProps): Promise<ConversationPreview> => {
-      if (!projectId) throw new Error("No projectId available.");
-      if (!conversationId) throw new Error("Please pass a conversationId.");
+      if (!projectId) throw new SublayError("No projectId available.");
+      if (!conversationId) throw new SublayError("Please pass a conversationId.");
 
       const response = await axios.get(
         `/${projectId}/chat/conversations/${conversationId}/preview`

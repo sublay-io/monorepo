@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface CheckSlugAvailabilityProps {
   slug: string;
@@ -13,11 +14,11 @@ function useCheckSlugAvailability(): (props: CheckSlugAvailabilityProps) => Prom
   const checkSlugAvailability = useCallback(
     async ({ slug }: CheckSlugAvailabilityProps) => {
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!slug) {
-        throw new Error("Please specify a slug");
+        throw new SublayError("Please specify a slug");
       }
 
       const response = await axios.get<{ available: boolean }>(

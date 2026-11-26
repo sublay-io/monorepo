@@ -17,7 +17,8 @@ import {
 } from "../../store/api/userApi";
 import { baseApi } from "../../store/api/baseApi";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
-import { toSublayErrorRecord } from "../../errors/SublayError";
+import { toSublayErrorRecord, rethrowAsSublayError } from "../../errors/SublayError";
+import { SublayError } from "../../errors/SublayError";
 
 /**
  * Redux-powered hook that provides current user management actions
@@ -53,7 +54,7 @@ export function useUserActions() {
   const updateUser = useCallback(
     async ({ projectId, userId, update, currentUser }: { projectId: string; userId: string; update: UpdateUserParams; currentUser?: AuthUser | null }) => {
       if (!projectId || !userId) {
-        throw new Error("Project ID and User ID are required");
+        throw new SublayError("Project ID and User ID are required");
       }
 
       // Built before anything changes: a `null` field can't travel with a
@@ -97,7 +98,7 @@ export function useUserActions() {
           // Same cache effect as the JSON mutation.
           dispatch(baseApi.util.invalidateTags([{ type: "User", id: "CURRENT" }]));
         } else {
-          result = await updateUserMutation({ projectId, userId, update }).unwrap();
+          result = await updateUserMutation({ projectId, userId, update }).unwrap().catch(rethrowAsSublayError);
         }
 
         // Replace optimistic update with real server data

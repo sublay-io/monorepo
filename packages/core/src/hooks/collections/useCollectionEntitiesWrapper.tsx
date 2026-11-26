@@ -17,7 +17,7 @@ import {
   appendCollectionEntities,
   selectCollectionEntities,
 } from "../../store/slices/collectionsSlice";
-import type { SublayError } from "../../errors/SublayError";
+import { type SublayError, rethrowAsSublayError } from "../../errors/SublayError";
 
 export interface UseCollectionEntitiesWrapperProps extends TopCommentsParams {
   collectionId?: string | null; // Optional - defaults to current collection from Redux
@@ -108,7 +108,7 @@ function useCollectionEntitiesWrapper(
     // render) doesn't restart the list.
     resetKey: JSON.stringify([viewerId, buildParams(1)]),
     fetchPage: pageNumberPaging((page) =>
-      fetchCollectionEntitiesQuery(buildParams(page)).unwrap()
+      fetchCollectionEntitiesQuery(buildParams(page)).unwrap().catch(rethrowAsSublayError)
     ),
     onPage: (page, replace) => {
       const collectionId = effectiveCollectionId as string;

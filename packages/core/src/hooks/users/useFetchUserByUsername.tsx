@@ -5,6 +5,7 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { User, UserIncludeParam } from "../../interfaces/models/User";
 import { SpaceReputationUserParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchUserByUsernameProps extends SpaceReputationUserParams {
   username: string;
@@ -22,11 +23,11 @@ function useFetchUserByUsername(): (props: FetchUserByUsernameProps) => Promise<
       spaceReputation,
     }: FetchUserByUsernameProps) => {
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!username) {
-        throw new Error("Please specify a username");
+        throw new SublayError("Please specify a username");
       }
 
       const params: Record<string, any> = {

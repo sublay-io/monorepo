@@ -57,7 +57,7 @@ describe("useModerateSpaceComment", () => {
 
     await expect(
       result.current({ spaceId: "space-1", commentId: "comment-1", action: "remove" }),
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    ).rejects.toMatchObject({ status: 403 });
   });
 
   it("throws before making a request when required fields are missing", async () => {

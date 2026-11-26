@@ -4,6 +4,7 @@ import useProject from "../projects/useProject";
 import { User } from "../../interfaces/models/User";
 import { SpaceReputationUserParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchUserSuggestionsProps extends SpaceReputationUserParams {
   query: string;
@@ -16,7 +17,7 @@ function useFetchUserSuggestions(): (props: FetchUserSuggestionsProps) => Promis
   const fetchUserSuggestions = useCallback(
     async ({ query, spaceReputation }: FetchUserSuggestionsProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const params: Record<string, any> = {

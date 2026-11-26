@@ -4,6 +4,7 @@ import { Comment, CommentIncludeParam } from "../../interfaces/models/Comment";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchCommentByForeignIdProps extends SpaceReputationContextParams {
   foreignId: string;
@@ -21,11 +22,11 @@ function useFetchCommentByForeignId(): (props: FetchCommentByForeignIdProps) => 
       spaceReputation,
     }: FetchCommentByForeignIdProps) => {
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!foreignId) {
-        throw new Error("No foreign ID passed");
+        throw new SublayError("No foreign ID passed");
       }
 
       const params: Record<string, any> = {

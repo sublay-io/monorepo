@@ -90,6 +90,6 @@ describe("useRemoveWorkspaceMemberFromSubtree", () => {
 
     await expect(
       result.current({ workspaceId: "w1", targetUserId: "user-2" })
-    ).rejects.toMatchObject({ response: { status: 409 } });
+    ).rejects.toMatchObject({ status: 409 });
   });
 });

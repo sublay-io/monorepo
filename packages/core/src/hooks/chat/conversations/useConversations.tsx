@@ -29,7 +29,7 @@ import useProject from "../../projects/useProject";
 import useFetchConversationPreview from "./useFetchConversationPreview";
 import { CursorPaginatedResponse } from "../../../interfaces/PaginatedResponse";
 import { appendImageSlot, type ImageSlotUpload } from "../../../utils/uploads";
-import type { SublayError } from "../../../errors/SublayError";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface UseConversationsProps {
   types?: ConversationType[];
@@ -190,7 +190,7 @@ function useConversations({
 
   const createGroup = useCallback(
     async (params: CreateGroupParams): Promise<Conversation> => {
-      if (!projectId) throw new Error("No project ID");
+      if (!projectId) throw new SublayError("No project ID");
 
       const path = `/${projectId}/chat/conversations`;
       const { avatarFile, ...fields } = params;

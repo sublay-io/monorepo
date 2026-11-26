@@ -7,6 +7,7 @@ import { Space, SpaceIncludeParam } from "../../interfaces/models/Space";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 import { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 import { NsfwFilter } from "../../interfaces/NsfwFilter";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchManySpacesProps {
   page?: number;
@@ -33,7 +34,7 @@ function useFetchManySpaces(): (params?: FetchManySpacesProps) => Promise<Pagina
   const fetchManySpaces = useCallback(
     async (params?: FetchManySpacesProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const queryParams: Record<string, any> = {};

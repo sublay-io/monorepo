@@ -55,7 +55,7 @@ describe("useFetchInvitees", () => {
 
     await expect(
       result.current({ eventId: "event-1" }),
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    ).rejects.toMatchObject({ status: 403 });
   });
 
   it("throws before making a request when there is no project", async () => {

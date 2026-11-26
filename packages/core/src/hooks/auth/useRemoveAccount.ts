@@ -38,7 +38,7 @@ export default function useRemoveAccount(): UseRemoveAccountReturn {
 
   const removeAccount = useCallback(
     async ({ userId }: { userId: string }) => {
-      if (!projectId) throw new Error("No projectId available");
+      if (!projectId) throw new SublayError("No projectId available");
 
       // FROM THE LIVE STORE, not from the render snapshot this callback closes
       // over — same reasoning as `useSwitchAccount`. A retained callback

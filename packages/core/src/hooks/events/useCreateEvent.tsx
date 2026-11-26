@@ -12,6 +12,7 @@ import {
   type ImageListUpload,
   type ImageSlotUpload,
 } from "../../utils/uploads";
+import { SublayError } from "../../errors/SublayError";
 
 export interface CreateEventProps {
   title: string;
@@ -80,7 +81,7 @@ function useCreateEvent(): (props: CreateEventProps) => Promise<Event> {
       } = props;
 
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const hasCover = !!coverFile && !!coverFile.file;

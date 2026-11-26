@@ -5,6 +5,7 @@ import {
   Workspace,
   WorkspaceCapability,
 } from "../../interfaces/models/Workspace";
+import { SublayError } from "../../errors/SublayError";
 
 export interface TransferWorkspaceOwnershipProps {
   workspaceId: string;
@@ -42,13 +43,13 @@ function useTransferWorkspaceOwnership(): (
   const transferWorkspaceOwnership = useCallback(
     async ({ workspaceId, ...rest }: TransferWorkspaceOwnershipProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!workspaceId) {
-        throw new Error("Please pass a workspaceId");
+        throw new SublayError("Please pass a workspaceId");
       }
       if (!rest.newOwnerId) {
-        throw new Error("Please pass a newOwnerId");
+        throw new SublayError("Please pass a newOwnerId");
       }
 
       // `newOwnerId` addresses the TARGET and rides in the body.

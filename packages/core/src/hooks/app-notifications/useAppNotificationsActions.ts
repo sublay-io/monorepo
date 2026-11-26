@@ -31,7 +31,7 @@ import {
 import { handleError } from "../../utils/handleError";
 import useProject from "../projects/useProject";
 import { useUser } from "../user";
-import type { SublayError } from "../../errors/SublayError";
+import { SublayError, rethrowAsSublayError } from "../../errors/SublayError";
 
 export interface UseAppNotificationsActionsValues {
   /** The last load failure, shared by every hook showing the notifications. Cleared when the next load starts. */
@@ -81,7 +81,7 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
   const markNotificationAsRead = useCallback(
     async ({ notificationId }: { notificationId: string }) => {
       if (!projectId || !user) {
-        throw new Error("No project ID or authenticated user available");
+        throw new SublayError("No project ID or authenticated user available");
       }
 
       const wasUnread = notifications.some(
@@ -96,7 +96,7 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
         await markNotificationAsReadMutation({
           projectId,
           notificationId,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
       } catch (error) {
         if (wasUnread) {
           dispatch(revertMarkAsReadLocally({ notificationIds: [notificationId] }));
@@ -128,7 +128,7 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
               projectId,
               page,
               limit: selectAppNotificationsLimit(state),
-            }).unwrap();
+            }).unwrap().catch(rethrowAsSublayError);
             if (!isCurrent() || !response) return;
             const { data: notifications, pagination } = response;
             // Store raw notifications - templates applied at display time
@@ -168,7 +168,7 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
     if (!projectId || !user) return;
 
     try {
-      const count = await triggerCountUnread({ projectId }).unwrap();
+      const count = await triggerCountUnread({ projectId }).unwrap().catch(rethrowAsSublayError);
       if (typeof count === "number") {
         dispatch(setUnreadCount(count));
       }
@@ -180,7 +180,7 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
   // Mark all notifications as read action
   const markAllNotificationsAsRead = useCallback(async () => {
     if (!projectId || !user) {
-      throw new Error("No project ID or authenticated user available");
+      throw new SublayError("No project ID or authenticated user available");
     }
 
     const unreadIds = notifications.filter((n) => !n.isRead).map((n) => n.id);
@@ -190,7 +190,7 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
       dispatch(markAllAsReadLocally());
 
       // Make API call
-      await markAllNotificationsAsReadMutation({ projectId }).unwrap();
+      await markAllNotificationsAsReadMutation({ projectId }).unwrap().catch(rethrowAsSublayError);
     } catch (error) {
       dispatch(revertMarkAsReadLocally({ notificationIds: unreadIds, unreadCount }));
       handleError(error, "Failed to mark all notifications as read:");

@@ -67,7 +67,7 @@ export interface UseSpaceDataValues {
 
 // The `code` of a server error response, if there is one.
 function errorCode(err: unknown): unknown {
-  return (err as { response?: { data?: { code?: unknown } } })?.response?.data?.code;
+  return toSublayError(err).code;
 }
 
 function useSpaceData({

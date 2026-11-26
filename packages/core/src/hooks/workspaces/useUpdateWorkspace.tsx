@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { Workspace } from "../../interfaces/models/Workspace";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UpdateWorkspaceProps {
   workspaceId: string;
@@ -22,10 +23,10 @@ function useUpdateWorkspace(): (
   const updateWorkspace = useCallback(
     async ({ workspaceId, ...rest }: UpdateWorkspaceProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!workspaceId) {
-        throw new Error("Please pass a workspaceId");
+        throw new SublayError("Please pass a workspaceId");
       }
 
       const response = await axios.patch<Workspace>(

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface ModerateSpaceEntityProps {
   spaceId: string;
@@ -42,11 +43,11 @@ function useModerateSpaceEntity(): (props: ModerateSpaceEntityProps) => Promise<
       reason,
     }: ModerateSpaceEntityProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId || !entityId) {
-        throw new Error("spaceId and entityId are required.");
+        throw new SublayError("spaceId and entityId are required.");
       }
 
       const response = await axios.patch(

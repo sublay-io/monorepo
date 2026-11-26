@@ -48,7 +48,7 @@ describe("useRemoveReaction", () => {
 
     await expect(
       result.current({ targetType: "entity", targetId: "entity-1" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when no target ID is passed", async () => {
@@ -111,7 +111,7 @@ describe("useRemoveReaction", () => {
 
       axiosPrivate.mockError("delete", 500, { message: "Internal error" });
       await expect(result.current({ targetType: "entity", targetId: "entity-1" })).rejects.toMatchObject({
-        response: { status: 500 },
+        status: 500,
       });
       expect(store.getState().sublay.entityLists).toBe(before);
     });

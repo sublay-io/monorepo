@@ -116,7 +116,7 @@ describe("useCreateEntity", () => {
     axiosPrivate.mockError("post", 500, { message: "Internal error" });
 
     await expect(result.current({ title: "Hello" })).rejects.toMatchObject({
-      response: { status: 500 },
+      status: 500,
     });
   });
 

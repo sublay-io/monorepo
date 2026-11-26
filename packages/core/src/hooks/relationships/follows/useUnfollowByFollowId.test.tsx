@@ -31,7 +31,7 @@ describe("useUnfollowByFollowId", () => {
 
     await expect(
       result.current({ followId: "follow-1" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when no follow ID is passed", async () => {

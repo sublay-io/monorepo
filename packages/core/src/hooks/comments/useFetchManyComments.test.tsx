@@ -127,7 +127,7 @@ describe("useFetchManyComments", () => {
     axiosPrivate.mockError("get", 500, { message: "Internal error" });
 
     await expect(result.current({ entityId: "entity-1" })).rejects.toMatchObject({
-      response: { status: 500 },
+      status: 500,
     });
   });
 

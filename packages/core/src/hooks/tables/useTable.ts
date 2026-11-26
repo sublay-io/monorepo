@@ -20,7 +20,7 @@ import {
   useRestoreRowMutation,
   useUpdateRowMutation,
 } from "../../store/api/tablesApi";
-import { SublayError, toSublayError } from "../../errors/SublayError";
+import { SublayError, toSublayError, rethrowAsSublayError } from "../../errors/SublayError";
 
 export type UseTableOptions = Partial<TableViewState>;
 
@@ -174,7 +174,7 @@ export function useTable<T extends TableRow = TableRow>(
         projectId: projectId as string,
         tableName,
         data: rowData,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
       return row as T;
     },
     [createRowMutation, projectId, tableName],
@@ -187,7 +187,7 @@ export function useTable<T extends TableRow = TableRow>(
         tableName,
         rowId,
         data: rowData,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
       return row as T;
     },
     [updateRowMutation, projectId, tableName],
@@ -200,7 +200,7 @@ export function useTable<T extends TableRow = TableRow>(
         tableName,
         rowId,
         force,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
     },
     [deleteRowMutation, projectId, tableName],
   );
@@ -211,7 +211,7 @@ export function useTable<T extends TableRow = TableRow>(
         projectId: projectId as string,
         tableName,
         rowId,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
       return row as T;
     },
     [restoreRowMutation, projectId, tableName],

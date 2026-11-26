@@ -1,5 +1,4 @@
-import { useSublaySelector } from "../../store/hooks";
-import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
+import { useViewerKey } from "../list/useViewerKey";
 import useProject from "../projects/useProject";
 import { useCallback } from "react";
 import { oneWaySortFields } from "../../helpers/oneWaySorts";
@@ -69,7 +68,7 @@ function useFetchManyCommentsWrapper(
   // A different project is a different list, and so is a different viewer
   // (results carry the viewer's reactions, follows, blocks).
   const { projectId } = useProject();
-  const viewerId = useSublaySelector(selectAuthUser)?.id ?? null;
+  const viewerId = useViewerKey();
   const resetKey = JSON.stringify({
     projectId,
     viewerId,

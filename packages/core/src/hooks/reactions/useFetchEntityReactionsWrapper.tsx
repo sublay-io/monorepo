@@ -1,5 +1,4 @@
-import { useSublaySelector } from "../../store/hooks";
-import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
+import { useViewerKey } from "../list/useViewerKey";
 import useProject from "../projects/useProject";
 import { Reaction, ReactionType } from "../../interfaces/models/Reaction";
 import useFetchEntityReactions from "./useFetchEntityReactions";
@@ -47,7 +46,7 @@ function useFetchEntityReactionsWrapper(
   // A different project is a different list, and so is a different viewer
   // (results carry the viewer's reactions, follows, blocks).
   const { projectId } = useProject();
-  const viewerId = useSublaySelector(selectAuthUser)?.id ?? null;
+  const viewerId = useViewerKey();
 
   // The one request builder for every page.
   const buildParams = (page: number) => ({

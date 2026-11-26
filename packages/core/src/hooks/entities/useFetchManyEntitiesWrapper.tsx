@@ -1,5 +1,4 @@
-import { useSublaySelector } from "../../store/hooks";
-import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
+import { useViewerKey } from "../list/useViewerKey";
 import useProject from "../projects/useProject";
 import { useState } from "react";
 import { oneWaySortFields } from "../../helpers/oneWaySorts";
@@ -119,7 +118,7 @@ function useFetchManyEntitiesWrapper(
   // A different project is a different list, and so is a different viewer
   // (results carry the viewer's reactions, follows, blocks).
   const { projectId } = useProject();
-  const viewerId = useSublaySelector(selectAuthUser)?.id ?? null;
+  const viewerId = useViewerKey();
 
   // The one request builder for every page: a param can't be sent with page 1
   // and left off page 2.

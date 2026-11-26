@@ -1,4 +1,4 @@
-import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
+import { useViewerKey } from "../list/useViewerKey";
 import { useState } from "react";
 import {
   CollectionEntityIncludeParam,
@@ -72,7 +72,7 @@ function useCollectionEntitiesWrapper(
 
   // A different viewer is a different list (an account change empties the
   // collections in the store too).
-  const viewerId = useSublaySelector(selectAuthUser)?.id ?? null;
+  const viewerId = useViewerKey();
 
   const effectiveCollectionId = passedCollectionId ?? currentCollection?.id;
 

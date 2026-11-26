@@ -8,7 +8,7 @@ import {
   okAxiosResponse,
   makeAuthUser,
 } from "../../test-utils";
-import { setUser } from "../../store/slices/authSlice";
+import { setInitialized, setUser } from "../../store/slices/authSlice";
 import { axiosPrivate as axiosPrivateInstance } from "../../config/axios";
 import useFetchManyEntitiesWrapper from "./useFetchManyEntitiesWrapper";
 import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
@@ -442,5 +442,28 @@ describe("useFetchManyEntitiesWrapper — the viewer changing", () => {
     const calls = axiosPrivate.calls("get");
     expect(calls).toHaveLength(2);
     expect(calls[1].config?.params).toMatchObject({ page: 1, followedOnly: true });
+  });
+});
+
+describe("useFetchManyEntitiesWrapper — the auth bootstrap", () => {
+  it("makes one page-1 request when the signed-in user lands as auth settles", async () => {
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useFetchManyEntitiesWrapper({ followedOnly: true }),
+      {
+        // A cold start: mounted before the bootstrap settles (no user yet).
+        beforeRender: ({ axiosPrivate, store }) => {
+          store.dispatch(setInitialized(false));
+          axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "e1" })], false));
+        },
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    act(() => {
+      store.dispatch(setUser(makeAuthUser({ id: "user-a" })));
+      store.dispatch(setInitialized(true));
+    });
+    await new Promise((r) => setTimeout(r, 30));
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+    expect(result.current.entities.map((e) => e.id)).toEqual(["e1"]);
   });
 });

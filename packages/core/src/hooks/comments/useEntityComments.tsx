@@ -1,3 +1,4 @@
+import { useViewerKey } from "../list/useViewerKey";
 import useProject from "../projects/useProject";
 import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import {
@@ -39,8 +40,6 @@ import {
   resolveReplySort,
   sendableReplySortByReaction,
 } from "../../helpers/commentThreadConfig";
-import { useSublaySelector } from "../../store/hooks";
-import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 
 export interface UseEntityCommentsProps extends SpaceReputationContextParams {
   entityId: string | undefined | null;
@@ -179,7 +178,8 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
   // Each comment carries the signed-in user's own reaction (`userReaction`),
   // so the list is fetched again when the user signs in, signs out or
   // switches accounts.
-  const userId = useSublaySelector(selectAuthUser)?.id ?? null;
+  // (The auth bootstrap settling is not a change: see useViewerKey.)
+  const userId = useViewerKey();
 
   const [sortBy, setSortBy] = useState<CommentsSortByOptions>(defaultSortBy);
   const [sortDir, setSortDir] = useState<"asc" | "desc">(defaultSortDir);

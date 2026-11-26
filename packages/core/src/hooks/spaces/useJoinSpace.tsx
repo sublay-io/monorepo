@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { SpaceMember } from "../../interfaces/models/SpaceMember";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface JoinSpaceProps {
   spaceId: string;
@@ -20,11 +21,11 @@ function useJoinSpace(): (props: JoinSpaceProps) => Promise<SpaceMember> {
   const joinSpace = useCallback(
     async ({ spaceId }: JoinSpaceProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId) {
-        throw new Error("Please pass a spaceId");
+        throw new SublayError("Please pass a spaceId");
       }
 
       const response = await axios.post(`/${projectId}/spaces/${spaceId}/join`);

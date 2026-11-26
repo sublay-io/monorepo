@@ -20,6 +20,7 @@ import {
   useRestoreRowMutation,
   useUpdateRowMutation,
 } from "../../store/api/tablesApi";
+import { SublayError, toSublayError, rethrowAsSublayError } from "../../errors/SublayError";
 
 export type UseTableOptions = Partial<TableViewState>;
 
@@ -36,7 +37,7 @@ export interface UseTableValues<T extends TableRow = TableRow> {
   rows: T[];
   pagination: PaginationMetadata | null;
   loading: boolean;
-  error: unknown;
+  error: SublayError | null;
   refetch: () => void;
 
   // Query controls (persisted in the tables slice).
@@ -44,17 +45,14 @@ export interface UseTableValues<T extends TableRow = TableRow> {
   setView: (view: Partial<TableViewState>) => void;
   setPage: (page: number) => void;
   setFilters: (filters: DbFilter[]) => void;
-  setSort: (sortBy: string | undefined, sortDir?: "asc" | "desc") => void;
+  setSort: (sort: { sortBy: string | undefined; sortDir?: "asc" | "desc" }) => void;
   setIncludeDeleted: (includeDeleted: boolean) => void;
 
   // Row mutations (projectId + tableName injected).
-  createRow: (data: Record<string, unknown>) => Promise<T>;
-  updateRow: (rowId: string, data: Record<string, unknown>) => Promise<T>;
-  deleteRow: (
-    rowId: string,
-    opts?: { force?: boolean },
-  ) => Promise<void>;
-  restoreRow: (rowId: string) => Promise<T>;
+  createRow: (props: { data: Record<string, unknown> }) => Promise<T>;
+  updateRow: (props: { rowId: string; data: Record<string, unknown> }) => Promise<T>;
+  deleteRow: (props: { rowId: string; force?: boolean }) => Promise<void>;
+  restoreRow: (props: { rowId: string }) => Promise<T>;
 }
 
 /**
@@ -171,49 +169,49 @@ export function useTable<T extends TableRow = TableRow>(
   );
 
   const createRow = useCallback(
-    async (rowData: Record<string, unknown>) => {
+    async ({ data: rowData }: { data: Record<string, unknown> }) => {
       const row = await createRowMutation({
         projectId: projectId as string,
         tableName,
         data: rowData,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
       return row as T;
     },
     [createRowMutation, projectId, tableName],
   );
 
   const updateRow = useCallback(
-    async (rowId: string, rowData: Record<string, unknown>) => {
+    async ({ rowId, data: rowData }: { rowId: string; data: Record<string, unknown> }) => {
       const row = await updateRowMutation({
         projectId: projectId as string,
         tableName,
         rowId,
         data: rowData,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
       return row as T;
     },
     [updateRowMutation, projectId, tableName],
   );
 
   const deleteRow = useCallback(
-    async (rowId: string, opts?: { force?: boolean }) => {
+    async ({ rowId, force }: { rowId: string; force?: boolean }) => {
       await deleteRowMutation({
         projectId: projectId as string,
         tableName,
         rowId,
-        force: opts?.force,
-      }).unwrap();
+        force,
+      }).unwrap().catch(rethrowAsSublayError);
     },
     [deleteRowMutation, projectId, tableName],
   );
 
   const restoreRow = useCallback(
-    async (rowId: string) => {
+    async ({ rowId }: { rowId: string }) => {
       const row = await restoreRowMutation({
         projectId: projectId as string,
         tableName,
         rowId,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
       return row as T;
     },
     [restoreRowMutation, projectId, tableName],
@@ -227,13 +225,13 @@ export function useTable<T extends TableRow = TableRow>(
       // tableName change. A page/sort/filter change keeps the previous page
       // visible and stays false.
       loading: isFetching && shownPage === undefined,
-      error,
+      error: error ? toSublayError(error) : null,
       refetch,
       view,
       setView: update,
       setPage: (page) => update({ page }),
       setFilters: (filters) => update({ filters, page: 1 }),
-      setSort: (sortBy, sortDir) => update({ sortBy, sortDir, page: 1 }),
+      setSort: ({ sortBy, sortDir }) => update({ sortBy, sortDir, page: 1 }),
       setIncludeDeleted: (includeDeleted) => update({ includeDeleted, page: 1 }),
       createRow,
       updateRow,

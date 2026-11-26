@@ -5,6 +5,7 @@ import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchEntityReactionsProps extends SpaceReputationContextParams {
   entityId: string;
@@ -23,19 +24,19 @@ function useFetchEntityReactions(): (props: FetchEntityReactionsProps) => Promis
       const { entityId, page, limit = 20, reactionType, sortDir = "desc", spaceReputation } = props;
 
       if (page === 0) {
-        throw new Error("Can't fetch reactions with page 0");
+        throw new SublayError("Can't fetch reactions with page 0");
       }
 
       if (limit === 0) {
-        throw new Error("Can't fetch with limit 0");
+        throw new SublayError("Can't fetch with limit 0");
       }
 
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!entityId) {
-        throw new Error("No entity ID provided");
+        throw new SublayError("No entity ID provided");
       }
 
       const params: Record<string, any> = {

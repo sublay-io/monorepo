@@ -3,6 +3,7 @@ import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { handleError } from "../../utils/handleError";
 import { User } from "../../interfaces/models/User";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UserSearchResult {
   similarity: number;
@@ -17,7 +18,7 @@ export interface UseSearchUsersProps {
 export interface UseSearchUsersReturn {
   results: UserSearchResult[];
   loading: boolean;
-  error: string | null;
+  error: SublayError | null;
   search: (props: UseSearchUsersProps) => Promise<void>;
   reset: () => void;
 }
@@ -28,7 +29,7 @@ export default function useSearchUsers(): UseSearchUsersReturn {
 
   const [results, setResults] = useState<UserSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const search = useCallback(
     async ({ query, limit }: UseSearchUsersProps) => {
@@ -44,7 +45,8 @@ export default function useSearchUsers(): UseSearchUsersReturn {
         );
         setResults(response.data);
       } catch (err) {
-        setError(handleError(err, "Failed to search users"));
+        handleError(err, "Failed to search users");
+        setError(toSublayError(err));
       } finally {
         setLoading(false);
       }

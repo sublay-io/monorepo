@@ -1,11 +1,15 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act } from "@testing-library/react";
 
 import {
   renderHookWithAxios,
   resetAxiosMocks,
   makeAuthUser,
+  stubAxiosAdapter,
+  axiosErrorWithStatus,
 } from "../../test-utils";
+import { axiosPrivate } from "../../config/axios";
+import { SublayError } from "../../errors/SublayError";
 import useCreateComment from "./useCreateComment";
 import type { Comment } from "../../interfaces/models/Comment";
 
@@ -14,6 +18,50 @@ afterEach(() => {
 });
 
 describe("useCreateComment", () => {
+  it("rejects with a SublayError carrying the server's code, status and param", async () => {
+    const { result } = renderHookWithAxios(() => useCreateComment(), {
+      projectId: "project-1",
+      user: makeAuthUser({ id: "user-1" }),
+    });
+    // The real request method, not the harness's spy: the conversion happens
+    // where the request leaves the axios instance.
+    vi.mocked(axiosPrivate.post).mockRestore();
+    stubAxiosAdapter(axiosPrivate, async (config) => {
+      throw axiosErrorWithStatus(
+        422,
+        { error: "Content is too long.", code: "comment/invalid-content", param: "content" },
+        config,
+      );
+    });
+
+    const err = await result
+      .current({ entityId: "entity-1", content: "x".repeat(10) })
+      .catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(SublayError);
+    expect(err).toMatchObject({
+      message: "Content is too long.",
+      code: "comment/invalid-content",
+      param: "content",
+      status: 422,
+    });
+    expect((err as SublayError).cause).toMatchObject({ response: { status: 422 } });
+  });
+
+  it("throws a code-less SublayError when there is no project", async () => {
+    const { result } = renderHookWithAxios(() => useCreateComment(), {
+      projectId: "",
+      user: makeAuthUser({ id: "user-1" }),
+    });
+
+    const err = await result
+      .current({ entityId: "entity-1", content: "hello" })
+      .catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(SublayError);
+    expect((err as SublayError).code).toBeUndefined();
+  });
+
   it("posts the comment and returns the created comment", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(() => useCreateComment(), {
@@ -152,7 +200,7 @@ describe("useCreateComment", () => {
 
     await expect(
       result.current({ entityId: "entity-1", content: "hello" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when there is no authenticated user", async () => {

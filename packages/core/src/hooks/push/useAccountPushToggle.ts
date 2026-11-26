@@ -14,6 +14,7 @@ import { handleError } from "../../utils/handleError";
 import type { SublayState } from "../../store/sublayReducers";
 import { applyAccountPushBinding } from "./reconcilePushBindings";
 import { AccountTransitionError } from "../auth/accountTransition";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface SetAccountPushEnabledParams {
   /** Any account in the stored account map — it does not have to be active. */
@@ -35,8 +36,8 @@ export interface UseAccountPushToggleValues {
   ) => Promise<boolean>;
   /** Whether a given stored account currently wants push on this device. */
   isAccountPushEnabled: (userId: string) => boolean;
-  isUpdating: boolean;
-  error: string | null;
+  updating: boolean;
+  error: SublayError | null;
 }
 
 /**
@@ -64,12 +65,12 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
   const store = useStore<{ sublay: SublayState }>();
   const { projectId } = useProject();
   const accounts = useSublaySelector(selectAccounts);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const setEnabled = useCallback(
     async ({ userId, enabled }: SetAccountPushEnabledParams) => {
-      if (!projectId) throw new Error("No projectId available");
+      if (!projectId) throw new SublayError("No projectId available");
 
       const getState = () => store.getState();
       // Typed with the same discriminant `useSwitchAccount` and
@@ -86,7 +87,7 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
         );
       }
 
-      setIsUpdating(true);
+      setUpdating(true);
       setError(null);
 
       try {
@@ -145,14 +146,11 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
         // the server, and reverting it would be the one variant that does
         // misreport. The rethrow is what tells the caller to retry.
         handleError(err, "Failed to update push notifications for account");
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to update push notifications for account"
-        );
-        throw err;
+        const failure = toSublayError(err);
+        setError(failure);
+        throw failure;
       } finally {
-        setIsUpdating(false);
+        setUpdating(false);
       }
     },
     [dispatch, store, projectId]
@@ -169,7 +167,7 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
   return {
     setAccountPushEnabled: setEnabled,
     isAccountPushEnabled: isEnabled,
-    isUpdating,
+    updating,
     error,
   };
 }

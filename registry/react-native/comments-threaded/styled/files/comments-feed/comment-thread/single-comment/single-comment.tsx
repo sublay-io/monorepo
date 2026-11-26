@@ -138,7 +138,7 @@ function SingleComment({
   const isReplyTarget = repliedToComment?.id === comment.id;
   const clearReplyTarget = () => {
     setRepliedToComment?.(null);
-    setShowReplyBanner?.({ newState: false });
+    setShowReplyBanner?.(false);
   };
   const handleReplyPress = () => {
     if (isReplyTarget) {

@@ -98,8 +98,8 @@ The opt-in `spaceReputation` object is accepted too; only spaces the viewer can 
   `true` while a page is loading, and before `userId` is first set. When `userId` is removed after it was set, the list is cleared and `loading` is `false`.
 </ResponseField>
 
-<ResponseField name="error" type="Error | null">
-  The last failure loading the list. Cleared when the next load starts. Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same page again, including a first page that failed.
+<ResponseField name="error" type="SublayError | null">
+  The last failure loading the list. Cleared when the next load starts. Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same page again, including a first page that failed. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">

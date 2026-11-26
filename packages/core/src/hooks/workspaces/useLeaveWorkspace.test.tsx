@@ -58,7 +58,7 @@ describe("useLeaveWorkspace", () => {
     axiosPrivate.mockError("delete", 409, { code: "workspace/sole-owner" });
 
     await expect(result.current({ workspaceId: "w1" })).rejects.toMatchObject({
-      response: { status: 409 },
+      status: 409,
     });
   });
 });

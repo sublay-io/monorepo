@@ -9,6 +9,7 @@ import {
 } from "../../interfaces/models/Report";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchModeratedReportsParams extends SpaceReputationContextParams {
   spaceId?: string;
@@ -65,7 +66,7 @@ function useFetchModeratedReports(): (params: FetchModeratedReportsParams) => Pr
       spaceReputation,
     }: FetchModeratedReportsParams) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const params: Record<string, any> = {

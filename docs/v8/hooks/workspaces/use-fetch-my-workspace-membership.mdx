@@ -15,7 +15,7 @@ Your own membership is `/workspaces/:workspaceId/members/me`: this hook reads it
 ## Usage Example
 
 ```tsx
-import { useFetchMyWorkspaceMembership } from "@sublay/react-js";
+import { useFetchMyWorkspaceMembership, SublayError } from "@sublay/react-js";
 
 function MyRole({ workspaceId }: { workspaceId: string }) {
   const fetchMyWorkspaceMembership = useFetchMyWorkspaceMembership();
@@ -24,8 +24,8 @@ function MyRole({ workspaceId }: { workspaceId: string }) {
     try {
       const me = await fetchMyWorkspaceMembership({ workspaceId });
       // me.capabilities, me.permissions, me.rank, me.relativeRank are always present here.
-    } catch (err: any) {
-      if (err.response?.data?.code === "workspace/not-found") {
+    } catch (err) {
+      if (err instanceof SublayError && err.code === "workspace/not-found") {
         // No such workspace, or no standing on it at all (answered alike).
       }
     }

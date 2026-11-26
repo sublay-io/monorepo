@@ -113,7 +113,7 @@ describe("useUpdateEntity", () => {
 
     await expect(
       result.current({ entityId: "entity-1", update: { title: "New title" } }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when there is no project", async () => {
@@ -209,7 +209,7 @@ describe("useUpdateEntity", () => {
       axiosPrivate.mockError("patch", 500, { message: "Internal error" });
       await expect(
         result.current({ entityId: "entity-1", update: { title: "New title" } }),
-      ).rejects.toMatchObject({ response: { status: 500 } });
+      ).rejects.toMatchObject({ status: 500 });
       expect(store.getState().sublay.entityLists).toBe(before);
     });
   });

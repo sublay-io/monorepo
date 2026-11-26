@@ -118,7 +118,7 @@ describe("useCreateReport", () => {
 
     await expect(
       result.current({ targetId: "comment-1", reason: "spam" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when there is no authenticated user", async () => {

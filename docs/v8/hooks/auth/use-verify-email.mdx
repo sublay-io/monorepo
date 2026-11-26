@@ -15,7 +15,7 @@ icon: "plug"
 
 <CodeGroup>
 ```tsx React
-import { useVerifyEmail } from "@sublay/react-js";
+import { useVerifyEmail, SublayError } from "@sublay/react-js";
 import { useState } from "react";
 
 function VerifyCodeForm() {
@@ -29,8 +29,8 @@ function VerifyCodeForm() {
     try {
       await verifyEmail({ token: code });
       // user.isVerified is now true locally
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? "Verification failed.");
+    } catch (err) {
+      setError(err instanceof SublayError ? err.message : "Verification failed.");
     }
   };
 

@@ -31,7 +31,7 @@ function NotificationSettings() {
     const next = disabledTypes.includes(type)
       ? disabledTypes.filter((t) => t !== type)
       : [...disabledTypes, type];
-    return updatePreferences(next);
+    return updatePreferences({ disabledTypes: next });
   };
 
   return (
@@ -71,15 +71,15 @@ The hook returns an object:
   `true` while an update is in flight.
 </ResponseField>
 
-<ResponseField name="error" type="unknown">
-  The read error, if any.
+<ResponseField name="error" type="SublayError | null">
+  The read error, or `null`. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="refetch" type="() => void">
   Re-fetch the preferences.
 </ResponseField>
 
-<ResponseField name="updatePreferences" type="(disabledTypes: PushEventType[]) => Promise<void>">
+<ResponseField name="updatePreferences" type="({ disabledTypes }: { disabledTypes: PushEventType[] }) => Promise<void>">
   Replace the disabled-types set (upsert). Pass the **complete** set you want stored, not a delta. Only valid event type names are accepted; unknown names are rejected server-side.
 </ResponseField>
 

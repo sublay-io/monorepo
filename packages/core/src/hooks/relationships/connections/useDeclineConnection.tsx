@@ -3,6 +3,7 @@ import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
 import type { ConnectionRow } from "../../../interfaces/models/Connection";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface DeclineConnectionProps {
   connectionId: string;
@@ -17,15 +18,15 @@ function useDeclineConnection(): (props: DeclineConnectionProps) => Promise<Conn
     async (props: DeclineConnectionProps): Promise<ConnectionRow> => {
       const { connectionId } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!user) {
-        throw new Error("No user is logged in");
+        throw new SublayError("No user is logged in");
       }
 
       if (!connectionId) {
-        throw new Error("No connection ID was provided");
+        throw new SublayError("No connection ID was provided");
       }
 
       // The row from the receiver's (caller's) side: `user` is the requester.

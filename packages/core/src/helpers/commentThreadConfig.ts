@@ -4,7 +4,8 @@ import {
   CommentsSortByOptions,
 } from "../interfaces/CommentsSortByOptions";
 import { ReactionType } from "../interfaces/models/Reaction";
-import { isDevelopment } from "../utils/env";
+
+declare const process: { env: Record<string, string | undefined> };
 
 /**
  * Mirrors of the server's thread limits (plan §3.2, D11). The worst-case
@@ -91,10 +92,25 @@ export function resolveReplySort(
   return { sortBy, sortDir, sortByReaction };
 }
 
-/** True in development builds (web bundlers' NODE_ENV, or React Native's `__DEV__`). */
+/**
+ * True in development builds: React Native's `__DEV__` when it is set,
+ * otherwise `process.env.NODE_ENV !== "production"`.
+ *
+ * The `process.env.NODE_ENV` read is written out literally, on purpose:
+ * webpack, Vite, CRA and Next replace that exact text at build time, while a
+ * guarded lookup (`typeof process !== "undefined" && process.env`) is false in
+ * a browser bundle, where there is no `process` object, and so reported every
+ * web build as production. The try/catch covers a runtime with no `process`
+ * and no build-time replacement.
+ */
 export function isDevBuild(): boolean {
-  if ((globalThis as { __DEV__?: boolean }).__DEV__ === true) return true;
-  return isDevelopment();
+  const dev = (globalThis as { __DEV__?: unknown }).__DEV__;
+  if (typeof dev === "boolean") return dev;
+  try {
+    return process.env.NODE_ENV !== "production";
+  } catch {
+    return false;
+  }
 }
 
 /**

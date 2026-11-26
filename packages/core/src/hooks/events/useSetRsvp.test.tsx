@@ -34,7 +34,7 @@ describe("useSetRsvp", () => {
 
     await expect(
       result.current({ eventId: "event-1", status: "going" }),
-    ).rejects.toMatchObject({ response: { status: 400 } });
+    ).rejects.toMatchObject({ status: 400 });
   });
 
   it("throws before making a request when there is no project", async () => {

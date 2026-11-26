@@ -69,8 +69,8 @@ function ThreadPanel({
   `true` while a fetch is in progress.
 </ResponseField>
 
-<ResponseField name="error" type="Error | null">
-  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook showing the same thread.
+<ResponseField name="error" type="SublayError | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook showing the same thread. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">

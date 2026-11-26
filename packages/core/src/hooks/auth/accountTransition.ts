@@ -22,6 +22,7 @@ import {
   type MintedAccountLease,
 } from "../push/mintAccountAccessToken";
 import { isCredentialRejection } from "../../utils/credentialRejection";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 /**
  * The account-transition core.
@@ -108,7 +109,7 @@ export const ACCOUNT_TRANSITION_FAILED_MESSAGE =
  * They are never both `true`: an account that is not in the map has no
  * credential to have refused.
  */
-export class AccountTransitionError extends Error {
+export class AccountTransitionError extends SublayError {
   readonly credentialRejected: boolean;
   /**
    * `true` when the operation named an account that is not in the stored
@@ -120,9 +121,20 @@ export class AccountTransitionError extends Error {
   constructor(
     message: string = ACCOUNT_TRANSITION_FAILED_MESSAGE,
     credentialRejected: boolean = false,
-    accountNotFound: boolean = false
+    accountNotFound: boolean = false,
+    /**
+     * The server's `code` / `param` / `status` when the failure was a server
+     * answer, and the original error as `cause`.
+     */
+    details: {
+      code?: string;
+      status?: number;
+      param?: string;
+      body?: Record<string, unknown>;
+      cause?: unknown;
+    } = {}
   ) {
-    super(message);
+    super(message, details);
     this.name = "AccountTransitionError";
     this.credentialRejected = credentialRejected;
     this.accountNotFound = accountNotFound;
@@ -246,7 +258,14 @@ export async function activateStoredAccount({
   } catch (error) {
     const rejected = isCredentialRejection(error);
     failTransition({ dispatch, getState, userId, credentialRejected: rejected });
-    throw new AccountTransitionError(readFailureReason(error), rejected);
+    const failure = toSublayError(error);
+    throw new AccountTransitionError(readFailureReason(error), rejected, false, {
+      code: failure.code,
+      status: failure.status,
+      param: failure.param,
+      body: failure.body,
+      cause: error,
+    });
   }
 
   try {
@@ -339,9 +358,7 @@ function failTransition({
 
 /** The server's reason, when it gave one, else the error's own message. */
 function readFailureReason(error: unknown): string {
-  const data = (
-    error as { response?: { data?: { error?: unknown; message?: unknown } } }
-  )?.response?.data;
+  const data = toSublayError(error).body;
 
   if (typeof data?.error === "string" && data.error) return data.error;
   if (typeof data?.message === "string" && data.message) return data.message;

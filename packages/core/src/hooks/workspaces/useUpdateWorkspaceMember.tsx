@@ -5,6 +5,7 @@ import {
   WorkspaceMember,
   WorkspaceCapability,
 } from "../../interfaces/models/Workspace";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UpdateWorkspaceMemberProps {
   workspaceId: string;
@@ -56,13 +57,13 @@ function useUpdateWorkspaceMember(): (
       ...rest
     }: UpdateWorkspaceMemberProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!workspaceId) {
-        throw new Error("Please pass a workspaceId");
+        throw new SublayError("Please pass a workspaceId");
       }
       if (!targetUserId) {
-        throw new Error("Please pass a targetUserId");
+        throw new SublayError("Please pass a targetUserId");
       }
 
       const response = await axios.patch<WorkspaceMember>(

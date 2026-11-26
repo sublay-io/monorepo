@@ -17,15 +17,15 @@ import { useEffect } from "react";
 import { useOAuthIdentities } from "@sublay/react-js";
 
 function LinkedIdentities() {
-  const { identities, fetchIdentities, unlinkIdentity, isLoading, error } =
+  const { identities, fetchIdentities, unlinkIdentity, loading, error } =
     useOAuthIdentities();
 
   useEffect(() => {
     fetchIdentities();
   }, []);
 
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <ul>
@@ -65,12 +65,12 @@ function LinkedIdentities() {
   if it would be the last identity and the user has no password set.
 </ResponseField>
 
-<ResponseField name="isLoading" type="boolean">
+<ResponseField name="loading" type="boolean">
   `true` while a fetch or unlink request is in progress.
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  Error message from the most recent failed operation, or `null` if no error.
+<ResponseField name="error" type="SublayError | null">
+  The error from the most recent failed operation, or `null` if no error. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 ## OAuthIdentity Type

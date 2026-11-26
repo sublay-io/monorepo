@@ -18,7 +18,7 @@ function Feed() {
   });
 
   useEffect(() => {
-    fetchEntities({}, { sortBy: "hot" }, { limit: 20 });
+    fetchEntities({ sort: { sortBy: "hot" }, config: { limit: 20 } });
   }, []);
 
   return (

@@ -30,7 +30,7 @@ function ProductFeed() {
   });
 
   useEffect(() => {
-    fetchEntities({}, { sortBy: "createdAt" }, { limit: 20 });
+    fetchEntities({ sort: { sortBy: "createdAt" }, config: { limit: 20 } });
   }, []);
 
   return (

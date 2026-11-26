@@ -34,6 +34,7 @@ import { useChatContext } from "../../../context/chat-context";
 import useFetchManyChatMessages, {
   isInvalidChatCursorError,
 } from "./useFetchManyChatMessages";
+import type { SublayError } from "../../../errors/SublayError";
 
 export interface UseLiveChatMessagesProps {
   conversationId: string;
@@ -56,7 +57,7 @@ export interface UseLiveChatMessagesValues {
    * The last load failure, shared by every hook showing this conversation (or
    * thread). Cleared when the next load starts; `loadMore()` retries it.
    */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
   /**

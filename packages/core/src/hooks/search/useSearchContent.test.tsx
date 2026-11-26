@@ -70,7 +70,7 @@ describe("useSearchContent", () => {
     });
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.error).toContain("Search failed");
+    expect(result.current.error?.message).toContain("Search failed");
   });
 
   it("does not call the API for a blank/whitespace-only query", async () => {

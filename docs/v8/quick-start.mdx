@@ -163,12 +163,11 @@ The examples use React on the web. React Native and Expo work the same way — s
       });
 
       const load = () =>
-        fetchEntities(
-          {},
-          { sortBy: "createdAt", sortDir: "desc" },
-          { limit: 20, include: ["user"] },
-          { fetchImmediately: true }
-        );
+        fetchEntities({
+          sort: { sortBy: "createdAt", sortDir: "desc" },
+          config: { limit: 20, include: ["user"] },
+          options: { fetchImmediately: true },
+        });
 
       useEffect(() => {
         load();

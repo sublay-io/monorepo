@@ -100,7 +100,7 @@ describe("useMatchUsers", () => {
     });
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.error).toContain("not enabled");
+    expect(result.current.error?.message).toContain("not enabled");
   });
 
   it("reset() clears results and error", async () => {

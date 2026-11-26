@@ -1,3 +1,4 @@
+import type { SublayError } from "../errors/SublayError";
 /**
  * How the confirmation email is sent when the project requires email
  * verification before sign-in. Accepted on sign-up and sign-in; ignored when
@@ -38,6 +39,10 @@ export interface AuthRejection {
   message: string;
   /** The server's error code, e.g. `auth/email-not-verified`. */
   code?: string;
+  /** The HTTP status, when the server answered. */
+  status?: number;
+  /** The server's JSON error body as sent, when it answered with one. */
+  body?: Record<string, unknown>;
   /**
    * The failing input, when the server names one: a dot path such as
    * `email`, or the field another user already holds on a
@@ -51,9 +56,10 @@ export interface AuthRejection {
   verificationId?: string;
 }
 
-/** The `Error` `useAuth`'s sign-up and sign-in throw. */
-export type SublayAuthError = Error & {
-  code?: string;
-  param?: string;
+/**
+ * The `SublayError` `useAuth`'s sign-up and sign-in throw, with the
+ * `verificationId` of a sign-in refused with `auth/email-not-verified`.
+ */
+export type SublayAuthError = SublayError & {
   verificationId?: string;
 };

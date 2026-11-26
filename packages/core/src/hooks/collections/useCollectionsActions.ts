@@ -38,6 +38,7 @@ import type {
   DeleteCollectionResponse,
 } from "../../interfaces/models/Collection";
 import type { Entity } from "../../interfaces/models/Entity";
+import { rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseCollectionsActionsValues {
   openCollection: (collection: Collection) => void;
@@ -114,7 +115,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
     dispatch(setLoading(true));
 
     try {
-      const result = await fetchRootCollectionQuery({ projectId }).unwrap();
+      const result = await fetchRootCollectionQuery({ projectId }).unwrap().catch(rethrowAsSublayError);
       if (result) {
         // The root collection has no parent
         const rootCollection = { ...result, parentCollectionId: null };
@@ -138,7 +139,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
     dispatch(setLoading(true));
 
     try {
-      const result = await fetchSubCollectionsQuery({ projectId, collectionId }).unwrap();
+      const result = await fetchSubCollectionsQuery({ projectId, collectionId }).unwrap().catch(rethrowAsSublayError);
       if (result) {
         dispatch(setSubCollections({ collections: result, parentCollectionId: collectionId }));
       }
@@ -170,7 +171,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         projectId,
         parentCollectionId,
         name,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
 
       if (result) {
         dispatch(addNewCollectionAndNavigate(result));
@@ -200,7 +201,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         projectId,
         collectionId,
         update,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
 
       if (result) {
         // Check if it's the current collection or a sub-collection
@@ -235,7 +236,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
       const result = await deleteCollectionMutation({
         projectId,
         collectionId: collection.id,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
       // The server names every collection the delete removed (this one and
       // every one under it).
       const returnedIds = result?.deletedCollectionIds;
@@ -291,7 +292,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         projectId,
         collectionId,
         entityId: entity.id,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
       collectionName =
         result?.name ?? collectionsByIdRef.current[collectionId]?.name;
     } catch (err) {
@@ -299,7 +300,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         dispatch(removeCollectionEntity({ collectionId, entityId: entity.id }));
       }
       handleErrorUtil(err, "Failed to add entity to collection");
-      throw err;
+      throw toSublayError(err);
     }
 
     // Loaded entity lists fetched with `include=saved` show the save too,
@@ -344,13 +345,13 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         projectId,
         collectionId,
         entityId,
-      }).unwrap();
+      }).unwrap().catch(rethrowAsSublayError);
     } catch (err) {
       if (entityToRestore) {
         dispatch(insertCollectionEntityAt({ collectionId, entity: entityToRestore, index: originalIndex }));
       }
       handleErrorUtil(err, "Failed to remove entity from collection");
-      throw err;
+      throw toSublayError(err);
     }
 
     // Loaded entity lists fetched with `include=saved` show the removal too.

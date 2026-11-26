@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { WithdrawRsvpResponse } from "../../interfaces/models/Event";
+import { SublayError } from "../../errors/SublayError";
 
 export interface WithdrawRsvpProps {
   eventId: string;
@@ -21,7 +22,7 @@ function useWithdrawRsvp(): (
   const withdrawRsvp = useCallback(
     async ({ eventId }: WithdrawRsvpProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const response = await axios.delete(

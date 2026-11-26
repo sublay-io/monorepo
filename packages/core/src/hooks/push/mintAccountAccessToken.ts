@@ -91,7 +91,7 @@
 // EVEN IF THE TOGGLE EVER GOES AWAY: two overlapping TRANSITIONS INTO THE SAME
 // ACCOUNT. Nothing prevents them. `activateStoredAccount` has no re-entrancy
 // guard of its own and is a public export; `useSwitchAccount` never consults
-// its own `isSwitching` flag as a guard, and its `userId === activeAccountId`
+// its own `switching` flag as a guard, and its `userId === activeAccountId`
 // early return only bites once the first transition has already installed. A
 // double tap, or two mounted switchers, therefore both get through. The second
 // one arriving in the settle -> install window is precisely the case
@@ -107,6 +107,7 @@ import {
 import { persistAccountMapFor } from "../../config/accountStorage";
 import { readJwtExp } from "../../utils/jwt";
 import type { AuthUser } from "../../interfaces/models/User";
+import { SublayError } from "../../errors/SublayError";
 
 export type GetSublayState = () => { sublay: SublayState };
 
@@ -119,7 +120,7 @@ export interface MintAccountAccessTokenArgs {
 }
 
 /** Raised when a mint cannot be completed. Never carries the token itself. */
-export class AccountTokenMintError extends Error {
+export class AccountTokenMintError extends SublayError {
   constructor(message: string) {
     super(message);
     this.name = "AccountTokenMintError";
@@ -244,7 +245,7 @@ function startOrJoin(
  * why this survived the removal of push reconciliation's bulk pass. Nothing
  * upstream serializes transitions: `activateStoredAccount` has no re-entrancy
  * guard and is publicly exported, and `useSwitchAccount` never reads its own
- * `isSwitching` flag as a guard — that flag is per-hook-instance React state,
+ * `switching` flag as a guard — that flag is per-hook-instance React state,
  * set inside the async callback, so a double tap or two mounted switchers both
  * get through, and the `userId === activeAccountId` early return only starts
  * refusing once the first transition has already installed. Remove the hold and

@@ -10,6 +10,7 @@ import {
 } from "../../test-utils";
 import { describeStoreListContract } from "../../test-utils/storeListContract";
 import useEntityList from "./useEntityList";
+import { SublayError } from "../../errors/SublayError";
 
 let fetchHandle: FetchMockHandle;
 
@@ -38,7 +39,7 @@ describe("useEntityList", () => {
       projectId: "test-project",
     });
 
-    act(() => result.current.fetchEntities({}));
+    act(() => result.current.fetchEntities());
 
     await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["e1"]));
     expect(result.current.hasMore).toBe(true);
@@ -55,7 +56,7 @@ describe("useEntityList", () => {
       projectId: "test-project",
     });
 
-    act(() => result.current.fetchEntities({ userId: "user-1" }, { sortBy: "createdAt" }));
+    act(() => result.current.fetchEntities({ filters: { userId: "user-1" }, sort: { sortBy: "createdAt" } }));
     expect(fetchHandle.calls()).toHaveLength(0); // not yet — debounced
 
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1), {
@@ -72,12 +73,7 @@ describe("useEntityList", () => {
     });
 
     await act(async () => {
-      result.current.fetchEntities(
-        { userId: "user-1" },
-        { sortBy: "createdAt" },
-        undefined,
-        { fetchImmediately: true },
-      );
+      result.current.fetchEntities({ filters: { userId: "user-1" }, sort: { sortBy: "createdAt" }, options: { fetchImmediately: true } });
       await Promise.resolve();
     });
 
@@ -89,14 +85,17 @@ describe("useEntityList", () => {
     const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
       projectId: "test-project",
     });
-    act(() => result.current.fetchEntities({}, undefined, undefined, { fetchImmediately: true }));
+    act(() => result.current.fetchEntities({ options: { fetchImmediately: true } }));
     await waitFor(() => expect(result.current.entities).toHaveLength(1));
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], false));
     act(() =>
-      result.current.fetchEntities({ userId: "user-2" }, undefined, undefined, {
+      result.current.fetchEntities({
+  filters: { userId: "user-2" },
+  options: {
         clearImmediately: true,
-      }),
+      },
+}),
     );
     expect(result.current.entities).toEqual([]); // cleared synchronously, before the debounce fires
 
@@ -111,17 +110,12 @@ describe("useEntityList", () => {
     const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
       projectId: "test-project",
     });
-    act(() => result.current.fetchEntities({}, undefined, undefined, { fetchImmediately: true }));
+    act(() => result.current.fetchEntities({ options: { fetchImmediately: true } }));
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1));
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
     act(() =>
-      result.current.fetchEntities(
-        { userId: "user-1" },
-        { sortBy: "createdAt" },
-        undefined,
-        { fetchImmediately: true },
-      ),
+      result.current.fetchEntities({ filters: { userId: "user-1" }, sort: { sortBy: "createdAt" }, options: { fetchImmediately: true } }),
     );
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(2));
     expect(result.current.userId).toBe("user-1");
@@ -129,11 +123,13 @@ describe("useEntityList", () => {
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
     act(() =>
-      result.current.fetchEntities({}, undefined, undefined, {
+      result.current.fetchEntities({
+  options: {
         fetchImmediately: true,
         resetFilters: true,
         resetSort: true,
-      }),
+      },
+}),
     );
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(3));
     expect(result.current.userId).toBeNull();
@@ -146,7 +142,7 @@ describe("useEntityList", () => {
       const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchEntities({}));
+      act(() => result.current.fetchEntities());
       await waitFor(() => expect(result.current.entities).toHaveLength(1));
       expect(result.current.sourceId).toBeNull();
 
@@ -170,14 +166,14 @@ describe("useEntityList", () => {
         projectId: "test-project",
       });
       act(() =>
-        result.current.fetchEntities({}, undefined, { sourceId: null, spaceId: null }, { fetchImmediately: true }),
+        result.current.fetchEntities({ config: { sourceId: null, spaceId: null }, options: { fetchImmediately: true } }),
       );
       await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1));
       await waitFor(() => expect(result.current.loading).toBe(false));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], true));
       act(() =>
-        result.current.fetchEntities({}, undefined, { sourceId: "none", spaceId: "none" }, { fetchImmediately: true }),
+        result.current.fetchEntities({ config: { sourceId: "none", spaceId: "none" }, options: { fetchImmediately: true } }),
       );
       await waitFor(() => expect(fetchHandle.calls()).toHaveLength(2));
       await waitFor(() => expect(result.current.hasMore).toBe(true));
@@ -220,7 +216,7 @@ describe("useEntityList", () => {
       const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchEntities({}));
+      act(() => result.current.fetchEntities());
       await waitFor(() => expect(result.current.entities).toHaveLength(1));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], false));
@@ -240,7 +236,7 @@ describe("useEntityList", () => {
       const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchEntities({}));
+      act(() => result.current.fetchEntities());
       await waitFor(() => expect(result.current.entities).toHaveLength(1));
       expect(result.current.hasMore).toBe(false);
 
@@ -258,7 +254,7 @@ describe("useEntityList", () => {
         projectId: "test-project",
       });
       act(() =>
-        result.current.fetchEntities({}, undefined, { sourceId: "source-1" }, { fetchImmediately: true }),
+        result.current.fetchEntities({ config: { sourceId: "source-1" }, options: { fetchImmediately: true } }),
       );
       await waitFor(() => expect(result.current.sourceId).toBe("source-1"));
 
@@ -278,12 +274,7 @@ describe("useEntityList", () => {
         projectId: "test-project",
       });
       act(() =>
-        result.current.fetchEntities(
-          {},
-          undefined,
-          { sourceId: "none", spaceId: "none" },
-          { fetchImmediately: true },
-        ),
+        result.current.fetchEntities({ config: { sourceId: "none", spaceId: "none" }, options: { fetchImmediately: true } }),
       );
       await waitFor(() => expect(result.current.sourceId).toBe("none"));
 
@@ -308,7 +299,7 @@ describe("useEntityList", () => {
       const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchEntities({}));
+      act(() => result.current.fetchEntities());
       await waitFor(() => expect(result.current.entities).toHaveLength(1));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(
@@ -329,7 +320,7 @@ describe("useEntityList", () => {
       () => useEntityList({ listId: "feed", infuseData }),
       { projectId: "test-project" },
     );
-    act(() => result.current.fetchEntities({}));
+    act(() => result.current.fetchEntities());
     await waitFor(() => expect(result.current.entities).toHaveLength(1));
 
     await waitFor(() => expect(result.current.infusedEntities).toHaveLength(1));
@@ -342,11 +333,13 @@ describe("useEntityList", () => {
       projectId: "test-project",
     });
     act(() =>
-      result.current.fetchEntities({}, undefined, {
+      result.current.fetchEntities({
+  config: {
         include: ["topComments"],
         topCommentsLimit: 3,
         topCommentsSortByReaction: "like",
-      }),
+      },
+}),
     );
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1));
     const first = new URL(fetchHandle.calls()[0].url).searchParams;
@@ -354,7 +347,7 @@ describe("useEntityList", () => {
     expect(first.get("topCommentsSortByReaction")).toBe("like");
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], true));
-    act(() => result.current.fetchEntities({}, undefined, { include: ["user"] }));
+    act(() => result.current.fetchEntities({ config: { include: ["user"] } }));
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(2));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
     const second = new URL(fetchHandle.calls()[1].url).searchParams;
@@ -381,12 +374,12 @@ describe("useEntityList", () => {
     const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
       projectId: "test-project",
     });
-    act(() => result.current.fetchEntities({}, undefined, firstConfig as any));
+    act(() => result.current.fetchEntities({ config: firstConfig as any }));
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], true));
-    act(() => result.current.fetchEntities({}, undefined, secondConfig as any));
+    act(() => result.current.fetchEntities({ config: secondConfig as any }));
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(2));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
 
@@ -445,12 +438,94 @@ describe("useEntityList", () => {
 describe("useEntityList — the list contract", () => {
   const pageParam = (i: number) => new URL(fetchHandle.calls()[i].url).searchParams;
 
+  it("fetchEntities takes one object, and sends its filters, sort and config", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "a1" }], false));
+    const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+
+    act(() =>
+      result.current.fetchEntities({
+        filters: { userId: "user-a" },
+        sort: { sortBy: "top" },
+        config: { limit: 3 },
+        options: { fetchImmediately: true },
+      }),
+    );
+    await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["a1"]));
+
+    const params = pageParam(0);
+    expect(params.get("userId")).toBe("user-a");
+    expect(params.get("sortBy")).toBe("top");
+    expect(params.get("limit")).toBe("3");
+  });
+
+  it("warns in development about keys fetchEntities doesn't take", async () => {
+    vi.stubGlobal("__DEV__", true);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
+    const { result, unmount } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+
+    act(() => result.current.fetchEntities({ userId: "u" } as never));
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('"userId"'));
+
+    // The old positional form: no stray key in the first argument.
+    warn.mockClear();
+    act(() =>
+      (result.current.fetchEntities as (...args: unknown[]) => void)(
+        {},
+        { sortBy: "top" },
+        { limit: 5 },
+      ),
+    );
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("got 3 arguments"));
+
+    warn.mockClear();
+    act(() =>
+      result.current.fetchEntities({ filters: { userId: "u" }, options: { fetchImmediately: true } }),
+    );
+    expect(warn).not.toHaveBeenCalled();
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    unmount();
+    vi.unstubAllGlobals();
+  });
+
+  it("doesn't warn outside development", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
+    const { result, unmount } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+
+    act(() => result.current.fetchEntities({ userId: "u" } as never));
+    expect(warn).not.toHaveBeenCalledWith(expect.stringContaining("fetchEntities takes"));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    unmount();
+    vi.unstubAllEnvs();
+  });
+
+  it("fetchEntities() with no argument loads the default first page", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "a1" }], false));
+    const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+
+    act(() => result.current.fetchEntities());
+    await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["a1"]));
+    expect(pageParam(0).get("page")).toBe("1");
+  });
+
   it("drops a page that lands after fetchEntities started a new query", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "a1" }], true));
     const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
       projectId: "test-project",
     });
-    act(() => result.current.fetchEntities({}));
+    act(() => result.current.fetchEntities());
     await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["a1"]));
 
     let releaseStale!: (r: Response) => void;
@@ -464,9 +539,12 @@ describe("useEntityList — the list contract", () => {
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "b1" }], false));
     act(() =>
-      result.current.fetchEntities({ userId: "user-b" }, undefined, undefined, {
+      result.current.fetchEntities({
+  filters: { userId: "user-b" },
+  options: {
         fetchImmediately: true,
-      }),
+      },
+}),
     );
     await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["b1"]));
 
@@ -481,13 +559,32 @@ describe("useEntityList — the list contract", () => {
     expect(pageParam(2).get("page")).toBe("1");
   });
 
+  it("a refused page exposes the server's error as a SublayError", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    fetchHandle.fetchMock.mockResolvedValueOnce(
+      jsonResponse(
+        { error: "limit must be at most 100.", code: "request/invalid", param: "limit" },
+        400,
+      ),
+    );
+    const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+    act(() => result.current.fetchEntities());
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(SublayError));
+    expect(result.current.error?.message).toBe("limit must be at most 100.");
+    expect(result.current.error?.code).toBe("request/invalid");
+    expect(result.current.error?.param).toBe("limit");
+    expect(result.current.error?.status).toBe(400);
+  });
+
   it("a failed first page sets error and loadMore retries page 1", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
     const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
       projectId: "test-project",
     });
-    act(() => result.current.fetchEntities({}));
+    act(() => result.current.fetchEntities());
     await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
     expect(result.current.loading).toBe(false);
     expect(result.current.hasMore).toBe(true);
@@ -518,7 +615,7 @@ describe("useEntityList — the list contract", () => {
       }),
       { projectId: "test-project" },
     );
-    act(() => result.current.a.fetchEntities({}));
+    act(() => result.current.a.fetchEntities());
     await waitFor(() => expect(result.current.b.entities.map((e) => e.id)).toEqual(["e1"]));
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], true));
@@ -536,12 +633,7 @@ describe("useEntityList — the list contract", () => {
       projectId: "test-project",
     });
     act(() =>
-      result.current.fetchEntities(
-        { userId: "user-1" },
-        { sortBy: "createdAt" },
-        { limit: 5, sourceId: "src" },
-        { fetchImmediately: true },
-      ),
+      result.current.fetchEntities({ filters: { userId: "user-1" }, sort: { sortBy: "createdAt" }, config: { limit: 5, sourceId: "src" }, options: { fetchImmediately: true } }),
     );
     await waitFor(() => expect(result.current.entities).toHaveLength(1));
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], true));
@@ -568,7 +660,7 @@ describe("useEntityList — the list contract", () => {
     const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
       projectId: "test-project",
     });
-    act(() => result.current.fetchEntities({}));
+    act(() => result.current.fetchEntities());
     await waitFor(() => expect(result.current.entities).toHaveLength(1));
 
     fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({}, 500));
@@ -592,10 +684,10 @@ describeStoreListContract({
       hasMore: list.hasMore,
       loadMore: list.loadMore,
       refetch: list.refetch,
-      start: () => list.fetchEntities({}),
-      changeFilterDebounced: () => list.fetchEntities({ userId: "user-b" }),
+      start: () => list.fetchEntities(),
+      changeFilterDebounced: () => list.fetchEntities({ filters: { userId: "user-b" } }),
       changeFilterNow: () =>
-        list.fetchEntities({ userId: "user-b" }, undefined, undefined, { fetchImmediately: true }),
+        list.fetchEntities({ filters: { userId: "user-b" }, options: { fetchImmediately: true } }),
     };
   },
   fetchHandle: () => fetchHandle,

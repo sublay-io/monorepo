@@ -17,7 +17,8 @@ function RefreshButton() {
   const { fetchEntities } = useEntityListActions();
 
   const handleRefresh = async () => {
-    await fetchEntities("my-feed", {
+    await fetchEntities({
+      listId: "my-feed",
       page: 1,
       sortBy: "hot",
       limit: 20,
@@ -30,7 +31,7 @@ function RefreshButton() {
 
 ## Return Values
 
-<ResponseField name="fetchEntities" type="(listId: string, options: FetchEntitiesOptions) => Promise<Entity[] | null>">
+<ResponseField name="fetchEntities" type="({ listId, ...props }: { listId: string } & FetchEntitiesOptions) => Promise<Entity[] | null>">
   Fetches a page of entities and dispatches the result into the Redux list state.
 
   <Expandable title="FetchEntitiesOptions">
@@ -67,10 +68,10 @@ function RefreshButton() {
   </Expandable>
 </ResponseField>
 
-<ResponseField name="createEntity" type="(listId: string, options: CreateEntityOptions) => Promise<Entity | undefined>">
+<ResponseField name="createEntity" type="({ listId, ...props }: { listId: string } & CreateEntityOptions) => Promise<Entity | undefined>">
   Creates an entity and inserts it into the specified list. JSON only: it takes no `images` or `files`. To create an entity with uploads, use [`useCreateEntity`](/v8/hooks/entities/use-create-entity).
 </ResponseField>
 
-<ResponseField name="deleteEntity" type="(listId: string, options: { entityId: string }) => Promise<void>">
+<ResponseField name="deleteEntity" type="({ listId, entityId }: { listId: string; entityId: string }) => Promise<void>">
   Deletes an entity and removes it from the specified list.
 </ResponseField>

@@ -7,7 +7,6 @@ import reducer, {
   setSpaceListSpaces,
   setSpaceListPage,
   setSpaceListHasMore,
-  setSpaceListError,
   addSpace,
   removeSpace,
   updateSpace,
@@ -55,7 +54,6 @@ describe("spaceListsSlice", () => {
       expect(list.limit).toBe(50);
       expect(list.page).toBe(1);
       expect(list.hasMore).toBe(true);
-      expect(list.error).toBeNull();
     });
 
     it("ignores undefined filter values but applies explicit nulls", () => {
@@ -149,10 +147,6 @@ describe("spaceListsSlice", () => {
     let s = reducer(initial, initializeList({ listId: "feed" }));
     s = reducer(s, setSpaceListHasMore({ listId: "feed", hasMore: false }));
     expect(s.lists.feed.hasMore).toBe(false);
-
-    s = reducer(s, setSpaceListError({ listId: "feed", error: "boom" }));
-    expect(s.lists.feed.error).toBe("boom");
-    expect(s.lists.feed.loading).toBe(false);
   });
 
   describe("addSpace / removeSpace / updateSpace", () => {

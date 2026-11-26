@@ -135,14 +135,14 @@ import { useAccounts, useAccountPushToggle } from "@sublay/react-js";
 
 function PerAccountPushSettings() {
   const { accounts } = useAccounts();
-  const { setAccountPushEnabled, isAccountPushEnabled, isUpdating } =
+  const { setAccountPushEnabled, isAccountPushEnabled, updating } =
     useAccountPushToggle();
 
   return accounts.map((account) => (
     <Switch
       key={account.id}
       checked={isAccountPushEnabled(account.id)}
-      disabled={isUpdating}
+      disabled={updating}
       onChange={(enabled) =>
         setAccountPushEnabled({ userId: account.id, enabled }).catch(() => {
           // Rejects when the binding change fails; the stored preference is

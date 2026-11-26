@@ -46,7 +46,7 @@ describe("useFetchBlockedUsers", () => {
     axiosPrivate.mockError("get", 500, { message: "Internal error" });
 
     await expect(result.current()).rejects.toMatchObject({
-      response: { status: 500 },
+      status: 500,
     });
   });
 

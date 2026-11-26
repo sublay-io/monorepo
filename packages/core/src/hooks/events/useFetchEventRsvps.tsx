@@ -3,6 +3,7 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { EventRsvp, RsvpStatus } from "../../interfaces/models/Event";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchEventRsvpsProps {
   eventId: string;
@@ -28,7 +29,7 @@ function useFetchEventRsvps(): (
   const fetchEventRsvps = useCallback(
     async ({ eventId, page, limit, status }: FetchEventRsvpsProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const params: Record<string, any> = {};

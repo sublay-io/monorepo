@@ -3,6 +3,7 @@ import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { handleError } from "../../utils/handleError";
 import { Space } from "../../interfaces/models/Space";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface SpaceSearchResult {
   similarity: number;
@@ -17,7 +18,7 @@ export interface UseSearchSpacesProps {
 export interface UseSearchSpacesReturn {
   results: SpaceSearchResult[];
   loading: boolean;
-  error: string | null;
+  error: SublayError | null;
   search: (props: UseSearchSpacesProps) => Promise<void>;
   reset: () => void;
 }
@@ -28,7 +29,7 @@ export default function useSearchSpaces(): UseSearchSpacesReturn {
 
   const [results, setResults] = useState<SpaceSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const search = useCallback(
     async ({ query, limit }: UseSearchSpacesProps) => {
@@ -44,7 +45,8 @@ export default function useSearchSpaces(): UseSearchSpacesReturn {
         );
         setResults(response.data);
       } catch (err) {
-        setError(handleError(err, "Failed to search spaces"));
+        handleError(err, "Failed to search spaces");
+        setError(toSublayError(err));
       } finally {
         setLoading(false);
       }

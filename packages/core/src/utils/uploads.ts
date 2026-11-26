@@ -1,4 +1,5 @@
 import type { UploadImageOptions } from "../interfaces/models/Image";
+import { SublayError } from "../errors/SublayError";
 
 /** A file picked in React Native / Expo: a local `uri` plus its name and type. */
 export interface NativeUploadFile {
@@ -160,7 +161,7 @@ export function refuseNullWithFile(
 ): void {
   for (const [key, value] of Object.entries(fields)) {
     if (value === null) {
-      throw new Error(
+      throw new SublayError(
         `[Sublay] ${fn}: \`${key}: null\` can't be sent with a file. Clear it in a separate call without a file.`,
       );
     }

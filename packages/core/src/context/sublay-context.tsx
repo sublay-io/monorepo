@@ -4,6 +4,7 @@ import useProjectData, {
   UseProjectDataValues,
 } from "../hooks/projects/useProjectData";
 import { SublayStoreProvider } from "./sublay-store-context";
+import { SublayError } from "../errors/SublayError";
 
 export interface SublayContextProps extends UseProjectDataProps {
   signedToken?: string | null | undefined;
@@ -25,7 +26,7 @@ export const SublayProvider: React.FC<SublayContextProps> = ({
   const data = useProjectData({ projectId });
 
   if (!projectId)
-    throw new Error("projectId in SublayProvider is " + typeof projectId);
+    throw new SublayError("projectId in SublayProvider is " + typeof projectId);
 
   return (
     <SublayContext.Provider value={data}>

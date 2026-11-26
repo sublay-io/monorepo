@@ -66,7 +66,7 @@ describe("useCheckMyConversationMembership", () => {
 
     await expect(
       result.current({ conversationId: "conv-1" }),
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    ).rejects.toMatchObject({ status: 403 });
   });
 
   it("throws before requesting when conversationId is missing", async () => {

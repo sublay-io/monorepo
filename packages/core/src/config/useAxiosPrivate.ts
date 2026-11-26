@@ -8,6 +8,7 @@ import {
   SUSPENDED_ERROR_CODE,
   SuspendedError,
 } from "../errors/SuspendedError";
+import { isPlainObject } from "../errors/SublayError";
 
 const useAxiosPrivate = (): AxiosInstance => {
   const { accessToken, requestNewAccessToken } = useAuth();
@@ -68,6 +69,8 @@ const useAxiosPrivate = (): AxiosInstance => {
               message: data?.error,
               reason: data?.reason ?? null,
               endDate: data?.endDate ?? null,
+              body: isPlainObject(data) ? data : undefined,
+              cause: error,
             })
           );
         }

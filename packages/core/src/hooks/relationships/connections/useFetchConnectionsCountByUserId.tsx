@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../../projects/useProject";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface FetchConnectionsCountByUserIdParams {
   userId: string;
@@ -16,11 +17,11 @@ function useFetchConnectionsCountByUserId(): (props: FetchConnectionsCountByUser
     ): Promise<number> => {
       const { userId } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!userId) {
-        throw new Error("No user ID was provided");
+        throw new SublayError("No user ID was provided");
       }
 
       const response = await axios.get<{ count: number }>(`/${projectId}/users/${userId}/connections-count`);

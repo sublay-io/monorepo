@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../../projects/useProject";
 import { Rule } from "../../../interfaces/models/Rule";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface CreateRuleProps {
   spaceId: string;
@@ -16,15 +17,15 @@ function useCreateRule(): (props: CreateRuleProps) => Promise<Rule> {
   const createRule = useCallback(
     async ({ spaceId, title, description }: CreateRuleProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId) {
-        throw new Error("Please pass a spaceId");
+        throw new SublayError("Please pass a spaceId");
       }
 
       if (!title) {
-        throw new Error("Rule title is required");
+        throw new SublayError("Rule title is required");
       }
 
       const response = await axios.post(

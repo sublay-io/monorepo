@@ -34,7 +34,7 @@ function ReplyBanner() {
         <button
           onClick={() => {
             setRepliedToComment!(null);
-            setShowReplyBanner!({ newState: false });
+            setShowReplyBanner!(false);
           }}
           style={resetButton}
           className="text-base dark:text-neutral-300"

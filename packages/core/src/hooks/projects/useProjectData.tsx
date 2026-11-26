@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Project } from "../../interfaces/models/Project";
 import { handleError } from "../../utils/handleError";
 import axios from "../../config/axios";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UseProjectDataProps {
   projectId: string | null | undefined;
@@ -17,7 +18,7 @@ function useProjectData({
   const [project, setProject] =
     useState<UseProjectDataValues["project"]>(null);
 
-  if (!projectId) throw new Error("Please pass a project ID");
+  if (!projectId) throw new SublayError("Please pass a project ID");
 
   useEffect(() => {
     const handleFetchProject = async () => {

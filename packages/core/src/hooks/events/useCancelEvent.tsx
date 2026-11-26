@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { CancelEventResponse } from "../../interfaces/models/Event";
+import { SublayError } from "../../errors/SublayError";
 
 export interface CancelEventProps {
   eventId: string;
@@ -28,10 +29,10 @@ function useCancelEvent(): (
   const cancelEvent = useCallback(
     async ({ eventId }: CancelEventProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!eventId) {
-        throw new Error("No eventId provided.");
+        throw new SublayError("No eventId provided.");
       }
 
       const response = await axios.post(`/${projectId}/events/${eventId}/cancel`);

@@ -2,6 +2,8 @@ import { useCallback } from "react";
 import { useSublayDispatch } from "../../store/hooks";
 import { confirmAccountDeletionThunk } from "../../store/slices/authThunks";
 import useProject from "../projects/useProject";
+import { SublayError } from "../../errors/SublayError";
+import { toAuthError } from "./useAuth";
 
 export interface ConfirmAccountDeletionProps {
   /** The one-time code emailed by `useRequestAccountDeletion`. */
@@ -26,11 +28,11 @@ function useConfirmAccountDeletion(): (
   const confirmAccountDeletion = useCallback(
     async ({ code }: ConfirmAccountDeletionProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!code?.trim()) {
-        throw new Error("Confirmation code is required.");
+        throw new SublayError("Confirmation code is required.");
       }
 
       const result = await dispatch(
@@ -38,7 +40,7 @@ function useConfirmAccountDeletion(): (
       );
 
       if (confirmAccountDeletionThunk.rejected.match(result)) {
-        throw new Error(result.payload as string);
+        throw toAuthError(result.payload);
       }
     },
     [projectId, dispatch]

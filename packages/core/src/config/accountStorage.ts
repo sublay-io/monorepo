@@ -31,6 +31,7 @@
 
 import type { AccountStorage } from "../interfaces/AccountStorage";
 import type { AccountMap } from "../store/slices/accountsSlice";
+import { SublayError } from "../errors/SublayError";
 
 interface StorageSlot {
   storage: AccountStorage;
@@ -61,7 +62,7 @@ const chains = new Map<string, Promise<void>>();
  * Failing at mount converts that into a mistake the developer hits on the first
  * render, before any credential exists to corrupt.
  */
-export class AccountStorageMultiProjectError extends Error {
+export class AccountStorageMultiProjectError extends SublayError {
   constructor(registered: string, incoming: string) {
     super(
       `Sublay supports one project per app. Account storage is already mounted for project ${registered}, ` +
@@ -141,7 +142,7 @@ export function runAccountStorageOp<T>(
  * A distinct type so the callers that must not proceed on a bad write can tell
  * "wrong project" apart from "the adapter failed".
  */
-export class AccountStorageProjectMismatchError extends Error {
+export class AccountStorageProjectMismatchError extends SublayError {
   constructor(expected: string, registered: string) {
     super(
       `Account storage is registered for project ${registered}, not ${expected}. Refusing to write.`

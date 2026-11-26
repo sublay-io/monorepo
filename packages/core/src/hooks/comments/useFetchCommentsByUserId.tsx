@@ -10,6 +10,7 @@ import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 /**
  * A user's comment history (`GET /users/:userId/comments`): flat, at any
@@ -67,15 +68,15 @@ function useFetchCommentsByUserId(): (
       } = props;
 
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!userId) {
-        throw new Error("No user ID passed");
+        throw new SublayError("No user ID passed");
       }
 
       if (limit === 0) {
-        throw new Error("Can't fetch with limit 0");
+        throw new SublayError("Can't fetch with limit 0");
       }
 
       const params: Record<string, any> = {

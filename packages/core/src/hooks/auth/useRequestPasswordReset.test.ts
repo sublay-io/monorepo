@@ -33,7 +33,7 @@ describe("useRequestPasswordReset", () => {
 
     await expect(
       result.current({ email: "alice@example.com" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when the email is blank", async () => {

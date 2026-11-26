@@ -16,7 +16,7 @@ import { useAccounts, useSwitchAccount } from "@sublay/react-js";
 
 function AccountSwitcher() {
   const { accounts, activeAccount } = useAccounts();
-  const { switchAccount, isSwitching, error } = useSwitchAccount();
+  const { switchAccount, switching, error } = useSwitchAccount();
 
   return (
     <ul>
@@ -35,14 +35,14 @@ function AccountSwitcher() {
                      carries the reason and you stay signed in where you were. */
                 })
               }
-              disabled={isSwitching}
+              disabled={switching}
             >
               Switch
             </button>
           )}
         </li>
       ))}
-      {error && <p>{error}</p>}
+      {error && <p>{error.message}</p>}
     </ul>
   );
 }
@@ -52,7 +52,7 @@ function AccountSwitcher() {
 import { useSwitchAccount } from "@sublay/react-native";
 
 function SwitchButton({ userId }: { userId: string }) {
-  const { switchAccount, isSwitching } = useSwitchAccount();
+  const { switchAccount, switching } = useSwitchAccount();
 
   return (
     <Button
@@ -63,7 +63,7 @@ function SwitchButton({ userId }: { userId: string }) {
              unhandled rejection. */
         })
       }
-      disabled={isSwitching}
+      disabled={switching}
     />
   );
 }
@@ -96,13 +96,13 @@ The hook returns a `switchAccount` function that accepts:
   app.
 </ResponseField>
 
-<ResponseField name="isSwitching" type="boolean">
+<ResponseField name="switching" type="boolean">
   `true` while the switch is in progress (validating the target's stored
   credential, then swapping the session over).
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  Error message if the switch failed, or `null` if no error occurred.
+<ResponseField name="error" type="SublayError | null">
+  The error if the switch failed, or `null` if no error occurred. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 ## Failure Behavior
@@ -144,9 +144,10 @@ async function onPick(userId: string) {
 
 A transition failure rejects with an `AccountTransitionError`, and its two boolean discriminants
 are the only way to tell those failures apart — so check with `instanceof` first, as the example
-above does, rather than assuming the type. (The hook also throws a plain `Error` when no
-`projectId` is configured, and [`removeAccount`](/v8/hooks/auth/use-remove-account) rejects with the
-server's own error, unchanged, when it refuses to unbind that account's push notifications.)
+above does, rather than assuming the type. (The hook also throws a code-less
+[`SublayError`](/v8/hooks/overview#sublayerror) when no `projectId` is configured, and
+[`removeAccount`](/v8/hooks/auth/use-remove-account) rejects with a `SublayError` carrying the
+server's own `code` when it refuses to unbind that account's push notifications.)
 
 <ResponseField name="credentialRejected" type="boolean">
   `true` when the server **refused** the stored credential — expired, revoked, reuse-detected,

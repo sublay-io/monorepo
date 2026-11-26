@@ -249,8 +249,8 @@ describe("useUserActions", () => {
 
   it("clearError clears the error field", () => {
     const { result, store } = renderHookWithStore(() => useUserActions());
-    act(() => store.dispatch(setError("boom")));
-    expect(selectUserError(store.getState())).toBe("boom");
+    act(() => store.dispatch(setError({ message: "boom" })));
+    expect(selectUserError(store.getState())).toEqual({ message: "boom" });
 
     act(() => result.current.clearError());
     expect(selectUserError(store.getState())).toBeNull();

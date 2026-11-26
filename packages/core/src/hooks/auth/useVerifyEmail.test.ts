@@ -68,7 +68,7 @@ describe("useVerifyEmail", () => {
     axiosPublic.mockError("post", 500, { message: "Internal error" });
 
     await expect(result.current({ token: "abc123" })).rejects.toMatchObject({
-      response: { status: 500 },
+      status: 500,
     });
   });
 

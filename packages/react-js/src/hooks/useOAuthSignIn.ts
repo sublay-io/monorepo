@@ -5,6 +5,8 @@ import {
   useSublaySelector,
   selectAccessToken,
   requestOAuthAuthorizationUrl,
+  SublayError,
+  toSublayError,
   handleOAuthRedirect,
   type OAuthProvider,
 } from "@sublay/core";
@@ -16,8 +18,8 @@ export interface UseOAuthSignInReturn {
   linkOAuthProvider: ({ provider, redirectAfterAuth }: { provider: OAuthProvider; redirectAfterAuth?: string }) => Promise<void>;
   /** Call on the callback page to extract tokens from the URL fragment. */
   handleOAuthCallback: () => boolean;
-  isLoading: boolean;
-  error: string | null;
+  loading: boolean;
+  error: SublayError | null;
 }
 
 /**
@@ -39,14 +41,14 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
   const { projectId } = useProject();
   const dispatch = useSublayDispatch();
   const accessToken = useSublaySelector(selectAccessToken);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<SublayError | null>(null);
 
   // Shared helper for both /authorize and /link endpoints
   const startOAuthFlow = useCallback(
     async (endpoint: "authorize" | "link", provider: OAuthProvider, redirectAfterAuth?: string) => {
       if (!projectId) {
-        setError("No projectId available.");
+        setError(new SublayError("No projectId available."));
         return;
       }
 
@@ -56,7 +58,7 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
       // the gate and throws the same message if nobody is signed in — the catch
       // below surfaces it identically.
 
-      setIsLoading(true);
+      setLoading(true);
       setError(null);
 
       try {
@@ -72,11 +74,11 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
         });
 
         // Redirect the browser to Sublay, which forwards it to the provider.
-        // isLoading intentionally stays true since we're navigating away.
+        // loading intentionally stays true since we're navigating away.
         window.location.href = authorizationUrl;
-      } catch (err: any) {
-        setError(err.message);
-        setIsLoading(false);
+      } catch (err) {
+        setError(toSublayError(err));
+        setLoading(false);
       }
     },
     [projectId, accessToken]
@@ -123,7 +125,7 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
     return false;
   }, [dispatch, projectId]);
 
-  return { initiateOAuth, linkOAuthProvider, handleOAuthCallback, isLoading, error };
+  return { initiateOAuth, linkOAuthProvider, handleOAuthCallback, loading, error };
 }
 
 export default useOAuthSignIn;

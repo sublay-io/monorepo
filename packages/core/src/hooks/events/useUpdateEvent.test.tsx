@@ -180,7 +180,7 @@ describe("useUpdateEvent", () => {
 
     await expect(
       result.current({ eventId: "event-1", update: { title: "New title" } }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when there is no project", async () => {

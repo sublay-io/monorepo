@@ -75,7 +75,7 @@ describe("useHandleSpaceReport", () => {
         actions: ["remove-comment"],
         summary: "removed",
       }),
-    ).rejects.toMatchObject({ response: { status: 400 } });
+    ).rejects.toMatchObject({ status: 400 });
   });
 
   it("throws before making a request when spaceId or reportId is missing", async () => {

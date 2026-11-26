@@ -46,7 +46,7 @@ describe("useFetchUser", () => {
 
     await expect(
       result.current({ userId: "user-1" }),
-    ).rejects.toMatchObject({ response: { status: 404 } });
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it("throws before making a request when no user ID is passed", async () => {

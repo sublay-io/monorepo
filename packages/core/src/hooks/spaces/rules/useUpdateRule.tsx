@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../../projects/useProject";
 import { Rule } from "../../../interfaces/models/Rule";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface UpdateRuleProps {
   spaceId: string;
@@ -19,15 +20,15 @@ function useUpdateRule(): (props: UpdateRuleProps) => Promise<Rule> {
   const updateRule = useCallback(
     async ({ spaceId, ruleId, update }: UpdateRuleProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId) {
-        throw new Error("Please pass a spaceId");
+        throw new SublayError("Please pass a spaceId");
       }
 
       if (!ruleId) {
-        throw new Error("Please pass a ruleId");
+        throw new SublayError("Please pass a ruleId");
       }
 
       const response = await axios.patch(

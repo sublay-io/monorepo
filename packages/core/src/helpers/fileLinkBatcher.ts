@@ -1,5 +1,6 @@
 import { fileLinksApi } from "../store/api/fileLinksApi";
 import { fileLinksRefreshed, fileLinksUnavailable } from "../store/slices/fileLinksSlice";
+import { rethrowAsSublayError } from "../errors/SublayError";
 
 /**
  * Collects the file ids whose links need refreshing (S#144) and asks
@@ -66,7 +67,7 @@ class FileLinkBatcher {
           // Nothing reads the mutation's state: don't keep every answer in the cache.
           { track: false }
         )
-      ).unwrap();
+      ).unwrap().catch(rethrowAsSublayError);
       this.dispatch(fileLinksRefreshed(files));
       const returned = new Set(files.map((f: { id: string }) => f.id));
       const missing = fileIds

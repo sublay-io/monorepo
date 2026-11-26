@@ -15,6 +15,7 @@ import {
   type FileListUpload,
   type ImageListUpload,
 } from "../../utils/uploads";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UpdateEntityProps {
   entityId: string;
@@ -94,7 +95,7 @@ function useUpdateEntity(): (props: UpdateEntityProps) => Promise<Entity> {
       const { images, files, include: includeProp, ...fields } = update;
 
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const hasImages = hasListFiles(images);

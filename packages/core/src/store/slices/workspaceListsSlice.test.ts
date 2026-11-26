@@ -7,7 +7,6 @@ import reducer, {
   setWorkspaceListWorkspaces,
   setWorkspaceListPage,
   setWorkspaceListHasMore,
-  setWorkspaceListError,
   addWorkspace,
   removeWorkspace,
   updateWorkspace,
@@ -68,7 +67,6 @@ describe("workspaceListsSlice", () => {
       expect(list.limit).toBe(50);
       expect(list.page).toBe(1);
       expect(list.hasMore).toBe(true);
-      expect(list.error).toBeNull();
     });
 
     it("undefined keeps a filter; null puts it back to its default", () => {
@@ -172,9 +170,6 @@ describe("workspaceListsSlice", () => {
     expect(s.lists.feed.page).toBe(3);
     s = reducer(s, setWorkspaceListHasMore({ listId: "feed", hasMore: false }));
     expect(s.lists.feed.hasMore).toBe(false);
-    s = reducer(s, setWorkspaceListError({ listId: "feed", error: "boom" }));
-    expect(s.lists.feed.error).toBe("boom");
-    expect(s.lists.feed.loading).toBe(false);
 
     expect(reducer(initial, setWorkspaceListPage({ listId: "missing", page: 3 }))).toEqual(initial);
     expect(reducer(initial, setWorkspaceListLoading({ listId: "missing", loading: true }))).toEqual(initial);

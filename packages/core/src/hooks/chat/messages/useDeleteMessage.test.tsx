@@ -81,7 +81,7 @@ describe("useDeleteMessage", () => {
 
     await expect(
       result.current({ conversationId: "conversation-1", messageId: "message-1" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
 
     const messages = selectMessages("conversation-1")(store.getState());
     expect(messages[0].content).toBe("hi");

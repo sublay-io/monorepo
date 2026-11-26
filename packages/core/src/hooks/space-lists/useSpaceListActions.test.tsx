@@ -14,7 +14,6 @@ import {
   selectSpaceListSpaces,
   selectSpaceListLoading,
   selectSpaceListHasMore,
-  selectSpaceList,
 } from "../../store/slices/spaceListsSlice";
 
 let fetchHandle: FetchMockHandle;
@@ -42,7 +41,7 @@ describe("useSpaceListActions", () => {
       });
 
       await act(async () => {
-        await result.current.fetchSpaces("feed", { page: 1, sortBy: "createdAt", limit: 20 });
+        await result.current.fetchSpaces({ listId: "feed", page: 1, sortBy: "createdAt", limit: 20 });
       });
 
       expect(selectSpaceListSpaces(store.getState(), "feed").map((s) => s.id)).toEqual(["s1"]);
@@ -65,7 +64,7 @@ describe("useSpaceListActions", () => {
         projectId: "test-project",
       });
       await act(async () => {
-        await result.current.fetchSpaces("feed", { page: 1, sortBy: "createdAt", limit: 1 });
+        await result.current.fetchSpaces({ listId: "feed", page: 1, sortBy: "createdAt", limit: 1 });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(
@@ -75,7 +74,7 @@ describe("useSpaceListActions", () => {
         }),
       );
       await act(async () => {
-        await result.current.fetchSpaces("feed", { page: 2, sortBy: "createdAt", limit: 1 });
+        await result.current.fetchSpaces({ listId: "feed", page: 2, sortBy: "createdAt", limit: 1 });
       });
 
       expect(
@@ -90,7 +89,8 @@ describe("useSpaceListActions", () => {
 
       let returned: unknown;
       await act(async () => {
-        returned = await result.current.fetchSpaces("feed", {
+        returned = await result.current.fetchSpaces({
+          listId: "feed",
           page: 1,
           sortBy: undefined as never,
           limit: 20,
@@ -105,11 +105,11 @@ describe("useSpaceListActions", () => {
       const { result } = renderHookWithStore(() => useSpaceListActions(), { projectId: "" });
 
       await expect(
-        result.current.fetchSpaces("feed", { page: 1, sortBy: "createdAt", limit: 20 }),
+        result.current.fetchSpaces({ listId: "feed", page: 1, sortBy: "createdAt", limit: 20 }),
       ).rejects.toThrow("No project ID available");
     });
 
-    it("records the error and re-throws on a failed request", async () => {
+    it("re-throws on a failed request and stops loading", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
       const { result, store } = renderHookWithStore(() => useSpaceListActions(), {
         projectId: "test-project",
@@ -118,11 +118,10 @@ describe("useSpaceListActions", () => {
 
       await act(async () => {
         await expect(
-          result.current.fetchSpaces("feed", { page: 1, sortBy: "createdAt", limit: 20 }),
+          result.current.fetchSpaces({ listId: "feed", page: 1, sortBy: "createdAt", limit: 20 }),
         ).rejects.toBeTruthy();
       });
 
-      expect(selectSpaceList(store.getState(), "feed")?.error).toBe("Failed to fetch spaces");
       expect(selectSpaceListLoading(store.getState(), "feed")).toBe(false);
     });
   });
@@ -137,7 +136,7 @@ describe("useSpaceListActions", () => {
 
       let created: { id: string } | undefined;
       await act(async () => {
-        created = await result.current.createSpace("feed", { name: "Hello" });
+        created = await result.current.createSpace({ listId: "feed", name: "Hello" });
       });
 
       expect(created?.id).toBe("s1");
@@ -151,12 +150,12 @@ describe("useSpaceListActions", () => {
       });
       act(() => store.dispatch(initializeList({ listId: "feed" })));
       await act(async () => {
-        await result.current.createSpace("feed", { name: "First" });
+        await result.current.createSpace({ listId: "feed", name: "First" });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ id: "s2" }, 201));
       await act(async () => {
-        await result.current.createSpace("feed", { name: "Second", insertPosition: "last" });
+        await result.current.createSpace({ listId: "feed", name: "Second", insertPosition: "last" });
       });
 
       expect(
@@ -167,7 +166,7 @@ describe("useSpaceListActions", () => {
     it("throws without a projectId", async () => {
       const { result } = renderHookWithStore(() => useSpaceListActions(), { projectId: "" });
 
-      await expect(result.current.createSpace("feed", { name: "Hello" })).rejects.toThrow(
+      await expect(result.current.createSpace({ listId: "feed", name: "Hello" })).rejects.toThrow(
         "No project ID available",
       );
     });
@@ -180,7 +179,8 @@ describe("useSpaceListActions", () => {
       act(() => store.dispatch(initializeList({ listId: "feed" })));
 
       await act(async () => {
-        await result.current.createSpace("feed", {
+        await result.current.createSpace({
+          listId: "feed",
           name: null,
           nsfw: true,
           visibility: "unlisted",
@@ -204,7 +204,7 @@ describe("useSpaceListActions", () => {
 
       await act(async () => {
         await expect(
-          result.current.createSpace("feed", { name: "Hello" }),
+          result.current.createSpace({ listId: "feed", name: "Hello" }),
         ).rejects.toBeTruthy();
       });
 
@@ -220,12 +220,12 @@ describe("useSpaceListActions", () => {
       });
       act(() => store.dispatch(initializeList({ listId: "feed" })));
       await act(async () => {
-        await result.current.createSpace("feed", { name: "Hello" });
+        await result.current.createSpace({ listId: "feed", name: "Hello" });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ success: true }));
       await act(async () => {
-        await result.current.deleteSpace("feed", { spaceId: "s1" });
+        await result.current.deleteSpace({ listId: "feed", spaceId: "s1" });
       });
 
       expect(selectSpaceListSpaces(store.getState(), "feed")).toEqual([]);
@@ -234,7 +234,7 @@ describe("useSpaceListActions", () => {
     it("throws without a projectId", async () => {
       const { result } = renderHookWithStore(() => useSpaceListActions(), { projectId: "" });
 
-      await expect(result.current.deleteSpace("feed", { spaceId: "s1" })).rejects.toThrow(
+      await expect(result.current.deleteSpace({ listId: "feed", spaceId: "s1" })).rejects.toThrow(
         "No project ID available",
       );
     });
@@ -245,7 +245,7 @@ describe("useSpaceListActions", () => {
       });
 
       await expect(
-        result.current.deleteSpace("feed", { spaceId: "" }),
+        result.current.deleteSpace({ listId: "feed", spaceId: "" }),
       ).rejects.toThrow("Space ID is required");
     });
 
@@ -256,13 +256,13 @@ describe("useSpaceListActions", () => {
       });
       act(() => store.dispatch(initializeList({ listId: "feed" })));
       await act(async () => {
-        await result.current.createSpace("feed", { name: "Hello" });
+        await result.current.createSpace({ listId: "feed", name: "Hello" });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
       await act(async () => {
         await expect(
-          result.current.deleteSpace("feed", { spaceId: "s1" }),
+          result.current.deleteSpace({ listId: "feed", spaceId: "s1" }),
         ).rejects.toBeTruthy();
       });
 

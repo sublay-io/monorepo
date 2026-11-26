@@ -71,7 +71,7 @@ describe("useAcceptWorkspaceInvite", () => {
     axiosPrivate.mockError("post", 403, { code: "workspace/email-not-verified" });
 
     await expect(result.current({ inviteId: "i1" })).rejects.toMatchObject({
-      response: { status: 403 },
+      status: 403,
     });
   });
 });

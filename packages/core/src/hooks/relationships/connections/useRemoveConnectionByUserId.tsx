@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface RemoveConnectionByUserIdProps {
   userId: string;
@@ -16,19 +17,19 @@ function useRemoveConnectionByUserId(): (props: RemoveConnectionByUserIdProps) =
     async (props: RemoveConnectionByUserIdProps): Promise<void> => {
       const { userId } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!user) {
-        throw new Error("No user is logged in");
+        throw new SublayError("No user is logged in");
       }
 
       if (!userId) {
-        throw new Error("No user ID was provided");
+        throw new SublayError("No user ID was provided");
       }
 
       if (userId === user.id) {
-        throw new Error("Cannot disconnect from yourself");
+        throw new SublayError("Cannot disconnect from yourself");
       }
 
       // One call for every case, answered 204 with no body: a request

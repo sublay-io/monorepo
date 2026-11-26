@@ -2,6 +2,7 @@ export { default as useWorkspaceList } from "./useWorkspaceList";
 export type {
   UseWorkspaceListProps,
   UseWorkspaceListValues,
+  WorkspaceListFetchWorkspacesProps,
   WorkspaceListCreateWorkspaceProps,
   WorkspaceListDeleteWorkspaceProps,
 } from "./useWorkspaceList";

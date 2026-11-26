@@ -4,7 +4,6 @@ import {
   setEntityListLoading,
   setEntityListEntities,
   setEntityListHasMore,
-  setEntityListError,
   addEntity,
   removeEntity,
 } from "../../store/slices/entityListsSlice";
@@ -28,6 +27,7 @@ import type { KeywordsFilters } from "../../interfaces/entity-filters/KeywordsFi
 import type { NsfwFilter } from "../../interfaces/NsfwFilter";
 import type { SpaceReputationContextObject } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError, rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 
 interface FetchEntitiesOptions {
   page: number;
@@ -87,17 +87,22 @@ interface DeleteEntityOptions {
 }
 
 export interface UseEntityListActionsValues {
-  fetchEntities: (listId: string, options: FetchEntitiesOptions, isCurrent?: () => boolean) => Promise<Entity[] | null>;
+  fetchEntities: (props: { listId: string } & FetchEntitiesOptions) => Promise<Entity[] | null>;
   /** JSON only: to create an entity with images or files, use `useCreateEntity`. */
-  createEntity: (listId: string, options: CreateEntityOptions) => Promise<Entity | undefined>;
-  deleteEntity: (listId: string, options: DeleteEntityOptions) => Promise<void>;
+  createEntity: (props: { listId: string } & CreateEntityOptions) => Promise<Entity | undefined>;
+  deleteEntity: (props: { listId: string } & DeleteEntityOptions) => Promise<void>;
 }
 
 /**
  * Redux-powered hook that provides all entity list actions
  * Uses RTK Query for stable function references and proper caching
  */
-export function useEntityListActions(): UseEntityListActionsValues {
+/**
+ * The implementation: `fetchEntities` also takes the list hooks' internal
+ * `isCurrent` guard as a second argument (a load superseded meanwhile writes
+ * nothing). Internal — not exported from the package.
+ */
+export function useEntityListActionsWithGuard() {
   const dispatch = useSublayDispatch();
 
   // Get project and user context
@@ -111,12 +116,11 @@ export function useEntityListActions(): UseEntityListActionsValues {
   // Fetch entities action
   const fetchEntities = useCallback(
     async (
-      listId: string,
-      options: FetchEntitiesOptions,
+      { listId, ...options }: { listId: string } & FetchEntitiesOptions,
       isCurrent: () => boolean = () => true
     ): Promise<Entity[] | null> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       if (!options.sortBy) {
@@ -158,7 +162,7 @@ export function useEntityListActions(): UseEntityListActionsValues {
           topCommentsSortByReaction: options.topCommentsSortByReaction,
           spaceReputationId: reputationParams.spaceReputationId,
           spaceReputationDescendants: reputationParams.spaceReputationDescendants,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // A newer load (or a reset) replaced this one: it writes nothing.
         if (!isCurrent()) return null;
@@ -183,10 +187,7 @@ export function useEntityListActions(): UseEntityListActionsValues {
           err
         );
         handleErrorUtil(err, "Failed to fetch entities:");
-        dispatch(
-          setEntityListError({ listId, error: "Failed to fetch entities" })
-        );
-        throw err;
+        throw toSublayError(err);
       } finally {
         if (isCurrent()) dispatch(setEntityListLoading({ listId, loading: false }));
       }
@@ -196,12 +197,12 @@ export function useEntityListActions(): UseEntityListActionsValues {
 
   // Create entity action
   const createEntity = useCallback(
-    async (
-      listId: string,
-      options: CreateEntityOptions
-    ): Promise<Entity | undefined> => {
+    async ({
+      listId,
+      ...options
+    }: { listId: string } & CreateEntityOptions): Promise<Entity | undefined> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       try {
@@ -216,7 +217,7 @@ export function useEntityListActions(): UseEntityListActionsValues {
           metadata: options.metadata,
           sourceId: options.sourceId,
           spaceId: options.spaceId,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // Add to the list
         dispatch(
@@ -230,7 +231,7 @@ export function useEntityListActions(): UseEntityListActionsValues {
         return newEntity;
       } catch (err) {
         handleErrorUtil(err, "Failed to create entity");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, createEntityMutation]
@@ -238,22 +239,22 @@ export function useEntityListActions(): UseEntityListActionsValues {
 
   // Delete entity action
   const deleteEntity = useCallback(
-    async (listId: string, options: DeleteEntityOptions): Promise<void> => {
+    async ({ listId, ...options }: { listId: string } & DeleteEntityOptions): Promise<void> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       try {
         await deleteEntityMutation({
           projectId,
           entityId: options.entityId,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // Remove from the list
         dispatch(removeEntity({ listId, entityId: options.entityId }));
       } catch (err) {
         handleErrorUtil(err, "Failed to delete entity");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, deleteEntityMutation]
@@ -264,6 +265,11 @@ export function useEntityListActions(): UseEntityListActionsValues {
     createEntity,
     deleteEntity,
   };
+}
+
+/** The list's low-level actions. Each takes one object: `{ listId, ... }`. */
+export function useEntityListActions(): UseEntityListActionsValues {
+  return useEntityListActionsWithGuard();
 }
 
 export default useEntityListActions;

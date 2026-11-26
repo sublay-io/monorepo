@@ -49,7 +49,7 @@ describe("useCreateRule", () => {
 
     await expect(
       result.current({ spaceId: "space-1", title: "Be respectful" }),
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    ).rejects.toMatchObject({ status: 403 });
   });
 
   it("throws before making a request when no title is passed", async () => {

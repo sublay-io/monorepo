@@ -18,11 +18,12 @@ import {
   isUnbindFailure,
   warnPushUnbindSkipped,
 } from "../../utils/unbindFailure";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseRemoveAccountReturn {
   removeAccount: ({ userId }: { userId: string }) => Promise<void>;
-  isRemoving: boolean;
-  error: string | null;
+  removing: boolean;
+  error: SublayError | null;
 }
 
 export default function useRemoveAccount(): UseRemoveAccountReturn {
@@ -32,12 +33,12 @@ export default function useRemoveAccount(): UseRemoveAccountReturn {
   // Read from the slice, not from storage: this hook holds no `AccountStorage`
   // handle, which is why the identifier has a Redux home at all.
   const deviceIdentifier = useSublaySelector(selectDeviceIdentifier);
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const removeAccount = useCallback(
     async ({ userId }: { userId: string }) => {
-      if (!projectId) throw new Error("No projectId available");
+      if (!projectId) throw new SublayError("No projectId available");
 
       // FROM THE LIVE STORE, not from the render snapshot this callback closes
       // over — same reasoning as `useSwitchAccount`. A retained callback
@@ -60,7 +61,7 @@ export default function useRemoveAccount(): UseRemoveAccountReturn {
         );
       }
 
-      setIsRemoving(true);
+      setRemoving(true);
       setError(null);
 
       try {
@@ -144,16 +145,15 @@ export default function useRemoveAccount(): UseRemoveAccountReturn {
         }
       } catch (err) {
         handleError(err, "Failed to remove account");
-        setError(
-          err instanceof Error ? err.message : "Failed to remove account"
-        );
-        throw err;
+        const failure = toSublayError(err);
+        setError(failure);
+        throw failure;
       } finally {
-        setIsRemoving(false);
+        setRemoving(false);
       }
     },
     [dispatch, projectId, store, deviceIdentifier]
   );
 
-  return { removeAccount, isRemoving, error };
+  return { removeAccount, removing, error };
 }

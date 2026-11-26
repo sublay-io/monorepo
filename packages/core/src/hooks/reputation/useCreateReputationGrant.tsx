@@ -5,6 +5,7 @@ import {
   ReputationGrant,
   ReputationGrantTargetFilter,
 } from "../../interfaces/models/ReputationGrant";
+import { SublayError } from "../../errors/SublayError";
 
 interface CreateReputationGrantBaseProps {
   /** The user receiving the reputation. Cannot be the logged-in user. */
@@ -72,18 +73,18 @@ function useCreateReputationGrant(): (
       } = props ?? ({} as CreateReputationGrantProps);
 
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!recipientId) {
-        throw new Error("recipientId is required.");
+        throw new SublayError("recipientId is required.");
       }
       if (typeof amount !== "number") {
-        throw new Error("amount is required.");
+        throw new SublayError("amount is required.");
       }
       // Mirrors the server's shared `bothOrNeitherTarget` refinement, so a
       // half-filled target fails locally instead of costing a round trip.
       if (Boolean(targetType) !== Boolean(targetId)) {
-        throw new Error("targetType and targetId must be supplied together.");
+        throw new SublayError("targetType and targetId must be supplied together.");
       }
 
       const response = await axios.post<ReputationGrant>(

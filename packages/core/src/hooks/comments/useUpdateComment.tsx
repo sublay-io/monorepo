@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { Comment } from "../../interfaces/models/Comment";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UpdateCommentProps {
   commentId: string;
@@ -16,17 +17,17 @@ function useUpdateComment(): (props: UpdateCommentProps) => Promise<Comment> {
   const updateComment = useCallback(
     async ({ commentId, content, metadata }: UpdateCommentProps) => {
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       // At least one of content or metadata must be provided
       if (content === undefined && metadata === undefined) {
-        throw new Error("Either content or metadata must be provided");
+        throw new SublayError("Either content or metadata must be provided");
       }
 
       // Validate content if provided
       if (content !== undefined && content.length < 1) {
-        throw new Error("Comment is too short");
+        throw new SublayError("Comment is too short");
       }
 
       // Validate metadata if provided
@@ -36,7 +37,7 @@ function useUpdateComment(): (props: UpdateCommentProps) => Promise<Comment> {
           metadata === null ||
           Array.isArray(metadata))
       ) {
-        throw new Error("Metadata must be a valid object");
+        throw new SublayError("Metadata must be a valid object");
       }
 
       // Build request body with only provided fields

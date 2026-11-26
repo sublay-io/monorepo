@@ -5,6 +5,7 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { User, UserIncludeParam } from "../../interfaces/models/User";
 import { SpaceReputationUserParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchUserByForeignIdProps extends SpaceReputationUserParams {
   foreignId: string;
@@ -22,11 +23,11 @@ function useFetchUserByForeignId(): (props: FetchUserByForeignIdProps) => Promis
       spaceReputation,
     }: FetchUserByForeignIdProps) => {
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!foreignId) {
-        throw new Error("Please specify a foreign ID");
+        throw new SublayError("Please specify a foreign ID");
       }
 
       const params: Record<string, any> = {

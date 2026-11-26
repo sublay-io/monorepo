@@ -14,6 +14,7 @@ import type { ContentFilters } from "../../interfaces/entity-filters/ContentFilt
 import type { AttachmentsFilters } from "../../interfaces/entity-filters/AttachmentsFilters";
 import type { KeywordsFilters } from "../../interfaces/entity-filters/KeywordsFilters";
 import type { NsfwFilter } from "../../interfaces/NsfwFilter";
+import { SublayError } from "../../errors/SublayError";
 
 // Helper function to serialize objects using bracket notation (like Axios does)
 const serializeObject = (obj: any, prefix = ''): Record<string, any> => {
@@ -188,7 +189,7 @@ export const entityListsApi = baseApi.injectEndpoints({
         spaceReputationDescendants
       }) => {
         if (!sortBy) {
-          throw new Error("sortBy is required for fetching entities");
+          throw new SublayError("sortBy is required for fetching entities");
         }
 
         // Validate sortBy (especially for metadata.* patterns)

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import axios from "../../config/axios";
 import useProject from "../projects/useProject";
+import { SublayError } from "../../errors/SublayError";
 
 export interface RequestPasswordResetProps {
   email: string;
@@ -12,11 +13,11 @@ function useRequestPasswordReset(): (props: RequestPasswordResetProps) => Promis
   const requestPasswordReset = useCallback(
     async ({ email }: RequestPasswordResetProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!email?.trim()) {
-        throw new Error("Email is required.");
+        throw new SublayError("Email is required.");
       }
 
       await axios.post(

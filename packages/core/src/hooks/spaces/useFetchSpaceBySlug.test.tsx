@@ -34,7 +34,7 @@ describe("useFetchSpaceBySlug", () => {
 
     await expect(
       result.current({ slug: "design" }),
-    ).rejects.toMatchObject({ response: { status: 404 } });
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it("throws before making a request when no slug is passed", async () => {

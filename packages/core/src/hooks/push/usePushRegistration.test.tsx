@@ -38,6 +38,7 @@ import type {
   PushTokenAdapter,
   PushDeviceIdentifier,
 } from "../../interfaces/PushTokenAdapter";
+import { SublayError } from "../../errors/SublayError";
 
 let fetchHandle: FetchMockHandle;
 
@@ -249,6 +250,41 @@ describe("usePushRegistration", () => {
       act(() => store.dispatch(setUser(makeAuthUser())));
 
       await expect(result.current.register()).rejects.toBeTruthy();
+    });
+  });
+
+  describe("non-HTTP failures", () => {
+    it("register rejects with a SublayError when the push adapter fails", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const original = new Error("FCM unavailable");
+      const adapter = makeAdapter({ getDeviceIdentifier: vi.fn().mockRejectedValue(original) });
+      const { result, store } = renderHookWithStore(() => usePushRegistration(adapter), {
+        projectId: "test-project",
+      });
+      act(() => store.dispatch(setUser(makeAuthUser())));
+
+      const err = await result.current.register().catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(SublayError);
+      expect((err as SublayError).message).toBe("FCM unavailable");
+      expect((err as SublayError).code).toBeUndefined();
+      expect((err as SublayError).cause).toBe(original);
+    });
+
+    it("unregister rejects with a SublayError when the push adapter fails", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const adapter = makeAdapter({
+        getDeviceIdentifier: vi.fn().mockRejectedValue(new Error("FCM unavailable")),
+      });
+      const { result, store } = renderHookWithStore(() => usePushRegistration(adapter), {
+        projectId: "test-project",
+      });
+      act(() => store.dispatch(setUser(makeAuthUser())));
+
+      const err = await result.current.unregister().catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(SublayError);
+      expect((err as SublayError).message).toBe("FCM unavailable");
     });
   });
 

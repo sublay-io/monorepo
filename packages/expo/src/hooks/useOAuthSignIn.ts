@@ -7,6 +7,8 @@ import {
   useSublaySelector,
   selectAccessToken,
   requestOAuthAuthorizationUrl,
+  SublayError,
+  toSublayError,
   parseOAuthRedirectUrl,
   handleOAuthRedirect,
   type OAuthRedirectParams,
@@ -20,8 +22,8 @@ export interface UseOAuthSignInReturn {
   linkOAuthProvider: ({ provider, redirectAfterAuth }: { provider: OAuthProvider; redirectAfterAuth?: string }) => Promise<void>;
   /** No-op on mobile (the deep-link result is resolved inline). Always returns false. */
   handleOAuthCallback: () => boolean;
-  isLoading: boolean;
-  error: string | null;
+  loading: boolean;
+  error: SublayError | null;
 }
 
 /**
@@ -49,21 +51,21 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
   const { projectId } = useProject();
   const dispatch = useSublayDispatch();
   const accessToken = useSublaySelector(selectAccessToken);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<SublayError | null>(null);
 
   // Shared helper for both /authorize and /link endpoints
   const startOAuthFlow = useCallback(
     async (endpoint: "authorize" | "link", provider: OAuthProvider, redirectAfterAuth?: string) => {
       if (!projectId) {
-        setError("No projectId available.");
+        setError(new SublayError("No projectId available."));
         return;
       }
 
       // Unlike web, there is no window.location to default to — the app must
       // supply the custom-scheme deep link the browser should return to.
       if (!redirectAfterAuth) {
-        setError("redirectAfterAuth is required on mobile.");
+        setError(new SublayError("redirectAfterAuth is required on mobile."));
         return;
       }
 
@@ -73,7 +75,7 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
       // the gate and throws the same message if nobody is signed in — the catch
       // below surfaces it identically.
 
-      setIsLoading(true);
+      setLoading(true);
       setError(null);
 
       try {
@@ -95,7 +97,7 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
         // Anything other than "success" is a user cancel / dismiss — resolve
         // quietly with no error, just clear the loading state.
         if (result.type !== "success") {
-          setIsLoading(false);
+          setLoading(false);
           return;
         }
 
@@ -109,13 +111,13 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
         if (redirectError) {
           setError(redirectError);
         } else if (!success) {
-          setError("OAuth sign-in failed: no tokens were returned.");
+          setError(new SublayError("OAuth sign-in failed: no tokens were returned."));
         }
 
-        setIsLoading(false);
-      } catch (err: any) {
-        setError(err.message);
-        setIsLoading(false);
+        setLoading(false);
+      } catch (err) {
+        setError(toSublayError(err));
+        setLoading(false);
       }
     },
     [projectId, accessToken, dispatch]
@@ -137,7 +139,7 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
   // already resolved inline above, so this is a compatibility no-op.
   const handleOAuthCallback = useCallback((): boolean => false, []);
 
-  return { initiateOAuth, linkOAuthProvider, handleOAuthCallback, isLoading, error };
+  return { initiateOAuth, linkOAuthProvider, handleOAuthCallback, loading, error };
 }
 
 /**

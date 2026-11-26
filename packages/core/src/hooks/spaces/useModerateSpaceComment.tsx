@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface ModerateSpaceCommentProps {
   spaceId: string;
@@ -42,11 +43,11 @@ function useModerateSpaceComment(): (props: ModerateSpaceCommentProps) => Promis
       reason,
     }: ModerateSpaceCommentProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId || !commentId) {
-        throw new Error("spaceId and commentId are required.");
+        throw new SublayError("spaceId and commentId are required.");
       }
 
       const response = await axios.patch(

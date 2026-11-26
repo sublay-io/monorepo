@@ -10,6 +10,7 @@ import useConversationMembers, {
 import useMarkConversationAsRead from "./useMarkConversationAsRead";
 import useTypingIndicator from "./useTypingIndicator";
 import { ChatMessage } from "../../interfaces/models/ChatMessage";
+import type { SublayError } from "../../errors/SublayError";
 
 export interface UseConversationDataProps {
   conversationId: string;
@@ -20,7 +21,7 @@ export interface UseConversationDataValues {
   messages: ChatMessage[];
   messagesLoading: boolean;
   /** The last failure loading messages. Cleared when the next load starts; `loadMore()` retries it. */
-  messagesError: Error | null;
+  messagesError: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: older messages, or a load that failed. */
   hasMore: boolean;
   /**

@@ -7,7 +7,6 @@ import reducer, {
   setEntityListEntities,
   setEntityListPage,
   setEntityListHasMore,
-  setEntityListError,
   addEntity,
   removeEntity,
   updateEntityInLists,
@@ -61,7 +60,6 @@ describe("entityListsSlice", () => {
       expect(list.limit).toBe(25);
       expect(list.page).toBe(1);
       expect(list.hasMore).toBe(true);
-      expect(list.error).toBeNull();
     });
 
     it("ignores undefined filter values but applies explicit nulls", () => {
@@ -163,14 +161,10 @@ describe("entityListsSlice", () => {
     });
   });
 
-  it("setEntityListHasMore and setEntityListError set their fields (and error also stops loading)", () => {
+  it("setEntityListHasMore sets its field", () => {
     let s = reducer(initial, initializeList({ listId: "feed" }));
     s = reducer(s, setEntityListHasMore({ listId: "feed", hasMore: false }));
     expect(s.lists.feed.hasMore).toBe(false);
-
-    s = reducer(s, setEntityListError({ listId: "feed", error: "boom" }));
-    expect(s.lists.feed.error).toBe("boom");
-    expect(s.lists.feed.loading).toBe(false);
   });
 
   describe("addEntity / removeEntity", () => {

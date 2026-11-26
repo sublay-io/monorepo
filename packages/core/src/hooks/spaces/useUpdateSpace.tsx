@@ -13,6 +13,7 @@ import {
   refuseNullWithFile,
   type ImageSlotUpload,
 } from "../../utils/uploads";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UpdateSpaceProps {
   spaceId: string;
@@ -49,11 +50,11 @@ function useUpdateSpace(): (
   const updateSpace = useCallback(
     async ({ spaceId, update }: UpdateSpaceProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId) {
-        throw new Error("Please pass a spaceId");
+        throw new SublayError("Please pass a spaceId");
       }
 
       const { avatarFile, bannerFile, ...fields } = update;

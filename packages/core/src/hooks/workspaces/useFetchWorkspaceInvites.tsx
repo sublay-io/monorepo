@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { WorkspaceInvitation } from "../../interfaces/models/Workspace";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchWorkspaceInvitesProps {
   workspaceId: string;
@@ -24,10 +25,10 @@ function useFetchWorkspaceInvites(): (
   const fetchWorkspaceInvites = useCallback(
     async ({ workspaceId }: FetchWorkspaceInvitesProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!workspaceId) {
-        throw new Error("Please pass a workspaceId");
+        throw new SublayError("Please pass a workspaceId");
       }
 
       const response = await axios.get<{ data: WorkspaceInvitation[] }>(

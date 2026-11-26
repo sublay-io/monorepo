@@ -21,6 +21,7 @@ import {
 } from "../../interfaces/models/Space";
 import { SpaceMemberStatus } from "../../interfaces/models/SpaceMember";
 import { handleError } from "../../utils/handleError";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseSpaceDataProps {
   space?: SpaceDetailed;
@@ -61,12 +62,12 @@ export interface UseSpaceDataValues {
 
   // State
   loading: boolean;
-  error: string | null;
+  error: SublayError | null;
 }
 
 // The `code` of a server error response, if there is one.
 function errorCode(err: unknown): unknown {
-  return (err as { response?: { data?: { code?: unknown } } })?.response?.data?.code;
+  return toSublayError(err).code;
 }
 
 function useSpaceData({
@@ -78,7 +79,7 @@ function useSpaceData({
 }: UseSpaceDataProps): UseSpaceDataValues {
   const [space, setSpace] = useState<SpaceDetailed | undefined | null>(spaceProp);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
   const [breadcrumb, setBreadcrumb] = useState<SpaceBreadcrumbEntry[]>([]);
 
   // Cache to store fetched spaces keyed by unique identifier
@@ -139,7 +140,7 @@ function useSpaceData({
         return newSpace;
       } catch (err) {
         handleError(err, "Failed to update space");
-        setError("Failed to update space");
+        setError(toSublayError(err));
       }
     },
     [space, updateSpaceHook, applySpace]
@@ -154,7 +155,7 @@ function useSpaceData({
       setSpace(undefined);
     } catch (err) {
       handleError(err, "Failed to delete space");
-      setError("Failed to delete space");
+      setError(toSublayError(err));
     }
   }, [space, deleteSpaceHook]);
 
@@ -178,7 +179,7 @@ function useSpaceData({
           return;
         }
         handleError(err, "Failed to refresh space");
-        setError("Failed to refresh space");
+        setError(toSublayError(err));
       }
     },
     [fetchSpace, stableInclude, applySpace, spaceId, shortId, slug]
@@ -196,7 +197,7 @@ function useSpaceData({
       await joinSpaceHook({ spaceId: space.id });
     } catch (err) {
       handleError(err, "Failed to join space");
-      setError("Failed to join space");
+      setError(toSublayError(err));
       return;
     }
     await refreshSpace(space.id);
@@ -222,7 +223,7 @@ function useSpaceData({
         return;
       }
       handleError(err, "Failed to leave space");
-      setError("Failed to leave space");
+      setError(toSublayError(err));
       return;
     }
     await refreshSpace(space.id);
@@ -274,7 +275,7 @@ function useSpaceData({
         }
       } catch (err) {
         handleError(err, "Failed to fetch space");
-        setError("Failed to fetch space");
+        setError(toSublayError(err));
         setSpace(null);
       } finally {
         setLoading(false);

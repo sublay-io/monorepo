@@ -86,8 +86,8 @@ if (user?.avatarFile) {
   `true` while an `updateUser` call is in progress.
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  Error message if an `updateUser` call fails. `null` when there is no error.
+<ResponseField name="error" type="SublayError | null">
+  The error if an `updateUser` call fails. `null` when there is no error. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="isSuspended" type="boolean">

@@ -57,7 +57,7 @@ describe("useFetchMyWorkspaceMembership", () => {
 
     await expect(
       result.current({ workspaceId: "w1" })
-    ).rejects.toMatchObject({ response: { status: 404 } });
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it("throws before requesting when workspaceId is missing", async () => {

@@ -61,7 +61,7 @@ describe("useGetMetadata", () => {
 
     await expect(
       result.current({ url: "https://example.com" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request for a relative/non-absolute URL", async () => {

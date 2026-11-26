@@ -26,7 +26,7 @@ import {
   type SpaceListFetchOptions,
 } from "../../store/slices/spaceListsSlice";
 
-import useSpaceListActions from "./useSpaceListActions";
+import { useSpaceListActionsWithGuard } from "./useSpaceListActions";
 
 import {
   Space,
@@ -39,9 +39,23 @@ import { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions"
 import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
 
 import { handleError } from "../../utils/handleError";
+import type { SublayError } from "../../errors/SublayError";
+import { warnStrayFetchKeys } from "../../utils/warnStrayFetchKeys";
+
+const FETCH_KEYS = ["filters", "config", "options"] as const;
 
 export interface UseSpaceListProps {
   listId: string;
+}
+
+/**
+ * What `fetchSpaces` takes. `filters` merge into the list's current filters;
+ * `config` is the list's settings; `options` controls this fetch.
+ */
+export interface SpaceListFetchSpacesProps {
+  filters?: Partial<SpaceListFilters>;
+  config?: SpaceListConfig;
+  options?: SpaceListFetchOptions;
 }
 
 export interface SpaceListCreateSpaceProps {
@@ -72,7 +86,7 @@ export interface UseSpaceListValues {
    * The last load failure, shared by every hook on this `listId`. Cleared
    * when the next load starts; `loadMore()` retries it.
    */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
 
@@ -88,11 +102,7 @@ export interface UseSpaceListValues {
   parentSpaceId: string | "none" | "any";
 
   // Operations
-  fetchSpaces: (
-    filters: Partial<SpaceListFilters>,
-    config?: SpaceListConfig,
-    options?: SpaceListFetchOptions
-  ) => void;
+  fetchSpaces: (props?: SpaceListFetchSpacesProps) => void;
   /**
    * Load the next page, or retry the load that failed (a failed first page
    * included). Does nothing while a page of this list is loading, while a
@@ -135,7 +145,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
   );
 
   // Get space actions hook
-  const spaceActions = useSpaceListActions();
+  const spaceActions = useSpaceListActionsWithGuard();
 
   // Load bookkeeping shared by every hook showing this list.
   const store = useStore<{ sublay: SublayState }>();
@@ -163,8 +173,8 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
           const page = first ? 1 : list.page + 1;
           dispatch(setSpaceListLoading({ listId, loading: true }));
           const data = await spaceActions.fetchSpaces(
-            listId,
             {
+              listId,
               page,
               sortBy: list.sortBy,
               sortDir: list.sortDir,
@@ -185,11 +195,10 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
 
   // Fetch spaces function (always triggers a fetch)
   const handleFetchSpaces = useCallback(
-    (
-      newFilters: Partial<SpaceListFilters>,
-      newConfig?: SpaceListConfig,
-      options?: SpaceListFetchOptions
-    ) => {
+    // `extra`: only so a call in the old positional form can be warned about.
+    (props: SpaceListFetchSpacesProps = {}, ...extra: unknown[]) => {
+      warnStrayFetchKeys("fetchSpaces", props, FETCH_KEYS, 1 + extra.length);
+      const { filters: newFilters = {}, config: newConfig, options } = props;
       // Apply config defaults if not provided
       const configWithDefaults = {
         limit: 20,
@@ -280,7 +289,8 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
       ...restOfProps
     }: SpaceListCreateSpaceProps) => {
       try {
-        const newSpace = await spaceActions.createSpace(listId, {
+        const newSpace = await spaceActions.createSpace({
+          listId,
           ...restOfProps,
           insertPosition,
         });
@@ -297,7 +307,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
   const deleteSpace = useCallback(
     async ({ spaceId }: SpaceListDeleteSpaceProps) => {
       try {
-        await spaceActions.deleteSpace(listId, { spaceId });
+        await spaceActions.deleteSpace({ listId, spaceId });
       } catch (err) {
         handleError(err, "Failed to delete space");
       }

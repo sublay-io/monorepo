@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import type { BlockRow } from "../../../interfaces/models/Block";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface BlockUserProps {
   userId: string;
@@ -15,11 +16,11 @@ function useBlockUser(): (props: BlockUserProps) => Promise<BlockRow> {
     async (props: BlockUserProps) => {
       const { userId } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!userId) {
-        throw new Error("No user ID was provided");
+        throw new SublayError("No user ID was provided");
       }
 
       // 201 for a new block, 200 when already blocking; `user` on the

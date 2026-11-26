@@ -8,6 +8,7 @@ import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 import { SpaceReputationUserParams } from "../../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../../interfaces/UserSearch";
 import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface FetchFollowersParams
   extends SpaceReputationUserParams,
@@ -24,11 +25,11 @@ function useFetchFollowers(): (params?: FetchFollowersParams) => Promise<Paginat
   const fetchFollowers = useCallback(
     async ({ page = 1, limit = 20, query, searchFields, spaceReputation }: FetchFollowersParams = {}) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!user) {
-        throw new Error("No user is logged in.");
+        throw new SublayError("No user is logged in.");
       }
 
       const response = await axios.get<PaginatedResponse<FollowRow>>(

@@ -31,7 +31,7 @@ describe("useUnblockUser", () => {
 
     await expect(
       result.current({ userId: "user-2" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when unblocking yourself", async () => {

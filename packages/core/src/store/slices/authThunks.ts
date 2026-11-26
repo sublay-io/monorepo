@@ -40,6 +40,8 @@ import type {
   EmailVerificationOptions,
   EmailVerificationRequiredResult,
 } from "../../interfaces/EmailVerification";
+import { toSublayError } from "../../errors/SublayError";
+import { SublayError } from "../../errors/SublayError";
 
 // Account-management endpoints (change/set password, confirm account deletion)
 // run behind requireUserAuth on the server. The shared default axios instance
@@ -426,7 +428,9 @@ async function refuseAtAccountLimit({
 }
 
 /**
- * The rejection payload for sign-up and sign-in: the server's `error` text as
+ * The rejection payload of the auth thunks (sign-up, sign-in, sign-out,
+ * password changes, account deletion, token refresh, …) when a request
+ * failed: the server's `error` text as
  * the message (the transport's own message when the server sent none), plus
  * the server's error `code`, the `param` naming the failing input when the
  * server gives one, and — on a sign-in refused with `auth/email-not-verified`
@@ -434,27 +438,30 @@ async function refuseAtAccountLimit({
  * with.
  */
 function toAuthRejection(error: unknown): AuthRejection {
-  const data = (error as { response?: { data?: unknown } } | null | undefined)
-    ?.response?.data as
-    | { error?: unknown; code?: unknown; param?: unknown; verificationId?: unknown }
-    | undefined;
-  const rejection: AuthRejection = {
-    message:
-      typeof data?.error === "string" && data.error
-        ? data.error
-        : error instanceof Error
-          ? error.message
-          : "Unknown error",
-  };
-  if (typeof data?.code === "string") rejection.code = data.code;
-  if (typeof data?.param === "string") rejection.param = data.param;
-  if (typeof data?.verificationId === "string") {
-    rejection.verificationId = data.verificationId;
+  const failure = toSublayError(error);
+  const rejection: AuthRejection = { message: failure.message };
+  if (failure.code !== undefined) rejection.code = failure.code;
+  if (failure.param !== undefined) rejection.param = failure.param;
+  if (failure.status !== undefined) rejection.status = failure.status;
+  if (failure.body !== undefined) rejection.body = failure.body;
+  const verificationId = failure.body?.verificationId;
+  if (typeof verificationId === "string") {
+    rejection.verificationId = verificationId;
   }
   return rejection;
 }
 
-const limitRejection = (): AuthRejection => ({ message: ACCOUNT_LIMIT_MESSAGE });
+/** A rejection for a failure the SDK found itself (no server answer). */
+const sdkRejection = (message: string): AuthRejection => ({ message });
+
+const limitRejection = (): AuthRejection => sdkRejection(ACCOUNT_LIMIT_MESSAGE);
+
+/** The message of a rejection payload: an `AuthRejection` or a plain string. */
+function rejectionMessage(payload: unknown): string | undefined {
+  if (typeof payload === "string") return payload || undefined;
+  const message = (payload as { message?: unknown } | null | undefined)?.message;
+  return typeof message === "string" && message ? message : undefined;
+}
 
 // Async Thunks
 
@@ -624,7 +631,7 @@ export const signOutThunk = createAsyncThunk(
     const pushDevice = state.sublay.accounts.deviceIdentifier;
 
     if (!refreshToken) {
-      throw new Error("No refresh token");
+      return rejectWithValue(sdkRejection("No refresh token"));
     }
 
     try {
@@ -684,9 +691,7 @@ export const signOutThunk = createAsyncThunk(
       return;
     } catch (error) {
       handleError(error, "Failed to log user out:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -730,9 +735,7 @@ export const confirmAccountDeletionThunk = createAsyncThunk(
       return;
     } catch (error) {
       handleError(error, "Failed to delete account:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -767,7 +770,7 @@ export interface RefreshRejectionMeta {
 export const requestNewAccessTokenThunk = createAsyncThunk<
   string,
   { projectId: string },
-  { rejectValue: string; rejectedMeta: RefreshRejectionMeta }
+  { rejectValue: AuthRejection; rejectedMeta: RefreshRejectionMeta }
 >(
   "auth/requestNewAccessToken",
   async (
@@ -794,7 +797,7 @@ export const requestNewAccessTokenThunk = createAsyncThunk<
       // not about the network: an entry carrying no usable refresh token is
       // exactly an entry that needs a re-authentication, which is the same
       // reading `activateStoredAccount` gives the identical case.
-      return rejectWithValue("No refresh token available", {
+      return rejectWithValue(sdkRejection("No refresh token available"), {
         credentialRejected: true,
       });
     }
@@ -816,10 +819,9 @@ export const requestNewAccessTokenThunk = createAsyncThunk<
       return result.accessToken;
     } catch (error) {
       handleError(error, "Request new access token error:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error",
-        { credentialRejected: isCredentialRejection(error) }
-      );
+      return rejectWithValue(toAuthRejection(error), {
+        credentialRejected: isCredentialRejection(error),
+      });
     }
   }
 );
@@ -854,7 +856,7 @@ export const verifyExternalUserThunk = createAsyncThunk(
           projectId: data.projectId,
           refreshToken: result?.refreshToken,
         });
-        return rejectWithValue(ACCOUNT_LIMIT_MESSAGE);
+        return rejectWithValue(limitRejection());
       }
 
       // Update auth state
@@ -870,9 +872,7 @@ export const verifyExternalUserThunk = createAsyncThunk(
       return result;
     } catch (error) {
       handleError(error, "Verify external user error:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     }
   }
 );
@@ -956,7 +956,7 @@ export const changePasswordThunk = createAsyncThunk(
       // Re-read: the bootstrap we just waited on is what populates `user`.
       const settled = (getState() as RootState).sublay.auth;
       if (!settled.user) {
-        return rejectWithValue("No user is authenticated");
+        return rejectWithValue(sdkRejection("No user is authenticated"));
       }
 
       // ── NAME THIS DEVICE. NOT THIS SESSION. ──────────────────────────────
@@ -1002,9 +1002,7 @@ export const changePasswordThunk = createAsyncThunk(
       return;
     } catch (error) {
       handleError(error, "Failed to change password:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -1026,7 +1024,7 @@ export const setPasswordThunk = createAsyncThunk(
       const authorization = await withAuth(state.sublay.auth.accessToken);
 
       if (!(getState() as RootState).sublay.auth.user) {
-        return rejectWithValue("No user is authenticated");
+        return rejectWithValue(sdkRejection("No user is authenticated"));
       }
 
       await authService.setPassword(
@@ -1038,9 +1036,7 @@ export const setPasswordThunk = createAsyncThunk(
       return;
     } catch (error) {
       handleError(error, "Failed to set password:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -1130,16 +1126,16 @@ export const signOutAllThunk = createAsyncThunk(
 
       if (blocked) {
         return rejectWithValue(
-          `Failed to sign out ${blockedOutcomes.length} of ${outcomes.length} accounts. Their sessions are still active — retry.`
+          sdkRejection(
+            `Failed to sign out ${blockedOutcomes.length} of ${outcomes.length} accounts. Their sessions are still active — retry.`
+          )
         );
       }
 
       return;
     } catch (error) {
       handleError(error, "Failed to sign out all accounts:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -1242,8 +1238,8 @@ export const initializeAuthThunk = createAsyncThunk(
         // Safe to key on the payload: `verifyExternalUserThunk` has no caller
         // outside this thunk and is not exported from `index.ts`, so nothing
         // downstream rethrows its payload as a user-facing message.
-        if (verified.payload === ACCOUNT_LIMIT_MESSAGE) {
-          throw new Error(ACCOUNT_LIMIT_MESSAGE);
+        if (rejectionMessage(verified.payload) === ACCOUNT_LIMIT_MESSAGE) {
+          throw new SublayError(ACCOUNT_LIMIT_MESSAGE);
         }
       }
 
@@ -1276,7 +1272,7 @@ export const initializeAuthThunk = createAsyncThunk(
         !result.payload
       ) {
         throw new StoredSessionRestoreError(
-          (typeof result.payload === "string" && result.payload) ||
+          rejectionMessage(result.payload) ||
             "Could not restore the stored session.",
           requestNewAccessTokenThunk.rejected.match(result)
             ? Boolean(result.meta.credentialRejected)

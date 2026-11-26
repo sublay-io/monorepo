@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { handleError } from "../../utils/handleError";
-import { toError } from "../../utils/toError";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 /**
  * One page of a list, in the engine's paging-agnostic shape. `nextCursor` is
@@ -47,7 +47,7 @@ export interface UseListLoaderOptions<TItem, TCursor> {
 export interface ListLoaderValues {
   loading: boolean;
   /** The last load failure. Cleared when the next load starts. */
-  error: Error | null;
+  error: SublayError | null;
   /**
    * Whether `loadMore()` has anything to fetch: a next page, or a load that
    * failed (which it retries).
@@ -89,7 +89,7 @@ export function useListLoader<TItem, TCursor>(
   } = options;
 
   const [loading, setLoading] = useState(pendingUntilEnabled || (enabled && autoLoad));
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
   const loadingRef = useRef(false);
@@ -136,7 +136,7 @@ export function useListLoader<TItem, TCursor>(
       // The failed load is still to do: `loadMore()` retries it.
       hasMoreRef.current = true;
       setHasMore(true);
-      setError(toError(err));
+      setError(toSublayError(err));
       handleError(err, request.errorLabel);
     } finally {
       if (generation === generationRef.current) {

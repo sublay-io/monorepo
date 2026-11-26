@@ -137,7 +137,7 @@ describe("useCreateEvent", () => {
         startTime: "2024-06-01T00:00:00.000Z",
         type: "online",
       }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when there is no project", async () => {

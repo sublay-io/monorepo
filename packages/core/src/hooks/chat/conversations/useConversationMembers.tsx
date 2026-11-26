@@ -9,6 +9,7 @@ import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
 import { SpaceReputationContextParams } from "../../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
+import { SublayError, toSublayError } from "../../../errors/SublayError";
 
 export interface UseConversationMembersProps extends SpaceReputationContextParams {
   conversationId: string;
@@ -91,8 +92,8 @@ function useConversationMembers({
 
   const addMember = useCallback(
     async ({ userId }: { userId: string }): Promise<ConversationMember> => {
-      if (!projectId) throw new Error("No projectId available.");
-      if (!conversationId) throw new Error("No conversationId provided.");
+      if (!projectId) throw new SublayError("No projectId available.");
+      if (!conversationId) throw new SublayError("No conversationId provided.");
       try {
         const response = await axios.post(
           `/${projectId}/chat/conversations/${conversationId}/members`,
@@ -103,7 +104,7 @@ function useConversationMembers({
         return newMember;
       } catch (err) {
         handleError(err, "Failed to add member");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, conversationId, axios]
@@ -119,7 +120,7 @@ function useConversationMembers({
         setMembers((prev) => prev.filter((m) => m.userId !== userId));
       } catch (err) {
         handleError(err, "Failed to remove member");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, conversationId, axios]
@@ -133,7 +134,7 @@ function useConversationMembers({
       );
     } catch (err) {
       handleError(err, "Failed to leave conversation");
-      throw err;
+      throw toSublayError(err);
     }
   }, [projectId, conversationId, axios]);
 
@@ -156,8 +157,8 @@ function useConversationMembers({
       userId: string;
       role: ConversationMemberRole;
     }): Promise<ConversationMember> => {
-      if (!projectId) throw new Error("No projectId available.");
-      if (!conversationId) throw new Error("No conversationId provided.");
+      if (!projectId) throw new SublayError("No projectId available.");
+      if (!conversationId) throw new SublayError("No conversationId provided.");
       try {
         const response = await axios.patch(
           `/${projectId}/chat/conversations/${conversationId}/members/${userId}/role`,
@@ -170,7 +171,7 @@ function useConversationMembers({
         return updated;
       } catch (err) {
         handleError(err, "Failed to change member role");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, conversationId, axios]

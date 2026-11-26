@@ -7,6 +7,7 @@ import { applyOwnMute } from "../../../store/slices/chatSlice";
 import { handleError } from "../../../utils/handleError";
 import type { MuteDuration } from "../../../interfaces/MuteDuration";
 import type { ConversationMember } from "../../../interfaces/models/ConversationMember";
+import { SublayError, rethrowAsSublayError, toSublayError } from "../../../errors/SublayError";
 
 export interface MuteConversationProps {
   conversationId: string;
@@ -46,21 +47,21 @@ function useMuteConversation(): UseMuteConversationValues {
       duration,
     }: MuteConversationProps): Promise<ConversationMember> => {
       if (!projectId || !user) {
-        throw new Error("No project ID or authenticated user available");
+        throw new SublayError("No project ID or authenticated user available");
       }
-      if (!conversationId) throw new Error("Please pass a conversationId.");
+      if (!conversationId) throw new SublayError("Please pass a conversationId.");
 
       try {
         const { currentMember } = await muteMutation({
           projectId,
           conversationId,
           duration,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
         dispatch(applyOwnMute({ conversationId, currentMember }));
         return currentMember;
       } catch (err) {
         handleError(err, "Failed to mute conversation");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, user, muteMutation, dispatch]

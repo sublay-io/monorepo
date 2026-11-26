@@ -15,6 +15,7 @@ import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
   /** Sort for the level being fetched. Server default: `"createdAt"`. */
@@ -81,15 +82,15 @@ function useFetchManyComments(): (
       } = props;
 
       if (!entityId && !parentCommentId) {
-        throw new Error("Fetching comments requires an entityId or a parentCommentId");
+        throw new SublayError("Fetching comments requires an entityId or a parentCommentId");
       }
 
       if (limit === 0) {
-        throw new Error("Can't fetch with limit 0");
+        throw new SublayError("Can't fetch with limit 0");
       }
 
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       const params: Record<string, any> = {

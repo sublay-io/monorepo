@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
+import { SublayError } from "@sublay/core";
 
 const useProject = vi.fn();
 const useSublayDispatch = vi.fn();
@@ -8,14 +9,20 @@ const requestOAuthAuthorizationUrl = vi.fn();
 const handleOAuthRedirect = vi.fn();
 const dispatch = vi.fn();
 
-vi.mock("@sublay/core", () => ({
-  useProject: () => useProject(),
-  useSublayDispatch: () => useSublayDispatch(),
-  useSublaySelector: (selector: unknown) => useSublaySelector(selector),
-  selectAccessToken: "selectAccessToken-placeholder",
-  requestOAuthAuthorizationUrl: (...args: unknown[]) => requestOAuthAuthorizationUrl(...args),
-  handleOAuthRedirect: (...args: unknown[]) => handleOAuthRedirect(...args),
-}));
+vi.mock("@sublay/core", async (importOriginal) => {
+  // The real error class and helper: the hook builds its errors with them.
+  const { SublayError, toSublayError } = await importOriginal<typeof import("@sublay/core")>();
+  return {
+    SublayError,
+    toSublayError,
+    useProject: () => useProject(),
+    useSublayDispatch: () => useSublayDispatch(),
+    useSublaySelector: (selector: unknown) => useSublaySelector(selector),
+    selectAccessToken: "selectAccessToken-placeholder",
+    requestOAuthAuthorizationUrl: (...args: unknown[]) => requestOAuthAuthorizationUrl(...args),
+    handleOAuthRedirect: (...args: unknown[]) => handleOAuthRedirect(...args),
+  };
+});
 
 import useOAuthSignIn from "./useOAuthSignIn";
 
@@ -84,10 +91,10 @@ describe("useOAuthSignIn (react-js)", () => {
       });
 
       expect(requestOAuthAuthorizationUrl).not.toHaveBeenCalled();
-      expect(result.current.error).toBe("No projectId available.");
+      expect(result.current.error?.message).toBe("No projectId available.");
     });
 
-    it("surfaces the rejection message and clears isLoading on failure", async () => {
+    it("surfaces the rejection message and clears loading on failure", async () => {
       requestOAuthAuthorizationUrl.mockRejectedValue(new Error("network down"));
       const { result } = renderHook(() => useOAuthSignIn());
 
@@ -95,8 +102,8 @@ describe("useOAuthSignIn (react-js)", () => {
         await result.current.initiateOAuth({ provider: "google" });
       });
 
-      expect(result.current.error).toBe("network down");
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error?.message).toBe("network down");
+      expect(result.current.loading).toBe(false);
     });
   });
 
@@ -120,8 +127,8 @@ describe("useOAuthSignIn (react-js)", () => {
       expect(requestOAuthAuthorizationUrl).toHaveBeenCalledWith(
         expect.objectContaining({ endpoint: "link", accessToken: null }),
       );
-      expect(result.current.error).toBe("Must be authenticated to link an OAuth provider.");
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error?.message).toBe("Must be authenticated to link an OAuth provider.");
+      expect(result.current.loading).toBe(false);
     });
 
     it("attaches the current access token when linking a provider", async () => {
@@ -160,7 +167,10 @@ describe("useOAuthSignIn (react-js)", () => {
     });
 
     it("sets the error, cleans the URL, and returns false on a redirect error", () => {
-      handleOAuthRedirect.mockReturnValue({ success: false, error: "access_denied" });
+      handleOAuthRedirect.mockReturnValue({
+        success: false,
+        error: new SublayError("access_denied", { code: "access_denied" }),
+      });
       const { result } = renderHook(() => useOAuthSignIn());
 
       let callbackResult: boolean;
@@ -169,7 +179,8 @@ describe("useOAuthSignIn (react-js)", () => {
       });
 
       expect(callbackResult!).toBe(false);
-      expect(result.current.error).toBe("access_denied");
+      expect(result.current.error?.message).toBe("access_denied");
+      expect(result.current.error?.code).toBe("access_denied");
       expect(window.history.replaceState).toHaveBeenCalled();
     });
 

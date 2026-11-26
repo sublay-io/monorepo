@@ -23,7 +23,8 @@ function AvatarUploader() {
   const { uploadImage, uploading, progress } = useUploadImage();
 
   const handleFile = async (file: File) => {
-    const image = await uploadImage(file, {
+    const image = await uploadImage({
+      file,
       mode: "exact-dimensions",
       dimensions: {
         avatar: { width: 200, height: 200 },
@@ -48,14 +49,14 @@ function AvatarUploader() {
 
 ## Parameters
 
-`uploadImage(file, options)` accepts two arguments:
+`uploadImage({ file, ...options })` takes one object: the `file`, plus the processing configuration (`UploadImageOptions`) and the call's own `onProgress` and `metadata`.
 
-<ParamField path="file" type="BrowserFile | RNFile" required>
-  The image to upload. In the browser, pass a standard `File` object. In React Native, pass `{ uri, name, type? }`.
+<ParamField body="file" type="BrowserFile | RNFile" required>
+  The image to upload. In the browser, pass a standard `File` object. In React Native, pass `{ uri, name, type? }`. Not part of `file.options`.
 </ParamField>
 
-<ParamField path="options" type="UseUploadImageOptions" required>
-  Processing configuration (`UploadImageOptions`) plus the call's own `onProgress` and `metadata`. Must include a `mode` field. See [Processing Modes](#processing-modes) below. Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). Unknown keys in the options, a key of another mode included, are refused with `400 storage/invalid-body`. A variant name uses only letters, digits, `_`, `-` and `.`, is at most 64 characters, can't contain `..`, and can't be `original`.
+<ParamField body="mode" type="string" required>
+  The processing mode. See [Processing Modes](#processing-modes) below. Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). Unknown keys in the options, a key of another mode included, are refused with `400 storage/invalid-body`. A variant name uses only letters, digits, `_`, `-` and `.`, is at most 64 characters, can't contain `..`, and can't be `original`.
 </ParamField>
 
 ### Common Options (all modes)
@@ -162,7 +163,7 @@ Picks the ratio in `aspectRatios` closest to the image and generates one variant
 
 ## Returns
 
-<ResponseField name="uploadImage" type="(file, options) => Promise<File>">
+<ResponseField name="uploadImage" type="({ file, ...options }: UploadImageProps) => Promise<File>">
   Async function that performs the upload and resolves with the [File](/v8/data-models/file) on success.
 </ResponseField>
 

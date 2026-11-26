@@ -8,11 +8,12 @@ import {
   activateStoredAccount,
   AccountTransitionError,
 } from "./accountTransition";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseSwitchAccountReturn {
   switchAccount: ({ userId }: { userId: string }) => Promise<void>;
-  isSwitching: boolean;
-  error: string | null;
+  switching: boolean;
+  error: SublayError | null;
 }
 
 export default function useSwitchAccount(): UseSwitchAccountReturn {
@@ -23,12 +24,12 @@ export default function useSwitchAccount(): UseSwitchAccountReturn {
   const store = useStore<{ sublay: SublayState }>();
   const { projectId } = useProject();
   const activeAccountId = useSublaySelector(selectActiveAccountId);
-  const [isSwitching, setIsSwitching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [switching, setSwitching] = useState(false);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const switchAccount = useCallback(
     async ({ userId }: { userId: string }) => {
-      if (!projectId) throw new Error("No projectId available");
+      if (!projectId) throw new SublayError("No projectId available");
 
       // FROM THE LIVE STORE, not from the render snapshot this callback closes
       // over. The snapshot is exactly what goes stale — an account added after
@@ -70,7 +71,7 @@ export default function useSwitchAccount(): UseSwitchAccountReturn {
       );
       if (userId === activeAccountId && hasLiveSession) return;
 
-      setIsSwitching(true);
+      setSwitching(true);
       setError(null);
 
       try {
@@ -88,16 +89,15 @@ export default function useSwitchAccount(): UseSwitchAccountReturn {
           previousActiveAccountId: activeAccountId,
         });
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to switch account"
-        );
-        throw err;
+        const failure = toSublayError(err);
+        setError(failure);
+        throw failure;
       } finally {
-        setIsSwitching(false);
+        setSwitching(false);
       }
     },
     [dispatch, store, projectId, activeAccountId]
   );
 
-  return { switchAccount, isSwitching, error };
+  return { switchAccount, switching, error };
 }

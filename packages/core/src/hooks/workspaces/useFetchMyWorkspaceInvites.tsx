@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { MyWorkspaceInvitation } from "../../interfaces/models/Workspace";
+import { SublayError } from "../../errors/SublayError";
 
 /**
  * The bearer-token user's LIVE pending invites (`status='pending' AND expiresAt
@@ -15,7 +16,7 @@ function useFetchMyWorkspaceInvites(): () => Promise<MyWorkspaceInvitation[]> {
 
   const fetchMyWorkspaceInvites = useCallback(async () => {
     if (!projectId) {
-      throw new Error("No projectId available.");
+      throw new SublayError("No projectId available.");
     }
 
     const response = await axios.get<{ data: MyWorkspaceInvitation[] }>(

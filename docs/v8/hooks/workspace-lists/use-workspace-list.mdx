@@ -23,11 +23,7 @@ function WorkspaceSwitcher() {
     useWorkspaceList({ listId: "switcher" });
 
   useEffect(() => {
-    fetchWorkspaces(
-      { relation: "direct", parentWorkspaceId: "any", sortDir: "asc", include: ["memberCount"] },
-      { limit: 50 },
-      { fetchImmediately: true }
-    );
+    fetchWorkspaces({ filters: { relation: "direct", parentWorkspaceId: "any", sortDir: "asc", include: ["memberCount"] }, config: { limit: 50 }, options: { fetchImmediately: true } });
   }, []);
 
   return (
@@ -59,20 +55,20 @@ function WorkspaceSwitcher() {
   `true` while fetching.
 </ResponseField>
 
-<ResponseField name="error" type="Error | null">
-  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook on the same `listId`.
+<ResponseField name="error" type="SublayError | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook on the same `listId`. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
   `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
 </ResponseField>
 
-<ResponseField name="fetchWorkspaces" type="function">
-  Fetch page 1 with new filters. A filter you leave out (`undefined`) keeps its current value; `null` puts it back to its default. The fetch runs right away when `filters` is empty or `fetchImmediately` is set, and after an 800 ms pause otherwise, so typing into a filter fires one request.
+<ResponseField name="fetchWorkspaces" type="({ filters?, config?, options? }) => void">
+  Fetch page 1 with new filters. It takes one object with up to three groups: `filters` merge into the list's current filters, `config` is the list's page size, and `options` control this fetch. A filter you leave out (`undefined`) keeps its current value; `null` puts it back to its default. The fetch runs right away when `filters` is empty or `fetchImmediately` is set, and after an 800 ms pause otherwise, so typing into a filter fires one request.
 
   ```ts
-  fetchWorkspaces(
-    filters: {
+  fetchWorkspaces({
+    filters?: {
       relation?: "reachable" | "direct" | null;          // default "reachable"
       parentWorkspaceId?: string | "none" | "any" | null; // default "any": every level
       sortDir?: "desc" | "asc" | null;                    // default "desc": newest first
@@ -83,8 +79,8 @@ function WorkspaceSwitcher() {
       fetchImmediately?: boolean; // skip the 800 ms pause
       resetUnspecified?: boolean; // put every filter you leave out back to its default
       clearImmediately?: boolean; // empty the list before the fetch starts
-    }
-  ) => void
+    };
+  }) => void
   ```
 
   Every page, including `loadMore` and `refetch`, is fetched with the filters in use.

@@ -1,6 +1,13 @@
 import { describe, it, expect, afterEach } from "vitest";
+import axios, { CanceledError } from "axios";
 
-import { resetAxiosMocks, stubAxiosAdapter, okAxiosResponse } from "../test-utils";
+import {
+  resetAxiosMocks,
+  stubAxiosAdapter,
+  okAxiosResponse,
+  axiosErrorWithStatus,
+} from "../test-utils";
+import { SublayError } from "../errors/SublayError";
 import axiosPublic, { axiosPrivate, BASE_URL, REQUEST_TIMEOUT_MS } from "./axios";
 
 afterEach(() => {
@@ -43,6 +50,38 @@ describe("config/axios", () => {
 
     return axiosPublic.get("/anything").then(() => {
       expect(seen).toBe(REQUEST_TIMEOUT_MS);
+    });
+  });
+
+  describe("failures reject as SublayError", () => {
+    it.each([
+      ["axiosPrivate", axiosPrivate],
+      ["the public instance", axiosPublic],
+    ])("%s: an error response carries the server's code, param and status", async (_, instance) => {
+      let raw: unknown;
+      stubAxiosAdapter(instance, async (config) => {
+        raw = axiosErrorWithStatus(422, { error: "Too long.", code: "x/too-long", param: "title" }, config);
+        throw raw;
+      });
+
+      const err = await instance.post("/x", {}).catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(SublayError);
+      expect(err).toMatchObject({ message: "Too long.", code: "x/too-long", param: "title", status: 422 });
+      expect((err as SublayError).cause).toBe(raw);
+    });
+
+    it("an aborted request keeps its name, and its cause is the axios cancel", async () => {
+      stubAxiosAdapter(axiosPrivate, async () => {
+        throw new CanceledError();
+      });
+
+      const err = await axiosPrivate.get("/x").catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(SublayError);
+      expect((err as SublayError).name).toBe("CanceledError");
+      expect((err as SublayError).code).toBeUndefined();
+      expect(axios.isCancel((err as SublayError).cause)).toBe(true);
     });
   });
 });

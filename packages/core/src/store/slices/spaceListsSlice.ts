@@ -12,7 +12,6 @@ export interface SpaceListState {
   page: number;
   loading: boolean;
   hasMore: boolean;
-  error: string | null;
   lastFetched: number | null;
 
   // Configuration (set when fetchSpaces is called)
@@ -42,7 +41,6 @@ const createDefaultSpaceListState = (): SpaceListState => ({
   page: 1,
   loading: true,
   hasMore: true,
-  error: null,
   lastFetched: null,
 
   // Default configuration
@@ -181,7 +179,6 @@ export const spaceListsSlice = createSlice({
       // Reset pagination when filters change
       list.page = 1;
       list.hasMore = true;
-      list.error = null;
     },
 
     // Set loading state for space list
@@ -241,18 +238,6 @@ export const spaceListsSlice = createSlice({
       const { listId, hasMore } = action.payload;
       if (state.lists[listId]) {
         state.lists[listId].hasMore = hasMore;
-      }
-    },
-
-    // Set error for space list
-    setSpaceListError: (
-      state,
-      action: PayloadAction<{ listId: string; error: string | null }>
-    ) => {
-      const { listId, error } = action.payload;
-      if (state.lists[listId]) {
-        state.lists[listId].error = error;
-        state.lists[listId].loading = false;
       }
     },
 
@@ -333,7 +318,6 @@ export const {
   setSpaceListSpaces,
   setSpaceListPage,
   setSpaceListHasMore,
-  setSpaceListError,
   addSpace,
   removeSpace,
   updateSpace,

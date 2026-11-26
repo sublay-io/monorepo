@@ -25,7 +25,6 @@ export interface EntityListState {
   page: number;
   loading: boolean;
   hasMore: boolean;
-  error: string | null;
   lastFetched: number | null;
 
   // Configuration (set when fetchEntities is called).
@@ -66,7 +65,6 @@ const createDefaultEntityListState = (): EntityListState => ({
   page: 1,
   loading: true,
   hasMore: true,
-  error: null,
   lastFetched: null,
 
   // Default configuration
@@ -323,7 +321,6 @@ const entityListsSlice = createSlice({
       // Reset pagination when filters or sort changes
       list.page = 1;
       list.hasMore = true;
-      list.error = null;
     },
 
     // Set loading state for entity list
@@ -386,18 +383,6 @@ const entityListsSlice = createSlice({
       const { listId, hasMore } = action.payload;
       if (state.lists[listId]) {
         state.lists[listId].hasMore = hasMore;
-      }
-    },
-
-    // Set error for entity list
-    setEntityListError: (
-      state,
-      action: PayloadAction<{ listId: string; error: string | null }>
-    ) => {
-      const { listId, error } = action.payload;
-      if (state.lists[listId]) {
-        state.lists[listId].error = error;
-        state.lists[listId].loading = false;
       }
     },
 
@@ -604,7 +589,6 @@ const entityListsSlice = createSlice({
       // Reset pagination when filters change
       list.page = 1;
       list.hasMore = true;
-      list.error = null;
     },
 
     // Clean up unused lists (for memory management)
@@ -642,7 +626,6 @@ export const {
   setEntityListEntities,
   setEntityListPage,
   setEntityListHasMore,
-  setEntityListError,
   addEntity,
   removeEntity,
   updateEntityInLists,

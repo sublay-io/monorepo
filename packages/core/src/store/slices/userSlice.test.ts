@@ -58,7 +58,7 @@ const initial: UserState = {
 
 describe("userSlice", () => {
   it("setUser stores the user and clears any existing error", () => {
-    const s = reducer({ ...initial, error: "boom" }, setUser(makeUser()));
+    const s = reducer({ ...initial, error: { message: "boom" } }, setUser(makeUser()));
     expect(s.user?.id).toBe("user-1");
     expect(s.error).toBeNull();
   });
@@ -69,7 +69,7 @@ describe("userSlice", () => {
   });
 
   it("clearUser clears the user and any error", () => {
-    const s = reducer({ ...initial, user: makeUser(), error: "boom" }, clearUser());
+    const s = reducer({ ...initial, user: makeUser(), error: { message: "boom" } }, clearUser());
     expect(s.user).toBeNull();
     expect(s.error).toBeNull();
   });
@@ -88,8 +88,8 @@ describe("userSlice", () => {
     expect(s.loading).toBe(true);
     s = reducer(s, setUpdating(true));
     expect(s.updating).toBe(true);
-    s = reducer(s, setError("boom"));
-    expect(s.error).toBe("boom");
+    s = reducer(s, setError({ message: "boom" }));
+    expect(s.error).toEqual({ message: "boom" });
     s = reducer(s, clearError());
     expect(s.error).toBeNull();
   });
@@ -117,7 +117,7 @@ describe("userSlice", () => {
         loading: true,
         updating: true,
         currentProjectId: "project-1",
-        error: "boom",
+        error: { message: "boom" },
       };
       const state = { sublay: { user: s } } as never;
 
@@ -125,7 +125,7 @@ describe("userSlice", () => {
       expect(selectUserLoading(state)).toBe(true);
       expect(selectUserUpdating(state)).toBe(true);
       expect(selectCurrentProjectId(state)).toBe("project-1");
-      expect(selectUserError(state)).toBe("boom");
+      expect(selectUserError(state)).toEqual({ message: "boom" });
     });
 
     it("selectUserById returns the user only when the id matches", () => {

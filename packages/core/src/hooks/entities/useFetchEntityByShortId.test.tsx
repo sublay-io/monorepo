@@ -38,7 +38,7 @@ describe("useFetchEntityByShortId", () => {
 
     await expect(
       result.current({ shortId: "short-1" }),
-    ).rejects.toMatchObject({ response: { status: 404 } });
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it("throws before making a request when no short ID is passed", async () => {

@@ -10,6 +10,7 @@ vi.mock("../../config/refreshAccessToken", () => ({
   refreshAccessToken: vi.fn(),
 }));
 import { refreshAccessToken } from "../../config/refreshAccessToken";
+import { SuspendedError } from "../../errors/SuspendedError";
 const mockedRefresh = vi.mocked(refreshAccessToken);
 
 afterEach(() => {
@@ -160,7 +161,7 @@ describe("useAskContent", () => {
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.error).toBe("Rate limited");
+    expect(result.current.error?.message).toBe("Rate limited");
     expect(result.current.streaming).toBe(false);
   });
 
@@ -179,7 +180,7 @@ describe("useAskContent", () => {
       result.current.ask({ query: "hello" });
     });
 
-    await waitFor(() => expect(result.current.error).toBe("Model unavailable"));
+    await waitFor(() => expect(result.current.error?.message).toBe("Model unavailable"));
     expect(result.current.streaming).toBe(false);
   });
 
@@ -259,9 +260,31 @@ describe("useAskContent", () => {
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.error).toBe("Semantic search requires a paid plan");
+    expect(result.current.error?.message).toBe("Semantic search requires a paid plan");
+    expect(result.current.error?.body).toMatchObject({ code: "project/plan-required" });
     expect(mockedRefresh).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("surfaces a suspended user's refusal as a SuspendedError", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({ error: "Suspended.", code: "user/suspended", reason: "spam", endDate: null }),
+          { status: 403 },
+        ),
+      ),
+    );
+    const { result } = renderHookWithAxios(() => useAskContent(), { accessToken: "tok" });
+
+    act(() => {
+      result.current.ask({ query: "hello" });
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.error).toBeInstanceOf(SuspendedError);
+    expect(result.current.error).toMatchObject({ reason: "spam", endDate: null, status: 403 });
   });
 
   it("refreshes once and retries on a bare 401, then streams", async () => {
@@ -320,8 +343,7 @@ describe("useAskContent", () => {
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.error).toBe(
-      "This session has ended. Sign in again.",
+    expect(result.current.error?.message).toBe("This session has ended. Sign in again.",
     );
     expect(mockedRefresh).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -357,8 +379,7 @@ describe("useAskContent", () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(result.current.error).toBe(
-      "This session has ended. Sign in again.",
+    expect(result.current.error?.message).toBe("This session has ended. Sign in again.",
     );
   });
 
@@ -378,7 +399,7 @@ describe("useAskContent", () => {
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.error).toBe("You must be signed in to use AI search.");
+    expect(result.current.error?.message).toBe("You must be signed in to use AI search.");
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
@@ -398,8 +419,7 @@ describe("useAskContent", () => {
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.error).toBe(
-      "Your session has expired. Please sign in again.",
+    expect(result.current.error?.message).toBe("Your session has expired. Please sign in again.",
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });

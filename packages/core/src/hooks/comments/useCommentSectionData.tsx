@@ -48,6 +48,7 @@ import {
 } from "../entities";
 import { isUUID } from "../../utils/isUUID";
 import { useStableObject } from "../useStableObject";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 /**
  * Whether an entity's id field is the one an id prop names. Compared as
@@ -179,7 +180,7 @@ export interface UseCommentSectionDataValues {
    * `loadMore()` retries a failed load, including a failed first page and a
    * failed entity lookup.
    */
-  error: Error | null;
+  error: SublayError | null;
   hasMore: boolean;
   submittingComment: boolean;
   /**
@@ -218,7 +219,7 @@ export interface UseCommentSectionDataValues {
   repliedToComment: Partial<Comment> | null;
   setRepliedToComment: (newRepliedToComment: Comment | null) => void;
   showReplyBanner: boolean;
-  setShowReplyBanner: ({ newState }: { newState: boolean }) => void;
+  setShowReplyBanner: (show: boolean) => void;
   /** Reply under `comment`: it becomes the reply target and the banner shows. */
   handleDeepReply: (comment: Comment) => void;
   /**
@@ -519,7 +520,7 @@ export function useCommentSectionDataInternal(
   const failedEntityKeyRef = useRef<string | null>(null);
   const [entityFetchFailure, setEntityFetchFailure] = useState<{
     key: string;
-    error: Error;
+    error: SublayError;
   } | null>(null);
 
   const submittingComment = useRef(false);
@@ -531,9 +532,6 @@ export function useCommentSectionDataInternal(
   const [repliedToComment, setRepliedToComment] =
     useState<Partial<Comment> | null>(null);
   const [showReplyBanner, setShowReplyBanner] = useState(false);
-  const setShowReplyBannerHandler = useCallback(({ newState }: { newState: boolean }) => {
-    setShowReplyBanner(newState);
-  }, []);
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
   // The latest reply target, for a create that settles after it changed.
   const replyTargetRef = useRef(repliedToComment);
@@ -911,12 +909,10 @@ export function useCommentSectionDataInternal(
         if (stillHere) setStore((prev) => removeComment(prev, TEMP_ID));
         settleCounts(false);
 
-        const response = (err as { response?: { status?: unknown; data?: unknown } } | null)
-          ?.response;
-        const body = (response?.data ?? null) as { code?: unknown; error?: unknown } | null;
+        const failed = toSublayError(err);
         // A write refused because the user is suspended arrives as a
-        // `SuspendedError` (the response interceptor converts the 403), which
-        // has no `response`: its details are on the error itself.
+        // `SuspendedError` (the response interceptor converts the 403): its
+        // details are on the error itself.
         const failure: CommentCreateError = isSuspendedError(err)
           ? {
               code: SUSPENDED_ERROR_CODE,
@@ -925,9 +921,9 @@ export function useCommentSectionDataInternal(
               parentCommentId: newParentId,
             }
           : {
-              code: typeof body?.code === "string" ? body.code : undefined,
-              message: typeof body?.error === "string" ? body.error : undefined,
-              status: typeof response?.status === "number" ? response.status : undefined,
+              code: failed.code,
+              message: typeof failed.body?.error === "string" ? failed.body.error : undefined,
+              status: failed.status,
               parentCommentId: newParentId,
             };
         // The server refuses a direct reply to a deleted or removed comment.
@@ -1148,7 +1144,7 @@ export function useCommentSectionDataInternal(
         // No entity, or not the one asked for: a failed lookup, not a
         // section left loading.
         if (!fetchedEntity || !entityMatchesIds(fetchedEntity, lookup)) {
-          throw new Error("Entity not found");
+          throw new SublayError("Entity not found");
         }
 
         setEntity(fetchedEntity);
@@ -1157,7 +1153,7 @@ export function useCommentSectionDataInternal(
         failedEntityKeyRef.current = key;
         setEntityFetchFailure({
           key,
-          error: err instanceof Error ? err : new Error(String(err)),
+          error: toSublayError(err),
         });
         handleError(err, "Fetching entity failed");
       } finally {
@@ -1277,7 +1273,7 @@ export function useCommentSectionDataInternal(
     repliedToComment,
     setRepliedToComment,
     showReplyBanner,
-    setShowReplyBanner: setShowReplyBannerHandler,
+    setShowReplyBanner,
 
     handleShallowReply,
     handleDeepReply,

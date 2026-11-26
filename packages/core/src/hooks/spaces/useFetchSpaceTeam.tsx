@@ -7,6 +7,7 @@ import {
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchSpaceTeamProps extends SpaceReputationContextParams {
   spaceId: string;
@@ -20,11 +21,11 @@ function useFetchSpaceTeam(): (props: FetchSpaceTeamProps) => Promise<SpaceMembe
   const fetchSpaceTeam = useCallback(
     async ({ spaceId, spaceReputation }: FetchSpaceTeamProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId) {
-        throw new Error("Please pass a spaceId");
+        throw new SublayError("Please pass a spaceId");
       }
 
       const url = `/${projectId}/spaces/${spaceId}/team`;

@@ -34,7 +34,7 @@ describe("usePublishDraft", () => {
 
     await expect(
       result.current({ entityId: "entity-1" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when no entity ID is passed", async () => {

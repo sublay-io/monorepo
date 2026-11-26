@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface RemoveConnectionProps {
   connectionId: string;
@@ -16,15 +17,15 @@ function useRemoveConnection(): (props: RemoveConnectionProps) => Promise<void> 
     async (props: RemoveConnectionProps): Promise<void> => {
       const { connectionId } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!user) {
-        throw new Error("No user is logged in");
+        throw new SublayError("No user is logged in");
       }
 
       if (!connectionId) {
-        throw new Error("No connection ID was provided");
+        throw new SublayError("No connection ID was provided");
       }
 
       // Withdraws a pending request or removes an accepted connection. The

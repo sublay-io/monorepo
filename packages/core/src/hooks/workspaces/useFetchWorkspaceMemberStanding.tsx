@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { WorkspaceMemberStanding } from "../../interfaces/models/Workspace";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchWorkspaceMemberStandingProps {
   workspaceId: string;
@@ -31,13 +32,13 @@ function useFetchWorkspaceMemberStanding(): (
   const fetchWorkspaceMemberStanding = useCallback(
     async ({ workspaceId, targetUserId }: FetchWorkspaceMemberStandingProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!workspaceId) {
-        throw new Error("Please pass a workspaceId");
+        throw new SublayError("Please pass a workspaceId");
       }
       if (!targetUserId) {
-        throw new Error("Please pass a targetUserId");
+        throw new SublayError("Please pass a targetUserId");
       }
 
       const response = await axios.get<WorkspaceMemberStanding>(

@@ -33,7 +33,7 @@ describe("useFetchConversation", () => {
 
     await expect(
       result.current({ conversationId: "conversation-1" }),
-    ).rejects.toMatchObject({ response: { status: 404 } });
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it("throws before making a request when no conversation ID is passed", async () => {

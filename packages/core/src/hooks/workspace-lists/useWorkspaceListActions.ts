@@ -4,7 +4,6 @@ import {
   setWorkspaceListLoading,
   setWorkspaceListWorkspaces,
   setWorkspaceListHasMore,
-  setWorkspaceListError,
   addWorkspace,
   removeWorkspace,
 } from "../../store/slices/workspaceListsSlice";
@@ -22,6 +21,7 @@ import type {
   WorkspaceListRelation,
   WorkspaceListSortDir,
 } from "../../interfaces/models/Workspace";
+import { SublayError, rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 
 export interface FetchWorkspacesOptions {
   page: number;
@@ -55,7 +55,18 @@ export interface DeleteWorkspaceOptions {
   workspaceId: string;
 }
 
-export function useWorkspaceListActions() {
+export interface UseWorkspaceListActionsValues {
+  fetchWorkspaces: (props: { listId: string } & FetchWorkspacesOptions) => Promise<Workspace[] | null>;
+  createWorkspace: (props: { listId: string } & CreateWorkspaceOptions) => Promise<Workspace | undefined>;
+  deleteWorkspace: (props: { listId: string } & DeleteWorkspaceOptions) => Promise<void>;
+}
+
+/**
+ * The implementation: `fetchWorkspaces` also takes the list hooks' internal
+ * `isCurrent` guard as a second argument (a load superseded meanwhile writes
+ * nothing). Internal — not exported from the package.
+ */
+export function useWorkspaceListActionsWithGuard() {
   const dispatch = useSublayDispatch();
   const { projectId } = useProject();
 
@@ -66,12 +77,11 @@ export function useWorkspaceListActions() {
 
   const fetchWorkspaces = useCallback(
     async (
-      listId: string,
-      options: FetchWorkspacesOptions,
+      { listId, ...options }: { listId: string } & FetchWorkspacesOptions,
       isCurrent: () => boolean = () => true
     ): Promise<Workspace[] | null> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       dispatch(setWorkspaceListLoading({ listId, loading: true }));
@@ -85,7 +95,7 @@ export function useWorkspaceListActions() {
           parentWorkspaceId: options.parentWorkspaceId,
           sortDir: options.sortDir,
           include: options.include,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // A newer load (or a reset) replaced this one: it writes nothing.
         if (!isCurrent()) return null;
@@ -116,10 +126,7 @@ export function useWorkspaceListActions() {
           err
         );
         handleErrorUtil(err, "Failed to fetch workspaces:");
-        dispatch(
-          setWorkspaceListError({ listId, error: "Failed to fetch workspaces" })
-        );
-        throw err;
+        throw toSublayError(err);
       } finally {
         if (isCurrent()) dispatch(setWorkspaceListLoading({ listId, loading: false }));
       }
@@ -134,16 +141,16 @@ export function useWorkspaceListActions() {
    * from the create is added without them.
    */
   const createWorkspace = useCallback(
-    async (
-      listId: string,
-      options: CreateWorkspaceOptions
-    ): Promise<Workspace | undefined> => {
+    async ({
+      listId,
+      ...options
+    }: { listId: string } & CreateWorkspaceOptions): Promise<Workspace | undefined> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       if (!options.name) {
-        throw new Error("Workspace name is required");
+        throw new SublayError("Workspace name is required");
       }
 
       try {
@@ -152,7 +159,7 @@ export function useWorkspaceListActions() {
         const created = await createWorkspaceMutation({
           projectId,
           ...createData,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         let workspace: Workspace = created;
         try {
@@ -160,7 +167,7 @@ export function useWorkspaceListActions() {
             projectId,
             workspaceId: created.id,
             include,
-          }).unwrap();
+          }).unwrap().catch(rethrowAsSublayError);
         } catch (readErr) {
           console.error(
             `[WorkspaceListActions] Created workspace ${created.id} but could not read it back for listId: ${listId}`,
@@ -177,27 +184,27 @@ export function useWorkspaceListActions() {
           err
         );
         handleErrorUtil(err, "Failed to create workspace:");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, createWorkspaceMutation, triggerFetchWorkspace]
   );
 
   const deleteWorkspace = useCallback(
-    async (listId: string, options: DeleteWorkspaceOptions): Promise<void> => {
+    async ({ listId, ...options }: { listId: string } & DeleteWorkspaceOptions): Promise<void> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       if (!options.workspaceId) {
-        throw new Error("Workspace ID is required");
+        throw new SublayError("Workspace ID is required");
       }
 
       try {
         await deleteWorkspaceMutation({
           projectId,
           workspaceId: options.workspaceId,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         dispatch(removeWorkspace({ listId, workspaceId: options.workspaceId }));
       } catch (err) {
@@ -206,7 +213,7 @@ export function useWorkspaceListActions() {
           err
         );
         handleErrorUtil(err, "Failed to delete workspace:");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, deleteWorkspaceMutation]
@@ -217,6 +224,11 @@ export function useWorkspaceListActions() {
     createWorkspace,
     deleteWorkspace,
   };
+}
+
+/** The list's low-level actions. Each takes one object: `{ listId, ... }`. */
+export function useWorkspaceListActions(): UseWorkspaceListActionsValues {
+  return useWorkspaceListActionsWithGuard();
 }
 
 export default useWorkspaceListActions;

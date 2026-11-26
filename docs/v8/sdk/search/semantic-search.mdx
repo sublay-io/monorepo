@@ -84,8 +84,8 @@ function ContentSearch() {
   `true` while a search is in progress.
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  Error message if the search failed.
+<ResponseField name="error" type="SublayError | null">
+  The error if the search failed. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="search" type="(props) => Promise<void>">
@@ -141,7 +141,7 @@ function UserSearch() {
 </ResponseField>
 
 <ResponseField name="loading" type="boolean" />
-<ResponseField name="error" type="string | null" />
+<ResponseField name="error" type="SublayError | null" />
 <ResponseField name="search" type="(props) => Promise<void>" />
 <ResponseField name="reset" type="() => void" />
 
@@ -190,6 +190,6 @@ function SpaceSearch() {
 </ResponseField>
 
 <ResponseField name="loading" type="boolean" />
-<ResponseField name="error" type="string | null" />
+<ResponseField name="error" type="SublayError | null" />
 <ResponseField name="search" type="(props) => Promise<void>" />
 <ResponseField name="reset" type="() => void" />

@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { RemoveHostResponse } from "../../interfaces/models/Event";
+import { SublayError } from "../../errors/SublayError";
 
 export interface RemoveHostProps {
   eventId: string;
@@ -31,7 +32,7 @@ function useRemoveHost(): (
   const removeHost = useCallback(
     async ({ eventId, userId }: RemoveHostProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const response = await axios.delete(

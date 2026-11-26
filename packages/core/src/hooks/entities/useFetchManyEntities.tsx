@@ -22,6 +22,7 @@ import { NsfwFilter } from "../../interfaces/NsfwFilter";
 import { BlockedFilter } from "../../interfaces/BlockedFilter";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError } from "../../errors/SublayError";
 
 // Helper to serialize objects into bracket notation for query params
 const serializeObject = (obj: any, prefix: string): Record<string, any> => {
@@ -94,7 +95,7 @@ function useFetchManyEntities(): (params?: FetchManyEntitiesParams) => Promise<P
   const fetchManyEntities = useCallback(
     async (params?: FetchManyEntitiesParams) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const queryParams: Record<string, any> = {};

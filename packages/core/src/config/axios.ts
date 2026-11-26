@@ -1,4 +1,5 @@
-import axios from "axios";
+import axios, { type AxiosInstance } from "axios";
+import { toSublayError } from "../errors/SublayError";
 
 export const BASE_URL = "https://api.sublay.io/v8";
 
@@ -29,10 +30,54 @@ export const BASE_URL = "https://api.sublay.io/v8";
  */
 export const REQUEST_TIMEOUT_MS = 30_000;
 
-export default axios.create({
-  baseURL: BASE_URL,
-  timeout: REQUEST_TIMEOUT_MS,
-});
+// The request methods of an axios instance. `axiosPrivate(config)` (the
+// instance called as a function) is left as it is: only the refresh-and-retry
+// interceptor calls it, and its failure reaches the caller through the method
+// that made the original request.
+const REQUEST_METHODS = [
+  "request",
+  "get",
+  "delete",
+  "head",
+  "options",
+  "post",
+  "put",
+  "patch",
+  "postForm",
+  "putForm",
+  "patchForm",
+] as const;
+
+/**
+ * Makes every request method of `instance` reject with a `SublayError`
+ * (`toSublayError`, with the axios error as `cause`) instead of the raw axios
+ * error.
+ *
+ * At the methods, not in an interceptor, deliberately: the response
+ * interceptors (`useAxiosPrivate`'s token refresh and suspension check) have to
+ * see the raw response, and one is registered per mounted hook, so no
+ * interceptor is reliably the last one to run. The methods are the edge every
+ * hook's request leaves through, after all of them.
+ */
+function rejectWithSublayErrors(instance: AxiosInstance): AxiosInstance {
+  const methods = instance as unknown as Record<string, unknown>;
+  for (const name of REQUEST_METHODS) {
+    const original = methods[name];
+    if (typeof original !== "function") continue;
+    methods[name] = (...args: unknown[]) =>
+      (original as (...a: unknown[]) => Promise<unknown>)
+        .apply(instance, args)
+        .catch((err: unknown) => Promise.reject(toSublayError(err)));
+  }
+  return instance;
+}
+
+export default rejectWithSublayErrors(
+  axios.create({
+    baseURL: BASE_URL,
+    timeout: REQUEST_TIMEOUT_MS,
+  })
+);
 
 /**
  * The authenticated instance — and DELIBERATELY WITHOUT `REQUEST_TIMEOUT_MS`.
@@ -56,7 +101,9 @@ export default axios.create({
  * `timeout` (or an `AbortSignal`) at the call site, where the caller knows
  * whether it is sending a JSON body or a 40 MB video.
  */
-export const axiosPrivate = axios.create({
-  baseURL: BASE_URL,
-  headers: { "Content-Type": "application/json" },
-});
+export const axiosPrivate = rejectWithSublayErrors(
+  axios.create({
+    baseURL: BASE_URL,
+    headers: { "Content-Type": "application/json" },
+  })
+);

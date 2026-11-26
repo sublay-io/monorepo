@@ -28,7 +28,7 @@ import {
 } from "../../store/slices/entityListsSlice";
 
 import useInfusedData from "./useInfusedData";
-import useEntityListActions from "./useEntityListActions";
+import { useEntityListActionsWithGuard } from "./useEntityListActions";
 
 import { Entity } from "../../interfaces/models/Entity";
 import { EntityListSortByOptions, SortByReaction, SortDirection, SortType } from "../../interfaces/EntityListSortByOptions";
@@ -41,6 +41,10 @@ import { AttachmentsFilters } from "../../interfaces/entity-filters/AttachmentsF
 import { KeywordsFilters } from "../../interfaces/entity-filters/KeywordsFilters";
 
 import { handleError } from "../../utils/handleError";
+import type { SublayError } from "../../errors/SublayError";
+import { warnStrayFetchKeys } from "../../utils/warnStrayFetchKeys";
+
+const FETCH_ENTITIES_KEYS = ["filters", "sort", "config", "options"] as const;
 
 /** A list filter value as an entity field: `"none"` and no filter both mean no value. */
 const noneToUnset = (value: string | null | undefined): string | undefined =>
@@ -49,6 +53,18 @@ const noneToUnset = (value: string | null | undefined): string | undefined =>
 export interface UseEntityListProps {
   listId: string;
   infuseData?: (foreignId: string) => Promise<Record<string, any> | null>;
+}
+
+/**
+ * What `fetchEntities` takes. `filters` merge into the list's current
+ * filters; `sort` and `config` are the list's settings; `options` controls
+ * this fetch.
+ */
+export interface EntityListFetchEntitiesProps {
+  filters?: Partial<EntityListFilters>;
+  sort?: Partial<EntityListSort>;
+  config?: EntityListConfig;
+  options?: EntityListFetchOptions;
 }
 
 export interface EntityListCreateEntityProps {
@@ -79,7 +95,7 @@ export interface UseEntityListValues {
    * The last load failure, shared by every hook on this `listId`. Cleared
    * when the next load starts; `loadMore()` retries it.
    */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
 
@@ -105,12 +121,7 @@ export interface UseEntityListValues {
   locationFilters: LocationFilters | null;
   metadataFilters: MetadataFilters | null;
 
-  fetchEntities: (
-    filters: Partial<EntityListFilters>,
-    sort?: Partial<EntityListSort>,
-    config?: EntityListConfig,
-    options?: EntityListFetchOptions
-  ) => void;
+  fetchEntities: (props?: EntityListFetchEntitiesProps) => void;
 
   /**
    * Load the next page, or retry the load that failed (a failed first page
@@ -159,7 +170,7 @@ function useEntityList({
   );
 
   // Get entity actions hook
-  const entityActions = useEntityListActions();
+  const entityActions = useEntityListActionsWithGuard();
 
   // Infused data
   const infusedEntities = useInfusedData({ entities, infuseData });
@@ -190,8 +201,8 @@ function useEntityList({
           const page = first ? 1 : list.page + 1;
           dispatch(setEntityListLoading({ listId, loading: true }));
           const data = await entityActions.fetchEntities(
-            listId,
             {
+              listId,
               page,
               sortBy: list.sortBy,
               sortByReaction: list.sortByReaction,
@@ -229,12 +240,15 @@ function useEntityList({
 
   // Fetch entities function (always triggers a fetch)
   const handleFetchEntities = useCallback(
-    (
-      newFilters: Partial<EntityListFilters>,
-      newSort?: Partial<EntityListSort>,
-      newConfig?: EntityListConfig,
-      options?: EntityListFetchOptions
-    ) => {
+    // `extra`: only so a call in the old positional form can be warned about.
+    (props: EntityListFetchEntitiesProps = {}, ...extra: unknown[]) => {
+      warnStrayFetchKeys("fetchEntities", props, FETCH_ENTITIES_KEYS, 1 + extra.length);
+      const {
+        filters: newFilters = {},
+        sort: newSort,
+        config: newConfig,
+        options,
+      } = props;
       // Apply config defaults if not provided
       // Each call sets the whole config: a field left out goes back to its
       // default rather than being carried over from the last fetch (loadMore
@@ -329,7 +343,8 @@ function useEntityList({
       ...restOfProps
     }: EntityListCreateEntityProps) => {
       try {
-        const newEntity = await entityActions.createEntity(listId, {
+        const newEntity = await entityActions.createEntity({
+          listId,
           ...restOfProps,
           // A new entity takes the list's source and space. A list filtered
           // to `"none"` (has none) creates it with no source / no space.
@@ -351,7 +366,7 @@ function useEntityList({
   const deleteEntity = useCallback(
     async ({ entityId }: EntityListDeleteEntityProps) => {
       try {
-        await entityActions.deleteEntity(listId, { entityId });
+        await entityActions.deleteEntity({ listId, entityId });
       } catch (err) {
         // Error handling is now done in entityActions.deleteEntity
         handleError(err, "Failed to delete entity");

@@ -6,6 +6,7 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { MySpacesSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import { buildSearchParams } from "../../utils/searchParams";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchMySpacesProps {
   page?: number;
@@ -41,7 +42,7 @@ function useFetchMySpaces(): (params?: FetchMySpacesProps) => Promise<MySpacesRe
   const fetchMySpaces = useCallback(
     async (params: FetchMySpacesProps = {}) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const { include, role, query, searchFields, parentSpaceId, ...rest } = params;

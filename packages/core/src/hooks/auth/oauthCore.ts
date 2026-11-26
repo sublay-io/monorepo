@@ -2,6 +2,7 @@ import type { AppDispatch } from "../../store/types";
 import { setTokens, setInitialized } from "../../store/slices/authSlice";
 import { completeOAuthSignInThunk } from "../../store/slices/authThunks";
 import { getAuthorizedTokenForAccount } from "../../config/authGate";
+import { SublayError, toSublayError, sublayErrorFromResponse } from "../../errors/SublayError";
 
 /**
  * Platform-agnostic OAuth helpers shared by the web (`@sublay/react-js`) and
@@ -74,7 +75,7 @@ export async function requestOAuthAuthorizationUrl({
     // anything could wait.
     const token = await getAuthorizedTokenForAccount(accessToken ?? null);
     if (!token) {
-      throw new Error("Must be authenticated to link an OAuth provider.");
+      throw new SublayError("Must be authenticated to link an OAuth provider.");
     }
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -83,11 +84,14 @@ export async function requestOAuthAuthorizationUrl({
     method: "POST",
     headers,
     body: JSON.stringify({ provider, redirectAfterAuth }),
-  });
+  }).catch((err: unknown) => Promise.reject(toSublayError(err)));
 
   if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.error || "Failed to initiate OAuth");
+    throw sublayErrorFromResponse({
+      status: response.status,
+      body: await response.json().catch(() => null),
+      fallbackMessage: "Failed to initiate OAuth",
+    });
   }
 
   const data = await response.json();
@@ -132,8 +136,12 @@ export function parseOAuthRedirectUrl(url: string): OAuthRedirectParams {
 export interface HandleOAuthRedirectResult {
   /** True when tokens were found and dispatched. */
   success: boolean;
-  /** A human-readable error message when the redirect carried an `?error=`. */
-  error: string | null;
+  /**
+   * The failure the redirect carried in its query (`?error=...&error_description=...`):
+   * `code` is the `error` value (e.g. `"access_denied"`), `message` the
+   * description (or the code when there is none). `null` otherwise.
+   */
+  error: SublayError | null;
 }
 
 /**
@@ -182,7 +190,12 @@ export function handleOAuthRedirect({
 
   // Errors arrive in the query string. Surface them without dispatching.
   if (parsed.error) {
-    return { success: false, error: parsed.errorDescription || parsed.error };
+    return {
+      success: false,
+      error: new SublayError(parsed.errorDescription || parsed.error, {
+        code: parsed.error,
+      }),
+    };
   }
 
   // Tokens arrive in the fragment. Only dispatch when both are present.

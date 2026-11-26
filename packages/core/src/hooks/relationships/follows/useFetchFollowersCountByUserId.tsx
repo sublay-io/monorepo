@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../../projects/useProject";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface FetchFollowersCountByUserIdProps {
   userId: string;
@@ -13,11 +14,11 @@ function useFetchFollowersCountByUserId(): (props: FetchFollowersCountByUserIdPr
   const fetchFollowersCountByUserId = useCallback(
     async ({ userId }: FetchFollowersCountByUserIdProps) => {
       if (!userId) {
-        throw new Error("No userId provided.");
+        throw new SublayError("No userId provided.");
       }
 
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const response = await axios.get<{ count: number }>(

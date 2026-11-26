@@ -10,6 +10,7 @@ import {
   type FileListUpload,
   type ImageListUpload,
 } from "../../utils/uploads";
+import { SublayError } from "../../errors/SublayError";
 
 export interface CreateEntityProps {
   foreignId?: string;
@@ -68,7 +69,7 @@ function useCreateEntity(): (props: CreateEntityProps) => Promise<Entity> {
       } = props;
 
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const hasImages = hasListFiles(images);

@@ -51,7 +51,7 @@ describe("useWorkspaceList", () => {
     expect(result.current.sortDir).toBe("desc");
     expect(result.current.include).toBeNull();
 
-    act(() => result.current.fetchWorkspaces({}));
+    act(() => result.current.fetchWorkspaces());
 
     await waitFor(() => expect(result.current.workspaces.map((w) => w.id)).toEqual(["w1"]));
     expect(result.current.workspaces[0].reasons).toEqual([{ type: "member" }]);
@@ -72,7 +72,7 @@ describe("useWorkspaceList", () => {
       projectId: "test-project",
     });
 
-    act(() => result.current.fetchWorkspaces({ relation: "direct" }));
+    act(() => result.current.fetchWorkspaces({ filters: { relation: "direct" } }));
     expect(fetchHandle.calls()).toHaveLength(0);
 
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1), {
@@ -87,9 +87,9 @@ describe("useWorkspaceList", () => {
       projectId: "test-project",
     });
 
-    act(() => result.current.fetchWorkspaces({ sortDir: "asc" }));
+    act(() => result.current.fetchWorkspaces({ filters: { sortDir: "asc" } }));
     await act(async () => {
-      result.current.fetchWorkspaces({ relation: "direct" }, undefined, { fetchImmediately: true });
+      result.current.fetchWorkspaces({ filters: { relation: "direct" }, options: { fetchImmediately: true } });
       await Promise.resolve();
     });
     expect(fetchHandle.calls()).toHaveLength(1);
@@ -105,11 +105,7 @@ describe("useWorkspaceList", () => {
     });
 
     act(() =>
-      result.current.fetchWorkspaces(
-        { relation: "direct", parentWorkspaceId: "any", sortDir: "asc", include: ["memberCount"] },
-        { limit: 50 },
-        { fetchImmediately: true },
-      ),
+      result.current.fetchWorkspaces({ filters: { relation: "direct", parentWorkspaceId: "any", sortDir: "asc", include: ["memberCount"] }, config: { limit: 50 }, options: { fetchImmediately: true } }),
     );
     await waitFor(() => expect(result.current.workspaces).toHaveLength(1));
     expect(result.current.include).toEqual(["memberCount"]);
@@ -140,18 +136,17 @@ describe("useWorkspaceList", () => {
     });
 
     act(() =>
-      result.current.fetchWorkspaces(
-        { relation: "direct", parentWorkspaceId: "p1", sortDir: "asc", include: "memberCount" },
-        undefined,
-        { fetchImmediately: true },
-      ),
+      result.current.fetchWorkspaces({ filters: { relation: "direct", parentWorkspaceId: "p1", sortDir: "asc", include: "memberCount" }, options: { fetchImmediately: true } }),
     );
     await waitFor(() => expect(result.current.parentWorkspaceId).toBe("p1"));
 
     act(() =>
-      result.current.fetchWorkspaces({ parentWorkspaceId: null, sortDir: null }, undefined, {
+      result.current.fetchWorkspaces({
+  filters: { parentWorkspaceId: null, sortDir: null },
+  options: {
         fetchImmediately: true,
-      }),
+      },
+}),
     );
     await waitFor(() => expect(listUrls()).toHaveLength(2));
     expect(result.current.parentWorkspaceId).toBe("any");
@@ -164,7 +159,7 @@ describe("useWorkspaceList", () => {
     expect(second.get("include")).toBe("memberCount");
 
     act(() =>
-      result.current.fetchWorkspaces({}, undefined, { fetchImmediately: true, resetUnspecified: true }),
+      result.current.fetchWorkspaces({ options: { fetchImmediately: true, resetUnspecified: true } }),
     );
     await waitFor(() => expect(listUrls()).toHaveLength(3));
     expect(result.current.relation).toBe("reachable");
@@ -179,12 +174,12 @@ describe("useWorkspaceList", () => {
     const { result } = renderHookWithStore(() => useWorkspaceList({ listId: "ws" }), {
       projectId: "test-project",
     });
-    act(() => result.current.fetchWorkspaces({}));
+    act(() => result.current.fetchWorkspaces());
     await waitFor(() => expect(result.current.workspaces).toHaveLength(1));
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "w2" }], false));
     act(() =>
-      result.current.fetchWorkspaces({ relation: "direct" }, undefined, { clearImmediately: true }),
+      result.current.fetchWorkspaces({ filters: { relation: "direct" }, options: { clearImmediately: true } }),
     );
     expect(result.current.workspaces).toEqual([]);
 
@@ -200,7 +195,7 @@ describe("useWorkspaceList", () => {
       { projectId: "test-project" },
     );
 
-    act(() => result.current.a.fetchWorkspaces({}));
+    act(() => result.current.a.fetchWorkspaces());
     await waitFor(() => expect(result.current.b.workspaces.map((w) => w.id)).toEqual(["w1"]));
   });
 
@@ -225,7 +220,7 @@ describe("useWorkspaceList", () => {
       const { result } = renderHookWithStore(() => useWorkspaceList({ listId: "ws" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchWorkspaces({}));
+      act(() => result.current.fetchWorkspaces());
       await waitFor(() => expect(result.current.workspaces).toHaveLength(1));
 
       await act(async () => {
@@ -240,7 +235,7 @@ describe("useWorkspaceList", () => {
         projectId: "test-project",
       });
       act(() =>
-        result.current.fetchWorkspaces({ relation: "direct" }, { limit: 5 }, { fetchImmediately: true }),
+        result.current.fetchWorkspaces({ filters: { relation: "direct" }, config: { limit: 5 }, options: { fetchImmediately: true } }),
       );
       await waitFor(() => expect(result.current.workspaces).toHaveLength(1));
 
@@ -262,7 +257,7 @@ describe("useWorkspaceList", () => {
         projectId: "test-project",
       });
       act(() =>
-        result.current.fetchWorkspaces({ include: "memberCount" }, undefined, { fetchImmediately: true }),
+        result.current.fetchWorkspaces({ filters: { include: "memberCount" }, options: { fetchImmediately: true } }),
       );
       await waitFor(() => expect(result.current.workspaces).toHaveLength(1));
 
@@ -288,7 +283,7 @@ describe("useWorkspaceList", () => {
       const { result } = renderHookWithStore(() => useWorkspaceList({ listId: "ws" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchWorkspaces({ sortDir: "asc" }, undefined, { fetchImmediately: true }));
+      act(() => result.current.fetchWorkspaces({ filters: { sortDir: "asc" }, options: { fetchImmediately: true } }));
       await waitFor(() => expect(result.current.workspaces).toHaveLength(1));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ id: "new", parentWorkspaceId: null }, 201));
@@ -305,7 +300,7 @@ describe("useWorkspaceList", () => {
       const { result } = renderHookWithStore(() => useWorkspaceList({ listId: "ws" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchWorkspaces({}));
+      act(() => result.current.fetchWorkspaces());
       await waitFor(() => expect(result.current.hasMore).toBe(false));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
@@ -322,7 +317,7 @@ describe("useWorkspaceList", () => {
       const { result } = renderHookWithStore(() => useWorkspaceList({ listId: "ws" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchWorkspaces({}));
+      act(() => result.current.fetchWorkspaces());
       await waitFor(() => expect(result.current.workspaces).toHaveLength(2));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
@@ -346,10 +341,10 @@ describeStoreListContract({
       hasMore: list.hasMore,
       loadMore: list.loadMore,
       refetch: list.refetch,
-      start: () => list.fetchWorkspaces({}),
-      changeFilterDebounced: () => list.fetchWorkspaces({ relation: "direct" }),
+      start: () => list.fetchWorkspaces(),
+      changeFilterDebounced: () => list.fetchWorkspaces({ filters: { relation: "direct" } }),
       changeFilterNow: () =>
-        list.fetchWorkspaces({ relation: "direct" }, undefined, { fetchImmediately: true }),
+        list.fetchWorkspaces({ filters: { relation: "direct" }, options: { fetchImmediately: true } }),
     };
   },
   fetchHandle: () => fetchHandle,

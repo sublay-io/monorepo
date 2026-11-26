@@ -43,7 +43,7 @@ describe("useFetchEntityReactions", () => {
 
     await expect(
       result.current({ entityId: "entity-1", page: 1 }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when limit is 0", async () => {

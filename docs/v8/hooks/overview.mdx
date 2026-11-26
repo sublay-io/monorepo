@@ -9,12 +9,82 @@ Hooks resolve to the plain value: a count is a `number`, an unpaged list an arra
 
 For higher-level integration guidance, see the [SDK Reference](/v8/sdk/getting-started).
 
+## Hook conventions
+
+Every hook follows the same rules for its flags, errors and functions.
+
+- **Flags.** A fact about the data starts with `is`, `has` or `can` (`isMember`, `isFollowing`, `hasMore`, `canPost`). Something in progress right now is the bare "-ing" word: `loading`, `uploading`, `updating`, `switching`, `removing`, `streaming`.
+- **Errors.** Every `error` a hook returns is a [`SublayError`](#sublayerror) or `null`, and every function a hook returns rejects with a `SublayError` when it fails. One field is not an `error`: the comment section's [`createError`](/v8/sdk/comments/comment-section) is a plain `CommentCreateError` record (`code`, `message`, `status`, `parentCommentId`), because it describes a failed comment create together with the reply it was for, and is what `commentCreateFailedCallback` receives.
+- **Action hooks** return one function that takes one object: `const createEntity = useCreateEntity(); createEntity({ title })`. A hook with live state of its own returns an object with the function, its "-ing" flag and that state instead: `const { uploadImage, uploading, progress } = useUploadImage()`, and the same for [`useUploadFile`](/v8/hooks/storage/use-upload-file).
+- **Functions on a data hook** take one object too: `updateRow({ rowId, data })`, and the list fetches `fetchEntities({ filters, sort, config, options })`, `fetchSpaces({ filters, config, options })` and `fetchWorkspaces({ filters, config, options })`, whose groups stay apart because they behave differently (`filters` merge into the current ones, `sort` and `config` are the list's settings, `options` control the one fetch). In a development build, a key other than those groups logs a warning (it would otherwise be ignored).
+- **Setters** on a data hook take their one value directly, like React's `setState`: `setSortBy("top")`, `setRsvp("going")`, `setShowReplyBanner(true)`.
+
+### SublayError
+
+`SublayError` extends `Error` and is exported from `@sublay/core` (and so from `@sublay/react-js`, `@sublay/react-native` and `@sublay/expo`). It is what a hook's `error` field holds and what a hook's functions reject with: a request the server refused, a request that never got an answer, and a check the SDK makes before sending (for example a call made with no project, which has no `code`).
+
+<ResponseField name="message" type="string">
+  When the server answered, the `error` text of its response. Otherwise what went wrong on the way: no network, a timeout, or a failure inside the SDK.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  `"SublayError"`, or the subclass's name (`"SuspendedError"`, `"AccountTransitionError"`). An aborted request keeps its abort name: `"CanceledError"` or `"AbortError"`.
+</ResponseField>
+
+<ResponseField name="code" type="string | undefined">
+  The server's machine-readable error code, such as `"space/not-found"` or `"user/suspended"`. Present only when the server answered with one; there is no `code` for a network error or a failure inside the SDK.
+</ResponseField>
+
+<ResponseField name="status" type="number | undefined">
+  The HTTP status of the response, when the server answered.
+</ResponseField>
+
+<ResponseField name="param" type="string | undefined">
+  The request field the error is about, when the server names one (for example `"username"`).
+</ResponseField>
+
+<ResponseField name="body" type="Record<string, unknown> | undefined">
+  The server's JSON error body exactly as sent: `error`, `code`, `param` and any extra fields a response carries (each hook's page lists them), such as `ownedWorkspaces` and `ownedCount`, `missingTables`, `verificationId`, or a 500's `details`. Present only when the server answered with a JSON object; a non-JSON answer (an HTML error page) and a failure with no answer have no `body`.
+</ResponseField>
+
+<ResponseField name="cause" type="unknown">
+  The original thrown value, such as the HTTP client's error.
+</ResponseField>
+
+Branch on `code`, which stays the same when the server rewords a message:
+
+```tsx
+const { error } = useSpace();
+
+if (error?.code === "space/banned") return <p>You can't join this space.</p>;
+if (error) return <p>{error.message}</p>;
+```
+
+The same works for a function's rejection:
+
+```tsx
+import { isSublayError, useJoinSpace } from "@sublay/react-js";
+
+const joinSpace = useJoinSpace();
+
+try {
+  await joinSpace({ spaceId });
+} catch (err) {
+  if (isSublayError(err) && err.code === "space/banned") showBanned();
+  else throw err;
+}
+```
+
+Prefer `isSublayError(err)` to `err instanceof SublayError`: it also recognises a `SublayError` made by another installed copy of the SDK, which `instanceof` misses.
+
+`toSublayError(err)` turns any other caught value into a `SublayError` the same way (a `SublayError` is returned unchanged), for code that mixes the SDK's calls with your own. [`SuspendedError`](/v8/sdk/moderation/suspensions) and [`AccountTransitionError`](/v8/sdk/authentication/multi-account#telling-a-dead-account-from-a-dead-network) are `SublayError`s with fields of their own.
+
 ## List hooks
 
 Every hook that returns a paged list with paging controls (`useEntityList`, `useSpaceList`, `useWorkspaceList`, `useAppNotifications`, `useConversations`, `useLiveChatMessages`, `useMessageThread`, `useEntityComments`, `useCommentSection`, `useReplies` and the `use…Wrapper` hooks) returns the same controls. `useConversationData` and the `ConversationProvider` context (`useConversationContext`) return them for the conversation's messages as `messagesLoading`, `messagesError`, `hasMore`, `loadMore` and `refetchMessages`, beside the members:
 
 - **`loading: boolean`** — `true` while a page is loading.
-- **`error: Error | null`** — the last load failure. Cleared when the next load starts.
+- **`error: SublayError | null`** — the last load failure, as a [`SublayError`](#sublayerror). Cleared when the next load starts.
 - **`hasMore: boolean`** — whether `loadMore()` has anything to fetch: a next page, or a load that failed. After a failure it is `true`.
 - **`loadMore: () => Promise<void>`** — loads the next page in the list's own reading order, or retries the load that failed (a failed first page is retried as the first page). Does nothing while a load is running or when there is nothing more. Never rejects: failures land in `error`.
 - **`refetch: () => Promise<void>`** — reloads from the first page with the current filters and sort. What is loaded stays until the new first page replaces it (each hook's page says what it keeps beyond that page, e.g. a comment section keeps the viewer's new comments and loaded replies). Never rejects.

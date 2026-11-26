@@ -183,12 +183,28 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
     // A target without an author, with the banner up.
     act(() => {
       result.current.setRepliedToComment({ id: A } as Comment);
-      result.current.setShowReplyBanner({ newState: true });
+      result.current.setShowReplyBanner(true);
     });
 
     await result.current.createComment({ content: "hello" });
     await waitFor(() => expect(result.current.submittingComment).toBe(false));
     await waitFor(() => expect(result.current.repliedToComment?.id).toBe(A));
+    expect(result.current.showReplyBanner).toBe(false);
+  });
+
+  it("setShowReplyBanner takes the value directly", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    vi.spyOn(axiosPrivate, "get").mockImplementation(() => ok(page([])));
+    const { result } = renderHookWithAxios(() => useCommentSectionData({ entity }), {
+      user: makeAuthUser({ id: "user-1", username: "u" }),
+    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.showReplyBanner).toBe(false);
+
+    act(() => result.current.setShowReplyBanner(true));
+    expect(result.current.showReplyBanner).toBe(true);
+
+    act(() => result.current.setShowReplyBanner(false));
     expect(result.current.showReplyBanner).toBe(false);
   });
 

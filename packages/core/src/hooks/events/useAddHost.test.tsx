@@ -34,7 +34,7 @@ describe("useAddHost", () => {
 
     await expect(
       result.current({ eventId: "event-1", userId: "user-2" }),
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    ).rejects.toMatchObject({ status: 403 });
   });
 
   it("throws before making a request when there is no project", async () => {

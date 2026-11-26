@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { SpaceMember } from "../../interfaces/models/SpaceMember";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface ApproveMemberProps {
   spaceId: string;
@@ -16,11 +17,11 @@ function useApproveMember(): (props: ApproveMemberProps) => Promise<SpaceMember>
   const approveMember = useCallback(
     async ({ spaceId, userId }: ApproveMemberProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId || !userId) {
-        throw new Error("spaceId and userId are required");
+        throw new SublayError("spaceId and userId are required");
       }
 
       const response = await axios.post(

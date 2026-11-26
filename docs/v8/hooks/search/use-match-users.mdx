@@ -86,8 +86,8 @@ Call `match` with:
   `true` while a match is in progress.
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  Error message if the last match failed.
+<ResponseField name="error" type="SublayError | null">
+  The error if the last match failed. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="match" type="(props) => Promise<void>">

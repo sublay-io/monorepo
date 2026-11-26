@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { Workspace } from "../../interfaces/models/Workspace";
+import { SublayError } from "../../errors/SublayError";
 
 export interface CreateWorkspaceProps {
   name: string;
@@ -23,10 +24,10 @@ function useCreateWorkspace(): (
   const createWorkspace = useCallback(
     async (props: CreateWorkspaceProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!props.name) {
-        throw new Error("Workspace name is required");
+        throw new SublayError("Workspace name is required");
       }
 
       const response = await axios.post<Workspace>(

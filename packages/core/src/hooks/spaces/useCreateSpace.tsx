@@ -12,6 +12,7 @@ import {
   withoutNulls,
   type ImageSlotUpload,
 } from "../../utils/uploads";
+import { SublayError } from "../../errors/SublayError";
 
 export interface CreateSpaceProps {
   // `null` is the same as leaving the field out.
@@ -40,7 +41,7 @@ function useCreateSpace(): (
   const createSpace = useCallback(
     async (props: CreateSpaceProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       // Build FormData if files are present, otherwise use JSON

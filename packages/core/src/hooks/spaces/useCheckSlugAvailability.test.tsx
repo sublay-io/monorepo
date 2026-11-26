@@ -37,7 +37,7 @@ describe("useCheckSlugAvailability", () => {
 
     await expect(
       result.current({ slug: "design" }),
-    ).rejects.toMatchObject({ response: { status: 500 } });
+    ).rejects.toMatchObject({ status: 500 });
   });
 
   it("throws before making a request when no slug is passed", async () => {

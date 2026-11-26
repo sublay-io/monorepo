@@ -41,7 +41,10 @@ export const getSublayLogLevel = (): SublayLogLevel => logLevel;
 export const handleError = (err: any, baseMessage?: string) => {
   let messages = [baseMessage ?? ""];
 
-  const responseData = err.response?.data;
+  // A raw HTTP error's response body, or a `SublayError`'s `body` (what the
+  // SDK's requests reject with), so the server's `error` and `details` are
+  // logged either way.
+  const responseData = err?.response?.data ?? err?.body;
   if (responseData) {
     if (responseData.error) {
       messages.push(responseData.error);

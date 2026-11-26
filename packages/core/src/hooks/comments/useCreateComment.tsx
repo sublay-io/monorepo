@@ -11,6 +11,7 @@ import {
   type FileListUpload,
   type ImageListUpload,
 } from "../../utils/uploads";
+import { SublayError } from "../../errors/SublayError";
 
 export interface CreateCommentProps {
   entityId: string;
@@ -56,15 +57,15 @@ function useCreateComment(): (props: CreateCommentProps) => Promise<Comment> {
         files,
       } = props;
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       if (!entityId) {
-        throw new Error("No entity ID was provided");
+        throw new SublayError("No entity ID was provided");
       }
 
       if (!user) {
-        throw new Error("No authenticated user");
+        throw new SublayError("No authenticated user");
       }
 
       const hasImages = hasListFiles(images);
@@ -79,7 +80,7 @@ function useCreateComment(): (props: CreateCommentProps) => Promise<Comment> {
         !hasImages &&
         !hasFiles
       ) {
-        throw new Error(
+        throw new SublayError(
           "No content, gif, attachments, images or files were provided"
         );
       }

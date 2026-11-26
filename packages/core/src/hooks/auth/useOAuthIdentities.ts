@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface OAuthIdentity {
   id: string;
@@ -18,8 +19,8 @@ export interface UseOAuthIdentitiesReturn {
   hasPassword: boolean;
   fetchIdentities: () => Promise<void>;
   unlinkIdentity: ({ identityId }: { identityId: string }) => Promise<void>;
-  isLoading: boolean;
-  error: string | null;
+  loading: boolean;
+  error: SublayError | null;
 }
 
 function useOAuthIdentities(): UseOAuthIdentitiesReturn {
@@ -27,42 +28,42 @@ function useOAuthIdentities(): UseOAuthIdentitiesReturn {
   const axios = useAxiosPrivate();
   const [identities, setIdentities] = useState<OAuthIdentity[]>([]);
   const [hasPassword, setHasPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const fetchIdentities = useCallback(async () => {
     if (!projectId) return;
-    setIsLoading(true);
+    setLoading(true);
     setError(null);
     try {
       const response = await axios.get(`/${projectId}/oauth/identities`);
       setIdentities(response.data.identities);
       setHasPassword(Boolean(response.data.hasPassword));
-    } catch (err: any) {
-      setError(err.response?.data?.error || err.message);
+    } catch (err) {
+      setError(toSublayError(err));
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }, [projectId, axios]);
 
   const unlinkIdentity = useCallback(
     async ({ identityId }: { identityId: string }) => {
       if (!projectId) return;
-      setIsLoading(true);
+      setLoading(true);
       setError(null);
       try {
         await axios.delete(`/${projectId}/oauth/identities/${identityId}`);
         setIdentities((prev) => prev.filter((i) => i.id !== identityId));
-      } catch (err: any) {
-        setError(err.response?.data?.error || err.message);
+      } catch (err) {
+        setError(toSublayError(err));
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     },
     [projectId, axios]
   );
 
-  return { identities, hasPassword, fetchIdentities, unlinkIdentity, isLoading, error };
+  return { identities, hasPassword, fetchIdentities, unlinkIdentity, loading, error };
 }
 
 export default useOAuthIdentities;

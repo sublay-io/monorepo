@@ -14,6 +14,7 @@ import useFetchManyReputationGrants, {
 } from "./useFetchManyReputationGrants";
 import { useListEngine } from "../list/useListEngine";
 import { ListPage } from "../list/useListLoader";
+import type { SublayError } from "../../errors/SublayError";
 
 type GrantsPage = ListPage<ReputationGrant, number> & {
   summary: GrantSummary | null;
@@ -46,7 +47,7 @@ export interface UseFetchManyReputationGrantsWrapperValues {
   summary: GrantSummary | null;
   loading: boolean;
   /** The last load failure. Cleared when the next load starts; `loadMore()` retries it. */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
   /**

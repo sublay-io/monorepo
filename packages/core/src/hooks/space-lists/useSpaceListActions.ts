@@ -5,7 +5,6 @@ import {
   setSpaceListLoading,
   setSpaceListSpaces,
   setSpaceListHasMore,
-  setSpaceListError,
   addSpace,
   removeSpace,
 } from "../../store/slices/spaceListsSlice";
@@ -25,6 +24,7 @@ import type {
 } from "../../interfaces/models/Space";
 import type { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
+import { SublayError, rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 
 export interface FetchSpacesOptions {
   page: number;
@@ -61,7 +61,18 @@ export interface DeleteSpaceOptions {
   spaceId: string;
 }
 
-export function useSpaceListActions() {
+export interface UseSpaceListActionsValues {
+  fetchSpaces: (props: { listId: string } & FetchSpacesOptions) => Promise<Space[] | null>;
+  createSpace: (props: { listId: string } & CreateSpaceOptions) => Promise<SpaceWithPermissions | undefined>;
+  deleteSpace: (props: { listId: string } & DeleteSpaceOptions) => Promise<void>;
+}
+
+/**
+ * The implementation: `fetchSpaces` also takes the list hooks' internal
+ * `isCurrent` guard as a second argument (a load superseded meanwhile writes
+ * nothing). Internal — not exported from the package.
+ */
+export function useSpaceListActionsWithGuard() {
   const dispatch = useSublayDispatch();
 
   // Get project context
@@ -75,12 +86,11 @@ export function useSpaceListActions() {
   // Fetch spaces action
   const fetchSpaces = useCallback(
     async (
-      listId: string,
-      options: FetchSpacesOptions,
+      { listId, ...options }: { listId: string } & FetchSpacesOptions,
       isCurrent: () => boolean = () => true
     ): Promise<Space[] | null> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       if (!options.sortBy) {
@@ -100,7 +110,7 @@ export function useSpaceListActions() {
           searchFields: options.searchFields,
           parentSpaceId: options.parentSpaceId,
           limit: options.limit,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // A newer load (or a reset) replaced this one: it writes nothing.
         if (!isCurrent()) return null;
@@ -125,10 +135,7 @@ export function useSpaceListActions() {
           err
         );
         handleErrorUtil(err, "Failed to fetch spaces:");
-        dispatch(
-          setSpaceListError({ listId, error: "Failed to fetch spaces" })
-        );
-        throw err;
+        throw toSublayError(err);
       } finally {
         if (isCurrent()) dispatch(setSpaceListLoading({ listId, loading: false }));
       }
@@ -138,12 +145,12 @@ export function useSpaceListActions() {
 
   // Create space action
   const createSpace = useCallback(
-    async (
-      listId: string,
-      options: CreateSpaceOptions
-    ): Promise<SpaceWithPermissions | undefined> => {
+    async ({
+      listId,
+      ...options
+    }: { listId: string } & CreateSpaceOptions): Promise<SpaceWithPermissions | undefined> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       try {
@@ -152,7 +159,7 @@ export function useSpaceListActions() {
         const newSpace = await createSpaceMutation({
           projectId,
           ...createData,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // Optimistically add to the list
         dispatch(
@@ -170,7 +177,7 @@ export function useSpaceListActions() {
           err
         );
         handleErrorUtil(err, "Failed to create space:");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, createSpaceMutation]
@@ -178,20 +185,20 @@ export function useSpaceListActions() {
 
   // Delete space action
   const deleteSpace = useCallback(
-    async (listId: string, options: DeleteSpaceOptions): Promise<void> => {
+    async ({ listId, ...options }: { listId: string } & DeleteSpaceOptions): Promise<void> => {
       if (!projectId) {
-        throw new Error("No project ID available");
+        throw new SublayError("No project ID available");
       }
 
       if (!options.spaceId) {
-        throw new Error("Space ID is required");
+        throw new SublayError("Space ID is required");
       }
 
       try {
         await deleteSpaceMutation({
           projectId,
           spaceId: options.spaceId,
-        }).unwrap();
+        }).unwrap().catch(rethrowAsSublayError);
 
         // Remove from the list
         dispatch(
@@ -206,7 +213,7 @@ export function useSpaceListActions() {
           err
         );
         handleErrorUtil(err, "Failed to delete space:");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, deleteSpaceMutation]
@@ -217,6 +224,11 @@ export function useSpaceListActions() {
     createSpace,
     deleteSpace,
   };
+}
+
+/** The list's low-level actions. Each takes one object: `{ listId, ... }`. */
+export function useSpaceListActions(): UseSpaceListActionsValues {
+  return useSpaceListActionsWithGuard();
 }
 
 export default useSpaceListActions;

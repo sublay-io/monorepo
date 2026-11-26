@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import useProject from "../projects/useProject";
 import { useUser } from "../user";
 import {
@@ -7,6 +7,7 @@ import {
 } from "../../store/api/notificationPreferencesApi";
 import { handleError } from "../../utils/handleError";
 import type { PushEventType } from "../../interfaces/PushEventType";
+import { SublayError, toSublayError, rethrowAsSublayError } from "../../errors/SublayError";
 
 export interface UseNotificationPreferencesValues {
   /**
@@ -16,12 +17,12 @@ export interface UseNotificationPreferencesValues {
   disabledTypes: PushEventType[] | undefined;
   loading: boolean;
   updating: boolean;
-  error: unknown;
+  error: SublayError | null;
   refetch: () => void;
   /**
    * Replace the user's disabled-types set (upsert). Server-exact type names.
    */
-  updatePreferences: (disabledTypes: PushEventType[]) => Promise<void>;
+  updatePreferences: (props: { disabledTypes: PushEventType[] }) => Promise<void>;
 }
 
 /**
@@ -49,26 +50,31 @@ function useNotificationPreferences(): UseNotificationPreferencesValues {
     useUpdateNotificationPreferencesMutation();
 
   const updatePreferences = useCallback(
-    async (disabledTypes: PushEventType[]): Promise<void> => {
+    async ({ disabledTypes }: { disabledTypes: PushEventType[] }): Promise<void> => {
       if (!projectId || !user) {
-        throw new Error("No project ID or authenticated user available");
+        throw new SublayError("No project ID or authenticated user available");
       }
 
       try {
-        await updateMutation({ projectId, disabledTypes }).unwrap();
+        await updateMutation({ projectId, disabledTypes }).unwrap().catch(rethrowAsSublayError);
       } catch (err) {
         handleError(err, "Failed to update notification preferences");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, user, updateMutation]
+  );
+
+  const sublayError = useMemo(
+    () => (error ? toSublayError(error) : null),
+    [error]
   );
 
   return {
     disabledTypes: data?.disabledTypes,
     loading,
     updating,
-    error,
+    error: sublayError,
     refetch,
     updatePreferences,
   };

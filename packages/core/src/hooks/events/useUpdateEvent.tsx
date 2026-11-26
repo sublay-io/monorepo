@@ -19,6 +19,7 @@ import {
   type ImageListUpload,
   type ImageSlotUpload,
 } from "../../utils/uploads";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UpdateEventProps {
   eventId: string;
@@ -79,7 +80,7 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
   const updateEvent = useCallback(
     async ({ eventId, update }: UpdateEventProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       // The files go as multipart parts; everything else in `update` is a field.

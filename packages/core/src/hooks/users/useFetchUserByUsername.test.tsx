@@ -38,7 +38,7 @@ describe("useFetchUserByUsername", () => {
 
     await expect(
       result.current({ username: "alice" }),
-    ).rejects.toMatchObject({ response: { status: 404 } });
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it("throws before making a request when no username is passed", async () => {

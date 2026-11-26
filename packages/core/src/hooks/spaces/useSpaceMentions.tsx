@@ -6,6 +6,7 @@ import useMentionSuggestions, {
   DEFAULT_MENTION_PATTERN,
   escapeRegex,
 } from "../utils/useMentionSuggestions";
+import { SublayError } from "../../errors/SublayError";
 
 export interface UseSpaceMentionsProps {
   content: string;
@@ -83,7 +84,7 @@ const useSpaceMentions = ({
   };
 
   const addSpaceMention = (space: Space) => {
-    if (!space.slug) throw new Error("Space has no slug set");
+    if (!space.slug) throw new SublayError("Space has no slug set");
     setMentions((prevMentions) => {
       if (prevMentions.some((mention) => mention.id === space.id)) {
         return prevMentions;

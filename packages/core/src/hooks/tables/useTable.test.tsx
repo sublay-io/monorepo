@@ -9,6 +9,7 @@ import {
   type FetchMockHandle,
 } from "../../test-utils";
 import { useTable } from "./useTable";
+import { SublayError } from "../../errors/SublayError";
 import { renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { baseApi } from "../../store/api/baseApi";
@@ -142,7 +143,7 @@ describe("useTable", () => {
 
     let created: { id: string } | undefined;
     await act(async () => {
-      created = await result.current.createRow({ name: "charlie" });
+      created = await result.current.createRow({ data: { name: "charlie" } });
     });
     expect(created?.id).toBe("3");
 
@@ -180,7 +181,7 @@ describe("useTable", () => {
     act(() => result.current.setPage(5));
     await waitFor(() => expect(result.current.view.page).toBe(5));
 
-    act(() => result.current.setSort("name", "desc"));
+    act(() => result.current.setSort({ sortBy: "name", sortDir: "desc" }));
     await waitFor(() => expect(result.current.view.sortBy).toBe("name"));
     expect(result.current.view.sortDir).toBe("desc");
     expect(result.current.view.page).toBe(1);
@@ -194,12 +195,33 @@ describe("useTable", () => {
 
     let updated: { id: string; name: string } | undefined;
     await act(async () => {
-      updated = await result.current.updateRow("1", { name: "updated" });
+      updated = await result.current.updateRow({ rowId: "1", data: { name: "updated" } });
     });
     expect(updated?.name).toBe("updated");
 
     const patchCall = fetchHandle.calls().find((c) => c.method === "PATCH");
     expect(patchCall?.url).toContain("/db/Events/1");
+  });
+
+  it("a refused row write rejects with a SublayError", async () => {
+    const { result } = renderHookWithStore(() => useTable("Events"));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    fetchHandle.fetchMock.mockResolvedValueOnce(
+      jsonResponse({ error: "name is required.", code: "database/invalid-row", param: "name" }, 400),
+    );
+
+    let err: unknown;
+    await act(async () => {
+      err = await result.current.updateRow({ rowId: "1", data: { name: null } }).catch((e: unknown) => e);
+    });
+
+    expect(err).toBeInstanceOf(SublayError);
+    expect(err).toMatchObject({
+      message: "name is required.",
+      code: "database/invalid-row",
+      param: "name",
+      status: 400,
+    });
   });
 
   it("deleteRow issues a DELETE and resolves with nothing", async () => {
@@ -208,7 +230,7 @@ describe("useTable", () => {
 
     let outcome: unknown = "unset";
     await act(async () => {
-      outcome = await result.current.deleteRow("1");
+      outcome = await result.current.deleteRow({ rowId: "1" });
     });
     expect(outcome).toBeUndefined();
 
@@ -221,7 +243,7 @@ describe("useTable", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => {
-      await result.current.deleteRow("1", { force: true });
+      await result.current.deleteRow({ rowId: "1", force: true });
     });
 
     const deleteCall = fetchHandle.calls().find((c) => c.method === "DELETE");
@@ -236,7 +258,7 @@ describe("useTable", () => {
 
     let restored: { id: string; deletedAt: string | null } | undefined;
     await act(async () => {
-      restored = await result.current.restoreRow("1");
+      restored = await result.current.restoreRow({ rowId: "1" });
     });
     expect(restored?.deletedAt).toBeNull();
 
@@ -265,7 +287,7 @@ describe("useTable", () => {
 
     await expect(
       act(async () => {
-        await result.current.createRow({ name: "broken" });
+        await result.current.createRow({ data: { name: "broken" } });
       }),
     ).rejects.toBeTruthy();
   });
@@ -361,7 +383,7 @@ describe("useTable", () => {
       act(() => result.current.setFilters([{ column: "name", operator: "eq", value: "x" }]));
       await waitFor(() => expect(lastUrl()).toContain("filters="));
 
-      act(() => result.current.setSort("name", "desc"));
+      act(() => result.current.setSort({ sortBy: "name", sortDir: "desc" }));
       await waitFor(() => expect(lastUrl()).toContain("sortBy=name"));
       expect(lastUrl()).toContain("sortDir=desc");
 
@@ -380,7 +402,7 @@ describe("useTable", () => {
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
       eventRows = [...EVENT_ROWS, { id: "3", name: "charlie" }];
-      await result.current.createRow({ name: "charlie" });
+      await result.current.createRow({ data: { name: "charlie" } });
 
       await waitFor(() => expect(result.current.rows).toHaveLength(3));
       expect(result.current.rows.map((r) => r.id)).toEqual(["1", "2", "3"]);

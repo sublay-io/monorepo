@@ -55,7 +55,7 @@ describe("useSendVerificationEmail", () => {
     axiosPrivate.mockError("post", 500, { message: "Internal error" });
 
     await expect(result.current({ mode: "link" })).rejects.toMatchObject({
-      response: { status: 500 },
+      status: 500,
     });
   });
 

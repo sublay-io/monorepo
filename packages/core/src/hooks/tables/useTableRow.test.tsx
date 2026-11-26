@@ -323,7 +323,7 @@ describe("useTableRow", () => {
 
       await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
 
-      await result.current.list.updateRow(ID_A, { name: "renamed" });
+      await result.current.list.updateRow({ rowId: ID_A, data: { name: "renamed" } });
 
       // No wiring between the two hooks — the mutation invalidates the row tag
       // this query provides, so the detail view refreshes on its own.
@@ -344,7 +344,7 @@ describe("useTableRow", () => {
       // fact, not a timing window.
       gateA = makeGate();
       const before = startsA;
-      await result.current.list.updateRow(ID_A, { name: "renamed" });
+      await result.current.list.updateRow({ rowId: ID_A, data: { name: "renamed" } });
       await waitFor(() => expect(startsA).toBe(before + 1));
 
       // Stale-while-revalidate: the previous row stays on screen and the
@@ -367,7 +367,7 @@ describe("useTableRow", () => {
       await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
 
       rowAStatus = "gone";
-      await result.current.list.deleteRow(ID_A);
+      await result.current.list.deleteRow({ rowId: ID_A });
 
       await waitFor(() => expect(result.current.detail.row).toBeNull());
       expect(result.current.detail.error).toBeTruthy();
@@ -382,7 +382,7 @@ describe("useTableRow", () => {
       await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
       const before = getsForA();
 
-      await result.current.list.updateRow(ID_B, { name: "other" });
+      await result.current.list.updateRow({ rowId: ID_B, data: { name: "other" } });
       await new Promise((r) => setTimeout(r, 30));
 
       // Tagged by row id, so an unrelated row's edit must not refetch this one.

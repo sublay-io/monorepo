@@ -37,7 +37,7 @@ describe("useOAuthIdentities", () => {
 
     expect(result.current.identities).toEqual(identities);
     expect(result.current.hasPassword).toBe(true);
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
 
     const [call] = axiosPrivate.calls("get");
@@ -53,8 +53,8 @@ describe("useOAuthIdentities", () => {
       await result.current.fetchIdentities();
     });
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBe("Internal error");
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error?.message).toBe("Internal error");
   });
 
   it("unlinks an identity and removes it from local state", async () => {
@@ -90,7 +90,7 @@ describe("useOAuthIdentities", () => {
       await result.current.unlinkIdentity({ identityId: "identity-1" });
     });
 
-    expect(result.current.error).toBe("Forbidden");
+    expect(result.current.error?.message).toBe("Forbidden");
     expect(result.current.identities).toHaveLength(1);
   });
 
@@ -104,6 +104,6 @@ describe("useOAuthIdentities", () => {
     });
 
     expect(axiosPrivate.calls("get")).toHaveLength(0);
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.loading).toBe(false);
   });
 });

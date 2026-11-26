@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { Event, RsvpStatus } from "../../interfaces/models/Event";
+import { SublayError } from "../../errors/SublayError";
 
 export interface SetRsvpProps {
   eventId: string;
@@ -22,7 +23,7 @@ function useSetRsvp(): (props: SetRsvpProps) => Promise<Event> {
   const setRsvp = useCallback(
     async ({ eventId, status }: SetRsvpProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const response = await axios.post(

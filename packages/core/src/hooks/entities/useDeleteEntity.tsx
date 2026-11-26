@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
+import { SublayError } from "../../errors/SublayError";
 
 export interface DeleteEntityProps {
   entityId: string;
@@ -13,11 +14,11 @@ function useDeleteEntity(): (props: DeleteEntityProps) => Promise<void> {
   const deleteEntity = useCallback(
     async ({ entityId }: DeleteEntityProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!entityId) {
-        throw new Error("No entityId provided.");
+        throw new SublayError("No entityId provided.");
       }
 
       await axios.delete(`/${projectId}/entities/${entityId}`);

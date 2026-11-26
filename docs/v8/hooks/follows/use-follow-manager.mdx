@@ -16,10 +16,10 @@ For integration guidance, see [Relationships — useFollowManager](/v8/sdk/relat
 import { useFollowManager } from "@sublay/react-js";
 
 function FollowButton({ userId }: { userId: string }) {
-  const { isFollowing, isLoading, toggleFollow } = useFollowManager({ userId });
+  const { isFollowing, loading, toggleFollow } = useFollowManager({ userId });
 
   return (
-    <button onClick={toggleFollow} disabled={isLoading || isFollowing === null}>
+    <button onClick={toggleFollow} disabled={loading || isFollowing === null}>
       {isFollowing ? "Unfollow" : "Follow"}
     </button>
   );
@@ -38,7 +38,7 @@ function FollowButton({ userId }: { userId: string }) {
   `true` if following, `false` if not, `null` while the initial status is loading.
 </ResponseField>
 
-<ResponseField name="isLoading" type="boolean">
+<ResponseField name="loading" type="boolean">
   `true` while the initial status check is in progress.
 </ResponseField>
 

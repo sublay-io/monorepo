@@ -11,7 +11,7 @@ export interface UseBlockManagerProps {
 export interface UseBlockManagerValues {
   /** Whether the signed-in user blocks `userId` (null until loaded). */
   isBlocking: boolean | null;
-  isLoading: boolean;
+  loading: boolean;
   toggleBlock: () => Promise<void>;
 }
 
@@ -19,7 +19,7 @@ function useBlockManager({ userId }: UseBlockManagerProps): UseBlockManagerValue
   const { user } = useUser();
 
   const [isBlocking, setIsBlocking] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const blockUser = useBlockUser();
   const unblockUser = useUnblockUser();
@@ -32,14 +32,14 @@ function useBlockManager({ userId }: UseBlockManagerProps): UseBlockManagerValue
   useEffect(() => {
     const loadBlockStatus = async () => {
       try {
-        setIsLoading(true);
+        setLoading(true);
         const result = await fetchBlockStatusRef.current({ userId });
         setIsBlocking(result.isBlocking);
       } catch (error) {
         console.error("Failed to fetch block status:", error);
         setIsBlocking(false);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
@@ -49,7 +49,7 @@ function useBlockManager({ userId }: UseBlockManagerProps): UseBlockManagerValue
   }, [userId, user?.id]);
 
   const toggleBlock = useCallback(async () => {
-    if (isBlocking === null || isLoading || user?.id === userId) return;
+    if (isBlocking === null || loading || user?.id === userId) return;
 
     try {
       if (isBlocking) {
@@ -62,11 +62,11 @@ function useBlockManager({ userId }: UseBlockManagerProps): UseBlockManagerValue
     } catch (error) {
       console.error("Failed to toggle block status:", error);
     }
-  }, [isBlocking, isLoading, userId, blockUser, unblockUser]);
+  }, [isBlocking, loading, userId, blockUser, unblockUser]);
 
   return {
     isBlocking,
-    isLoading,
+    loading,
     toggleBlock,
   };
 }

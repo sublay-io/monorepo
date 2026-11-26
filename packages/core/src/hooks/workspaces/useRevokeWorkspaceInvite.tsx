@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SublayError } from "../../errors/SublayError";
 
 export interface RevokeWorkspaceInviteProps {
   workspaceId: string;
@@ -20,13 +21,13 @@ function useRevokeWorkspaceInvite(): (
   const revokeWorkspaceInvite = useCallback(
     async ({ workspaceId, inviteId }: RevokeWorkspaceInviteProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
       if (!workspaceId) {
-        throw new Error("Please pass a workspaceId");
+        throw new SublayError("Please pass a workspaceId");
       }
       if (!inviteId) {
-        throw new Error("Please pass an inviteId");
+        throw new SublayError("Please pass an inviteId");
       }
 
       await axios.post<void>(

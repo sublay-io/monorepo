@@ -15,6 +15,8 @@ import {
   jsonResponse,
 } from "../../test-utils";
 import { armAuthGate, syncAuthGate, resetAuthGate } from "../../config/authGate";
+import { SublayError } from "../../errors/SublayError";
+import { SuspendedError } from "../../errors/SuspendedError";
 
 /** Minimal unsigned JWT carrying a `sub` and a far-future `exp`. */
 function jwtFor(sub: string) {
@@ -230,6 +232,53 @@ describe("requestOAuthAuthorizationUrl", () => {
       }),
     ).rejects.toThrow("Unsupported provider");
   });
+
+  it("rejects a suspended user's request with a SuspendedError", async () => {
+    stubFetchMock(async () =>
+      jsonResponse({ error: "Suspended.", code: "user/suspended", reason: null, endDate: null }, 403),
+    );
+
+    const err = await requestOAuthAuthorizationUrl({
+      projectId: "project-1",
+      endpoint: "authorize",
+      provider: "google",
+      redirectAfterAuth: "https://app.example.com/done",
+    }).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(SuspendedError);
+  });
+
+  it("falls back to its own message for a non-JSON failure, keeping the status", async () => {
+    stubFetchMock(async () => new Response("<html>Bad gateway</html>", { status: 502 }));
+
+    const err = await requestOAuthAuthorizationUrl({
+      projectId: "project-1",
+      endpoint: "authorize",
+      provider: "google",
+      redirectAfterAuth: "https://app.example.com/done",
+    }).catch((e: unknown) => e);
+    expect(err).toMatchObject({ message: "Failed to initiate OAuth", status: 502 });
+    expect((err as SublayError).body).toBeUndefined();
+  });
+
+  it("rejects with a SublayError carrying the response's code, param and status", async () => {
+    stubFetchMock(async () =>
+      jsonResponse({ error: "Unsupported provider", code: "oauth/invalid-provider", param: "provider" }, 400),
+    );
+
+    const err = await requestOAuthAuthorizationUrl({
+      projectId: "project-1",
+      endpoint: "authorize",
+      provider: "unknown" as never,
+      redirectAfterAuth: "https://app.example.com/done",
+    }).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(SublayError);
+    expect(err).toMatchObject({
+      code: "oauth/invalid-provider",
+      param: "provider",
+      status: 400,
+      body: { error: "Unsupported provider", code: "oauth/invalid-provider", param: "provider" },
+    });
+  });
 });
 
 describe("handleOAuthRedirect", () => {
@@ -295,7 +344,11 @@ describe("handleOAuthRedirect", () => {
       url: "https://app.example.com/callback?error=access_denied&error_description=User+cancelled",
     });
 
-    expect(result).toEqual({ success: false, error: "User cancelled" });
+    expect(result.success).toBe(false);
+    // The query's `error` is the code, its description the message.
+    expect(result.error).toBeInstanceOf(SublayError);
+    expect(result.error?.message).toBe("User cancelled");
+    expect(result.error?.code).toBe("access_denied");
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 

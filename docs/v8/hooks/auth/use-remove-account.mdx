@@ -32,7 +32,7 @@ import { useAccounts, useRemoveAccount } from "@sublay/react-js";
 
 function AccountList() {
   const { accounts } = useAccounts();
-  const { removeAccount, isRemoving, error } = useRemoveAccount();
+  const { removeAccount, removing, error } = useRemoveAccount();
 
   return (
     <ul>
@@ -46,13 +46,13 @@ function AccountList() {
                    below carries the reason and nothing was torn down. */
               })
             }
-            disabled={isRemoving}
+            disabled={removing}
           >
             Remove
           </button>
         </li>
       ))}
-      {error && <p>{error}</p>}
+      {error && <p>{error.message}</p>}
     </ul>
   );
 }
@@ -62,7 +62,7 @@ function AccountList() {
 import { useAccounts, useRemoveAccount } from "@sublay/react-native";
 
 function AccountItem({ userId }: { userId: string }) {
-  const { removeAccount, isRemoving } = useRemoveAccount();
+  const { removeAccount, removing } = useRemoveAccount();
 
   return (
     <Button
@@ -73,7 +73,7 @@ function AccountItem({ userId }: { userId: string }) {
              unhandled rejection. */
         })
       }
-      disabled={isRemoving}
+      disabled={removing}
     />
   );
 }
@@ -101,12 +101,12 @@ The hook returns a `removeAccount` function that accepts:
   untouched.
 </ResponseField>
 
-<ResponseField name="isRemoving" type="boolean">
+<ResponseField name="removing" type="boolean">
   `true` while the removal is in progress.
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  Error message if the removal failed, or `null` if no error occurred.
+<ResponseField name="error" type="SublayError | null">
+  The error if the removal failed, or `null` if no error occurred. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 ## Integration Guide

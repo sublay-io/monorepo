@@ -3,6 +3,7 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { EventInvite } from "../../interfaces/models/Event";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
+import { SublayError } from "../../errors/SublayError";
 
 export interface FetchInviteesProps {
   eventId: string;
@@ -26,7 +27,7 @@ function useFetchInvitees(): (
   const fetchInvitees = useCallback(
     async ({ eventId, page, limit }: FetchInviteesProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const params: Record<string, any> = {};

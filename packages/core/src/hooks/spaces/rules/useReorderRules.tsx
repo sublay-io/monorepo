@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useProject from "../../projects/useProject";
 import { Rule } from "../../../interfaces/models/Rule";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
+import { SublayError } from "../../../errors/SublayError";
 
 export interface ReorderRulesProps {
   spaceId: string;
@@ -15,15 +16,15 @@ function useReorderRules(): (props: ReorderRulesProps) => Promise<Rule[]> {
   const reorderRules = useCallback(
     async ({ spaceId, ruleIds }: ReorderRulesProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       if (!spaceId) {
-        throw new Error("Please pass a spaceId");
+        throw new SublayError("Please pass a spaceId");
       }
 
       if (!ruleIds || ruleIds.length === 0) {
-        throw new Error("Please pass at least one ruleId");
+        throw new SublayError("Please pass at least one ruleId");
       }
 
       const response = await axios.post(

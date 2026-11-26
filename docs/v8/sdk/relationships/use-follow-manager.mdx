@@ -11,9 +11,9 @@ description: "High-level hook for managing follow state with a single user"
 import { useFollowManager } from "@sublay/react-js";
 
 function FollowButton({ userId }: { userId: string }) {
-  const { isFollowing, isLoading, toggleFollow } = useFollowManager({ userId });
+  const { isFollowing, loading, toggleFollow } = useFollowManager({ userId });
 
-  if (isLoading) return <button disabled>...</button>;
+  if (loading) return <button disabled>...</button>;
 
   return (
     <button onClick={toggleFollow}>
@@ -35,7 +35,7 @@ function FollowButton({ userId }: { userId: string }) {
   Whether the current user is following the target user. `null` while the initial status check is in progress.
 </ResponseField>
 
-<ResponseField name="isLoading" type="boolean">
+<ResponseField name="loading" type="boolean">
   `true` while the initial follow status is being fetched.
 </ResponseField>
 

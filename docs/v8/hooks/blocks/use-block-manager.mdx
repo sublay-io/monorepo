@@ -16,10 +16,10 @@ Blocking is part of the trust & safety (moderation) bundle. See [Moderation — 
 import { useBlockManager } from "@sublay/react-js";
 
 function BlockButton({ userId }: { userId: string }) {
-  const { isBlocking, isLoading, toggleBlock } = useBlockManager({ userId });
+  const { isBlocking, loading, toggleBlock } = useBlockManager({ userId });
 
   return (
-    <button onClick={toggleBlock} disabled={isLoading || isBlocking === null}>
+    <button onClick={toggleBlock} disabled={loading || isBlocking === null}>
       {isBlocking ? "Unblock" : "Block"}
     </button>
   );
@@ -38,7 +38,7 @@ function BlockButton({ userId }: { userId: string }) {
   `true` if the current user blocks the target, `false` if not, `null` while the initial status is loading.
 </ResponseField>
 
-<ResponseField name="isLoading" type="boolean">
+<ResponseField name="loading" type="boolean">
   `true` while the initial status check is in progress.
 </ResponseField>
 

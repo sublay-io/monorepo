@@ -2,7 +2,7 @@ import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { Comment } from "../../interfaces/models/Comment";
 import { handleError } from "../../utils/handleError";
-import { toError } from "../../utils/toError";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 import useFetchManyComments from "./useFetchManyComments";
 import { isUUID } from "../../utils/isUUID";
 import { CommentSectionInternalContext } from "./useEntityComments";
@@ -49,7 +49,7 @@ export interface UseRepliesValues {
    * The last failure loading replies. Cleared when the next load starts or the
    * section resets (e.g. a sort change); `loadMore()` retries it.
    */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether "load more replies" has anything to fetch. */
   hasMore: boolean;
   /**
@@ -94,7 +94,7 @@ function useReplies({
   // section reset (sort change) makes an older failure stale, so it no longer
   // shows.
   const [failures, setFailures] = useState<
-    Record<string, { error: Error; generation: number; refetch: boolean }>
+    Record<string, { error: SublayError; generation: number; refetch: boolean }>
   >({});
   const failuresRef = useRef(failures);
   failuresRef.current = failures;
@@ -192,7 +192,7 @@ function useReplies({
         if (generation !== ctx.generationRef.current) return;
         setFailures((prev) => ({
           ...prev,
-          [commentId]: { error: toError(err), generation, refetch },
+          [commentId]: { error: toSublayError(err), generation, refetch },
         }));
         handleError(err, "Failed to fetch replies:");
       } finally {

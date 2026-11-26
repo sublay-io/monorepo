@@ -69,8 +69,8 @@ function EventDetail({ eventId }: { eventId: string | null }) {
   A background refresh with a row already on screen reports `false`: an edit made through `useTable` invalidates this row and it updates in place, rather than flashing a spinner. A skipped request never loads, so waiting on an unresolved `rowId` reports `false` with `row: null` rather than a spinner that never resolves.
 </ResponseField>
 
-<ResponseField name="error" type="unknown">
-  The query error, if any.
+<ResponseField name="error" type="SublayError | null">
+  The query error, or `null`. A [`SublayError`](/v8/hooks/overview#sublayerror).
 
   A `404` (`database/row-not-found`, or `database/table-not-found` if the table itself was dropped) sets this **and** clears `row` — the record is unreachable, so there is nothing valid to show. Any other failure sets this while leaving `row` intact.
 </ResponseField>

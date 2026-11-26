@@ -20,7 +20,7 @@ function SpaceDirectory() {
   const { spaces, loading, hasMore, fetchSpaces, loadMore } = useSpaceList({ listId: "directory" });
 
   useEffect(() => {
-    fetchSpaces({ sortBy: "createdAt" });
+    fetchSpaces({ filters: { sortBy: "createdAt" } });
   }, []);
 
   return (
@@ -48,20 +48,20 @@ function SpaceDirectory() {
   `true` while fetching.
 </ResponseField>
 
-<ResponseField name="error" type="Error | null">
-  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook on the same `listId`.
+<ResponseField name="error" type="SublayError | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook on the same `listId`. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
   `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
 </ResponseField>
 
-<ResponseField name="fetchSpaces" type="function">
-  Trigger a new fetch. Resets to page 1. Accepts filter and config parameters.
+<ResponseField name="fetchSpaces" type="({ filters?, config?, options? }) => void">
+  Trigger a new fetch. Resets to page 1. Takes one object: `filters` merge into the list's current filters, `config` is the list's page size, and `options` control this fetch.
 
   ```ts
-  fetchSpaces(
-    filters: {
+  fetchSpaces({
+    filters?: {
       sortBy?: "createdAt" | "members" | "alphabetical";
       sortDir?: "asc" | "desc" | null; // null: the sort's natural direction
       query?: string | null; // a blank value is left out of the request
@@ -69,8 +69,8 @@ function SpaceDirectory() {
       parentSpaceId?: string | "none" | "any" | null; // "none" (the default; null resets to it): top-level only; "any": every level
     },
     config?: { limit?: number },
-    options?: { fetchImmediately?: boolean; resetUnspecified?: boolean; clearImmediately?: boolean }
-  ) => void
+    options?: { fetchImmediately?: boolean; resetUnspecified?: boolean; clearImmediately?: boolean };
+  }) => void
   ```
 </ResponseField>
 

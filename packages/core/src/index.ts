@@ -5,6 +5,7 @@ export {
   getSublayLogLevel,
   type SublayLogLevel,
 } from "./utils/handleError";
+export { SublayError, toSublayError, isSublayError } from "./errors/SublayError";
 export {
   SuspendedError,
   isSuspendedError,
@@ -389,6 +390,7 @@ export {
   useEntityListActions,
   type UseEntityListProps,
   type UseEntityListValues,
+  type EntityListFetchEntitiesProps,
   type EntityListCreateEntityProps,
   type EntityListDeleteEntityProps,
   type EntityListFilters,
@@ -543,6 +545,7 @@ export {
   useSpaceListActions,
   type UseSpaceListProps,
   type UseSpaceListValues,
+  type SpaceListFetchSpacesProps,
   type SpaceListCreateSpaceProps,
   type SpaceListDeleteSpaceProps,
   type FetchSpacesOptions,
@@ -556,6 +559,7 @@ export {
   useWorkspaceListActions,
   type UseWorkspaceListProps,
   type UseWorkspaceListValues,
+  type WorkspaceListFetchWorkspacesProps,
   type WorkspaceListCreateWorkspaceProps,
   type WorkspaceListDeleteWorkspaceProps,
   type FetchWorkspacesOptions,
@@ -785,8 +789,10 @@ export {
   useUploadFile,
   useUploadImage,
   type RNFile,
-  type UploadFileOptions,
+  type UploadFileProps,
+  type UseUploadFileValues,
   type UseUploadImageOptions,
+  type UploadImageProps,
   type UseUploadImageValues,
 } from "./hooks/storage";
 

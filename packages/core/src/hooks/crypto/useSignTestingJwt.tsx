@@ -1,5 +1,6 @@
 import axios from "../../config/axios";
 import { handleError } from "../../utils/handleError";
+import { SublayError } from "../../errors/SublayError";
 
 const WARNING = `
     WARNING: You are using a testing function to generate JWTs in your client application.
@@ -27,7 +28,7 @@ function useSignTestingJwt(): (props: SignTestingJwtProps) => Promise<string | u
   }: SignTestingJwtProps) => {
     try {
       if (!projectId) {
-        throw new Error("No project specified");
+        throw new SublayError("No project specified");
       }
 
       // Warn developers about the security risks

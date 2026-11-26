@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { Event } from "../../interfaces/models/Event";
+import { SublayError } from "../../errors/SublayError";
 
 export interface RemoveInviteProps {
   eventId: string;
@@ -25,7 +26,7 @@ function useRemoveInvite(): (props: RemoveInviteProps) => Promise<Event> {
   const removeInvite = useCallback(
     async ({ eventId, userId }: RemoveInviteProps) => {
       if (!projectId) {
-        throw new Error("No projectId available.");
+        throw new SublayError("No projectId available.");
       }
 
       const response = await axios.delete(

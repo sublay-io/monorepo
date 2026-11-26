@@ -8,6 +8,7 @@ import {
   jsonResponse,
   type FetchMockHandle,
 } from "../../test-utils";
+import { describeStoreListContract } from "../../test-utils/storeListContract";
 import useWorkspaceList from "./useWorkspaceList";
 
 let fetchHandle: FetchMockHandle;
@@ -332,4 +333,26 @@ describe("useWorkspaceList", () => {
       expect(result.current.workspaces.map((w) => w.id)).toEqual(["w2"]);
     });
   });
+});
+
+describeStoreListContract({
+  name: "useWorkspaceList",
+  useList: (listId) => {
+    const list = useWorkspaceList({ listId });
+    return {
+      ids: list.workspaces.map((w) => w.id),
+      loading: list.loading,
+      error: list.error,
+      hasMore: list.hasMore,
+      loadMore: list.loadMore,
+      refetch: list.refetch,
+      start: () => list.fetchWorkspaces({}),
+      changeFilterDebounced: () => list.fetchWorkspaces({ relation: "direct" }),
+      changeFilterNow: () =>
+        list.fetchWorkspaces({ relation: "direct" }, undefined, { fetchImmediately: true }),
+    };
+  },
+  fetchHandle: () => fetchHandle,
+  listUrls,
+  filterParam: ["relation", "direct"],
 });

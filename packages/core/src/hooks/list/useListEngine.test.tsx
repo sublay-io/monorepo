@@ -256,4 +256,23 @@ describe("useListEngine", () => {
     });
     expect(fetch.mock.calls[1]).toEqual(["a", 2]);
   });
+
+  it("a failed refetch is retried by loadMore as page 1, not the next page", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { result, queue, fetch } = setup();
+    await act(async () => queue[0].resolve(pageOf(["1"], true)));
+
+    act(() => {
+      result.current.refetch();
+    });
+    await act(async () => queue[1].reject(new Error("refetch failed")));
+    expect(result.current.items.map((i) => i.id)).toEqual(["1"]);
+
+    act(() => {
+      result.current.loadMore();
+    });
+    expect(fetch.mock.calls[2]).toEqual(["a", 1]);
+    await act(async () => queue[2].resolve(pageOf(["1-new"], false)));
+    expect(result.current.items.map((i) => i.id)).toEqual(["1-new"]);
+  });
 });

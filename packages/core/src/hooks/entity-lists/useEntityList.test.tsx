@@ -8,6 +8,7 @@ import {
   jsonResponse,
   type FetchMockHandle,
 } from "../../test-utils";
+import { describeStoreListContract } from "../../test-utils/storeListContract";
 import useEntityList from "./useEntityList";
 
 let fetchHandle: FetchMockHandle;
@@ -578,4 +579,30 @@ describe("useEntityList — the list contract", () => {
     expect(result.current.entities.map((e) => e.id)).toEqual(["e1"]);
     vi.restoreAllMocks();
   });
+});
+
+describeStoreListContract({
+  name: "useEntityList",
+  useList: (listId) => {
+    const list = useEntityList({ listId });
+    return {
+      ids: list.entities.map((e) => e.id),
+      loading: list.loading,
+      error: list.error,
+      hasMore: list.hasMore,
+      loadMore: list.loadMore,
+      refetch: list.refetch,
+      start: () => list.fetchEntities({}),
+      changeFilterDebounced: () => list.fetchEntities({ userId: "user-b" }),
+      changeFilterNow: () =>
+        list.fetchEntities({ userId: "user-b" }, undefined, undefined, { fetchImmediately: true }),
+    };
+  },
+  fetchHandle: () => fetchHandle,
+  listUrls: () =>
+    fetchHandle
+      .calls()
+      .map((c) => new URL(c.url))
+      .filter((u) => /\/entities$/.test(u.pathname)),
+  filterParam: ["userId", "user-b"],
 });

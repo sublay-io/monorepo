@@ -465,12 +465,24 @@ describe("useEntityList — the list contract", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
     const { result, unmount } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
       projectId: "test-project",
     });
 
     act(() => result.current.fetchEntities({ userId: "u" } as never));
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('"userId"'));
+
+    // The old positional form: no stray key in the first argument.
+    warn.mockClear();
+    act(() =>
+      (result.current.fetchEntities as (...args: unknown[]) => void)(
+        {},
+        { sortBy: "top" },
+        { limit: 5 },
+      ),
+    );
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("got 3 arguments"));
 
     warn.mockClear();
     act(() =>

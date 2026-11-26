@@ -195,8 +195,9 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
 
   // Fetch spaces function (always triggers a fetch)
   const handleFetchSpaces = useCallback(
-    (props: SpaceListFetchSpacesProps = {}) => {
-      warnStrayFetchKeys("fetchSpaces", props, FETCH_KEYS);
+    // `extra`: only so a call in the old positional form can be warned about.
+    (props: SpaceListFetchSpacesProps = {}, ...extra: unknown[]) => {
+      warnStrayFetchKeys("fetchSpaces", props, FETCH_KEYS, 1 + extra.length);
       const { filters: newFilters = {}, config: newConfig, options } = props;
       // Apply config defaults if not provided
       const configWithDefaults = {

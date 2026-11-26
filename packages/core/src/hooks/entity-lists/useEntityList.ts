@@ -240,8 +240,9 @@ function useEntityList({
 
   // Fetch entities function (always triggers a fetch)
   const handleFetchEntities = useCallback(
-    (props: EntityListFetchEntitiesProps = {}) => {
-      warnStrayFetchKeys("fetchEntities", props, FETCH_ENTITIES_KEYS);
+    // `extra`: only so a call in the old positional form can be warned about.
+    (props: EntityListFetchEntitiesProps = {}, ...extra: unknown[]) => {
+      warnStrayFetchKeys("fetchEntities", props, FETCH_ENTITIES_KEYS, 1 + extra.length);
       const {
         filters: newFilters = {},
         sort: newSort,

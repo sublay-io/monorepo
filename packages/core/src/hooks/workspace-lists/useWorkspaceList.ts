@@ -188,8 +188,9 @@ function useWorkspaceList({
 
   // Fetch workspaces (always triggers a fetch of page 1)
   const handleFetchWorkspaces = useCallback(
-    (props: WorkspaceListFetchWorkspacesProps = {}) => {
-      warnStrayFetchKeys("fetchWorkspaces", props, FETCH_KEYS);
+    // `extra`: only so a call in the old positional form can be warned about.
+    (props: WorkspaceListFetchWorkspacesProps = {}, ...extra: unknown[]) => {
+      warnStrayFetchKeys("fetchWorkspaces", props, FETCH_KEYS, 1 + extra.length);
       const { filters: newFilters = {}, config: newConfig, options } = props;
       const configWithDefaults = {
         limit: 20,

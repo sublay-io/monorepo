@@ -21,6 +21,7 @@ import {
   clearUnread,
   replaceMessages,
   setMessagesHasMore,
+  setMessagesLoading,
   upsertMessage,
 } from "../store/slices/chatSlice";
 import type { ChatMessage } from "../interfaces/models/ChatMessage";
@@ -142,6 +143,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
               hasMore: latest.pagination.hasMore,
             }),
           );
+          // The dropped page (if one was loading) won't clear `loading`.
+          dispatch(setMessagesLoading({ conversationId, loading: false }));
           messagesStatus.clearFailure();
           return;
         }

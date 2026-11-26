@@ -750,6 +750,7 @@ describe("ConversationProvider", () => {
         await new Promise((r) => setTimeout(r, 20));
       });
       expect(result.current.messages!.map((m) => m.id)).toEqual(["message-2", "message-3"]);
+      expect(result.current.messagesLoading).toBe(false);
     });
 
     it("anchors on the newest real message, not an optimistic one, when the socket drops", async () => {

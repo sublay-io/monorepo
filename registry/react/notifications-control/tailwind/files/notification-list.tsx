@@ -175,7 +175,7 @@ function NotificationList({
                   )}
                 >
                   {error
-                    ? "Couldn't load more. Try again"
+                    ? "Couldn't load notifications. Try again"
                     : "Load more notifications"}
                 </button>
               )}

@@ -74,7 +74,7 @@ Call `refetch` after issuing a grant to pull the new row and updated totals.
   `{ total, count, viewerTotal }` for the target. Populated **only** on the target filter shape; `null` otherwise.
 </ResponseField>
 <ResponseField name="loading" type="boolean">`true` while fetching.</ResponseField>
-<ResponseField name="error" type="Error | null">The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it.</ResponseField>
+<ResponseField name="error" type="SublayError | null">The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. A [`SublayError`](/v8/hooks/overview#sublayerror).</ResponseField>
 <ResponseField name="hasMore" type="boolean">`true` while `loadMore()` has something to fetch: a next page, or a load that failed.</ResponseField>
 <ResponseField name="loadMore" type="() => Promise<void>">Load the next page and append it, or retry the load that failed. Does nothing while a load is running or when there is nothing more. Never rejects: a failure lands in `error`.</ResponseField>
 <ResponseField name="refetch" type="() => Promise<void>">Reload from page 1 with the current filters. The loaded grants stay until the new first page replaces them. Never rejects: a failure lands in `error`.</ResponseField>

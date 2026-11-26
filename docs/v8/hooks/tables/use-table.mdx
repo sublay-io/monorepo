@@ -40,7 +40,7 @@ function Events() {
     <>
       {loading && <Spinner />}
       {rows.map((e) => (
-        <Row key={e.id} event={e} onSave={(d) => updateRow(e.id, d)} onDelete={() => deleteRow(e.id)} />
+        <Row key={e.id} event={e} onSave={(d) => updateRow({ rowId: e.id, data: d })} onDelete={() => deleteRow({ rowId: e.id })} />
       ))}
       {/* Both halves come off `view.page` (what you asked for) rather than
           `pagination` (what is on screen) — see the note below. `totalPages`
@@ -91,8 +91,8 @@ function Events() {
   [`useTableRow`](/v8/hooks/tables/use-table-row) follows the same rule for the same reason — a `rowId` change reports `loading: true` rather than leaving the previous record on screen.
 </ResponseField>
 
-<ResponseField name="error" type="unknown">
-  The query error, if any.
+<ResponseField name="error" type="SublayError | null">
+  The query error, or `null`. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="refetch" type="() => void">
@@ -115,7 +115,7 @@ function Events() {
   Replaces the filter clauses (and resets to page 1). Each clause is `{ column, operator, value }`; operators are `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `in`, `contains`, `like`, `isNull`, AND-combined.
 </ResponseField>
 
-<ResponseField name="setSort" type="(sortBy?: string, sortDir?: 'asc' | 'desc') => void">
+<ResponseField name="setSort" type="(sort: { sortBy: string | undefined; sortDir?: 'asc' | 'desc' }) => void">
   Sets the sort column/direction (and resets to page 1).
 </ResponseField>
 
@@ -127,14 +127,14 @@ function Events() {
   Inserts a row. Managed columns (`id`/`createdAt`/`updatedAt`/`deletedAt`) are server-set and rejected from the body.
 </ResponseField>
 
-<ResponseField name="updateRow" type="(rowId: string, data: Record<string, unknown>) => Promise<T>">
+<ResponseField name="updateRow" type="({ rowId, data }: { rowId: string; data: Record<string, unknown> }) => Promise<T>">
   Updates a row; `updatedAt` is bumped automatically on a timestamped table.
 </ResponseField>
 
-<ResponseField name="deleteRow" type="(rowId: string, opts?: { force?: boolean }) => Promise<void>">
-  Deletes a row. Soft-deletes on a paranoid table by default; pass `{ force: true }` to hard-delete.
+<ResponseField name="deleteRow" type="({ rowId, force }: { rowId: string; force?: boolean }) => Promise<void>">
+  Deletes a row. Soft-deletes on a paranoid table by default; pass `force: true` to hard-delete.
 </ResponseField>
 
-<ResponseField name="restoreRow" type="(rowId: string) => Promise<T>">
+<ResponseField name="restoreRow" type="({ rowId }: { rowId: string }) => Promise<T>">
   Clears `deletedAt` on a soft-deleted row (paranoid tables only).
 </ResponseField>

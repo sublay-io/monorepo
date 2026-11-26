@@ -27,17 +27,17 @@ Call `initiateOAuth` with the provider name and the URL your app will redirect b
 import { useOAuthSignIn } from "@sublay/react-js";
 
 function SignInWithGoogle() {
-  const { initiateOAuth, isLoading, error } = useOAuthSignIn();
+  const { initiateOAuth, loading, error } = useOAuthSignIn();
 
   const handleClick = async () => {
     // The user will be redirected to Google's authorization page.
-    // isLoading stays true during the redirect.
+    // loading stays true during the redirect.
     await initiateOAuth({ provider: "google", redirectAfterAuth: "https://yourapp.com/auth/callback" });
   };
 
   return (
-    <button onClick={handleClick} disabled={isLoading}>
-      {isLoading ? "Redirecting..." : "Sign in with Google"}
+    <button onClick={handleClick} disabled={loading}>
+      {loading ? "Redirecting..." : "Sign in with Google"}
     </button>
   );
 }
@@ -65,7 +65,7 @@ function AuthCallbackPage() {
     }
   }, []);
 
-  if (error) return <p>Authentication failed: {error}</p>;
+  if (error) return <p>Authentication failed: {error.message}</p>;
 
   return <p>Authenticating...</p>;
 }
@@ -73,7 +73,7 @@ function AuthCallbackPage() {
 
 `handleOAuthCallback` returns `true` if tokens were found in the URL fragment and `false` otherwise. If the provider returned an error (for example, the user denied access), the error is surfaced through the `error` field.
 
-`error` holds the redirect's `error_description`, written to be shown to the user. When the project requires email verification before sign-in and the account has a password and an unconfirmed email, the sign-in is refused (`error=account_email_not_confirmed`) and a confirmation link is emailed to the account's address (unless one went out in the last 10 minutes); when an account with an unconfirmed email links a provider with a different email, the link is refused (`error=link_needs_confirmed_email`). See [Authorize OAuth](/v8/api-reference/oauth/authorize#callback) for every error.
+`error` is a [`SublayError`](/v8/hooks/overview#sublayerror) whose `message` is the redirect's `error_description`, written to be shown to the user, and whose `code` is the redirect's `error` value (for example `"access_denied"`), to branch on. When the project requires email verification before sign-in and the account has a password and an unconfirmed email, the sign-in is refused (`error=account_email_not_confirmed`) and a confirmation link is emailed to the account's address (unless one went out in the last 10 minutes); when an account with an unconfirmed email links a provider with a different email, the link is refused (`error=link_needs_confirmed_email`). See [Authorize OAuth](/v8/api-reference/oauth/authorize#callback) for every error.
 
 ### Linking an Additional Provider
 
@@ -99,7 +99,7 @@ The callback page logic is identical for both sign-in and link flows — `handle
 
 ## Expo Integration
 
-`@sublay/expo` ships its own `useOAuthSignIn` hook with the **same API** as the web hook (`initiateOAuth`, `linkOAuthProvider`, `handleOAuthCallback`, `isLoading`, `error`). Instead of a full-page redirect, it opens the Sublay-brokered consent screen in the system browser and returns to your app through a custom-scheme deep link.
+`@sublay/expo` ships its own `useOAuthSignIn` hook with the **same API** as the web hook (`initiateOAuth`, `linkOAuthProvider`, `handleOAuthCallback`, `loading`, `error`). Instead of a full-page redirect, it opens the Sublay-brokered consent screen in the system browser and returns to your app through a custom-scheme deep link.
 
 <Note>
   Deep links don't work reliably in **Expo Go**. You need a [custom dev client](https://docs.expo.dev/develop/development-builds/introduction/) (`npx expo run:ios` / `npx expo run:android`) or an [EAS Build](https://docs.expo.dev/build/introduction/).
@@ -139,7 +139,7 @@ The callback page logic is identical for both sign-in and link flows — `handle
 import { useOAuthSignIn } from "@sublay/expo";
 
 function SignInWithGoogle() {
-  const { initiateOAuth, isLoading, error } = useOAuthSignIn();
+  const { initiateOAuth, loading, error } = useOAuthSignIn();
 
   const handlePress = () =>
     initiateOAuth({
@@ -149,9 +149,9 @@ function SignInWithGoogle() {
 
   return (
     <Button
-      title={isLoading ? "Signing in..." : "Sign in with Google"}
+      title={loading ? "Signing in..." : "Sign in with Google"}
       onPress={handlePress}
-      disabled={isLoading}
+      disabled={loading}
     />
   );
 }
@@ -159,7 +159,7 @@ function SignInWithGoogle() {
 
 On a successful return, tokens are parsed from the deep link and stored automatically. There is **no separate callback page** — the result is resolved inline. `handleOAuthCallback` exists for API parity but is a no-op that always returns `false`, so you never need to call it on mobile.
 
-If the user cancels or dismisses the browser, the flow resolves quietly: `isLoading` resets to `false` and `error` stays `null`. `error` is only set on a server failure, a provider `error` in the redirect, or when no tokens are returned.
+If the user cancels or dismisses the browser, the flow resolves quietly: `loading` resets to `false` and `error` stays `null`. `error` is only set on a server failure, a provider `error` in the redirect, or when no tokens are returned.
 
 ### Linking an Additional Provider
 
@@ -217,7 +217,7 @@ function OAuthCallbackPage() {
   }, []);
 
   if (accountLimitReached) return <p>You're signed in to 5 accounts already. Sign out of one to add another.</p>;
-  if (error) return <p>{error}</p>;
+  if (error) return <p>{error.message}</p>;
   return <p>Signing you in...</p>;
 }
 ```
@@ -246,7 +246,7 @@ Use `useOAuthIdentities` to list and unlink OAuth identities on the current user
 import { useOAuthIdentities } from "@sublay/react-js";
 
 function LinkedAccounts() {
-  const { identities, fetchIdentities, unlinkIdentity, isLoading } = useOAuthIdentities();
+  const { identities, fetchIdentities, unlinkIdentity, loading } = useOAuthIdentities();
 
   useEffect(() => {
     fetchIdentities();

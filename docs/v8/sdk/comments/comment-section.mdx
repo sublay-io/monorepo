@@ -253,8 +253,8 @@ function CommentList() {
   `true` while a page of top-level comments is loading, and while the section is looking up its entity. `false` when the entity lookup failed. When the section moves to another entity, `comments` is empty and `loading` is `true` from the first render with that entity.
 </ResponseField>
 
-<ResponseField name="error" type="Error | null">
-  The last failure loading the section: the comment list, or the entity itself when the section looks it up from `entityId`, `foreignId` or `shortId` and it can't be fetched or isn't found. Cleared when the next load starts. Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same page again, including a first page that failed. After a failed entity lookup, `loadMore()` looks the entity up again. A missing highlighted comment doesn't set it.
+<ResponseField name="error" type="SublayError | null">
+  The last failure loading the section: the comment list, or the entity itself when the section looks it up from `entityId`, `foreignId` or `shortId` and it can't be fetched or isn't found. Cleared when the next load starts. Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same page again, including a first page that failed. After a failed entity lookup, `loadMore()` looks the entity up again. A missing highlighted comment doesn't set it. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
@@ -365,8 +365,8 @@ function CommentList() {
   Whether to show a reply indicator UI banner. Set back to `false` when the section moves to another entity.
 </ResponseField>
 
-<ResponseField name="setShowReplyBanner" type="({ newState }: { newState: boolean }) => void">
-  Show or hide the reply banner.
+<ResponseField name="setShowReplyBanner" type="(show: boolean) => void">
+  Show (`true`) or hide (`false`) the reply banner.
 </ResponseField>
 
 <ResponseField name="pushMention" type="User | null">

@@ -62,7 +62,7 @@ function EventsList() {
 
 <ResponseField name="events" type="Event[]">The accumulated events.</ResponseField>
 <ResponseField name="loading" type="boolean">`true` while fetching.</ResponseField>
-<ResponseField name="error" type="Error | null">The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it.</ResponseField>
+<ResponseField name="error" type="SublayError | null">The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. A [`SublayError`](/v8/hooks/overview#sublayerror).</ResponseField>
 <ResponseField name="hasMore" type="boolean">`true` while `loadMore()` has something to fetch: a next page, or a load that failed.</ResponseField>
 <ResponseField name="sortBy" type='"startTime" | "going"'>Current sort field.</ResponseField>
 <ResponseField name="sortDir" type='"asc" | "desc" | null'>Current sort direction; `null` means the sort's natural one.</ResponseField>

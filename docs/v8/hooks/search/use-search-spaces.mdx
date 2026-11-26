@@ -65,8 +65,8 @@ Call `search` with:
   `true` while a search is in progress.
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  Error message if the last search failed.
+<ResponseField name="error" type="SublayError | null">
+  The error if the last search failed. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="search" type="(props) => Promise<void>">

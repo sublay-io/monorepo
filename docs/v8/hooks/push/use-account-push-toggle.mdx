@@ -23,7 +23,7 @@ import { useAccounts, useAccountPushToggle } from "@sublay/react-js";
 
 function PerAccountNotificationSettings() {
   const { accounts } = useAccounts();
-  const { setAccountPushEnabled, isAccountPushEnabled, isUpdating, error } =
+  const { setAccountPushEnabled, isAccountPushEnabled, updating, error } =
     useAccountPushToggle();
 
   return (
@@ -34,7 +34,7 @@ function PerAccountNotificationSettings() {
           <input
             type="checkbox"
             checked={isAccountPushEnabled(account.id)}
-            disabled={isUpdating}
+            disabled={updating}
             onChange={(e) =>
               setAccountPushEnabled({
                 userId: account.id,
@@ -46,7 +46,7 @@ function PerAccountNotificationSettings() {
           />
         </label>
       ))}
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{error.message}</p>}
     </>
   );
 }
@@ -70,12 +70,12 @@ function PerAccountNotificationSettings() {
   It is reported state, not the rule that decides whether a binding exists. An account reading as enabled purely because it never answered has no binding until it explicitly opts in — through this toggle, or through a [`register()`](/v8/hooks/push/use-push-registration) that records a preference for every account that never had one.
 </ResponseField>
 
-<ResponseField name="isUpdating" type="boolean">
+<ResponseField name="updating" type="boolean">
   `true` while a change is in flight.
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  The reason the last change failed, or `null`.
+<ResponseField name="error" type="SublayError | null">
+  The reason the last change failed, or `null`. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 ## Failure Semantics

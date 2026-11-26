@@ -80,8 +80,8 @@ Call `ask` with:
   `true` from `ask()` call until the first token arrives.
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  Error message if the request failed.
+<ResponseField name="error" type="SublayError | null">
+  The error if the request or the answer stream failed. Carries the server's `code` and `status` when it refused the request (for example `"project/plan-required"`). A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="ask" type="(props) => void">

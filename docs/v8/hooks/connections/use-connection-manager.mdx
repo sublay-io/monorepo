@@ -16,10 +16,10 @@ For integration guidance and a full example, see [Relationships — useConnectio
 import { useConnectionManager } from "@sublay/react-js";
 
 function ConnectionControls({ userId }: { userId: string }) {
-  const { connectionStatus, isLoading, sendConnectionRequest, acceptConnectionRequest } =
+  const { connectionStatus, loading, sendConnectionRequest, acceptConnectionRequest } =
     useConnectionManager({ userId });
 
-  if (isLoading) return null;
+  if (loading) return null;
   if (connectionStatus === "none")
     return <button onClick={() => sendConnectionRequest()}>Connect</button>;
   if (connectionStatus === "pending-received")
@@ -48,11 +48,11 @@ function ConnectionControls({ userId }: { userId: string }) {
   The connection record seen from the current user's side (`user` is the target user), or `null` if there is none. See [ConnectionRow](/v8/data-models/connection#connectionrow).
 </ResponseField>
 
-<ResponseField name="isLoading" type="boolean">
+<ResponseField name="loading" type="boolean">
   `true` while the initial status is being fetched.
 </ResponseField>
 
-<ResponseField name="sendConnectionRequest" type="(message?: string) => Promise<void>">
+<ResponseField name="sendConnectionRequest" type="(props?: { message?: string }) => Promise<void>">
   Sends a connection request. Only active when status is `"none"` or `"declined-received"`; the server rejects a new request while a declined one exists between the two users (`409 connection/request-declined`), so in `"declined-received"` the call fails. When the server answers with an existing row (your request was already pending, or you were connected meanwhile), the state takes that row. When the other user sent you a request meanwhile (`409 connection/request-received`), the call fails and the state takes their request from the error body, so `connectionStatus` becomes `"pending-received"` and `acceptConnectionRequest` works.
 </ResponseField>
 

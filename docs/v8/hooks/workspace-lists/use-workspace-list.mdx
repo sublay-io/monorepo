@@ -59,8 +59,8 @@ function WorkspaceSwitcher() {
   `true` while fetching.
 </ResponseField>
 
-<ResponseField name="error" type="Error | null">
-  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook on the same `listId`.
+<ResponseField name="error" type="SublayError | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook on the same `listId`. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">

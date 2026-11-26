@@ -50,7 +50,7 @@ Messages are sorted oldest-first in the returned array. `loadMore` fetches messa
 `ConversationProvider` loads its conversation's messages itself. Read them, with the conversation's members, from `useConversationContext()` (or `useConversationData({ conversationId })` without the provider):
 
 - `messages`, `messagesLoading`, `hasMore`
-- `messagesError` — the last failure loading messages, or `null`. Cleared when the next load starts.
+- `messagesError` — the last failure loading messages, as a [`SublayError`](/v8/hooks/overview#sublayerror), or `null`. Cleared when the next load starts.
 - `loadMore()` — loads older messages, or retries the load that failed. Never rejects.
 - `refetchMessages()` — reloads the latest page, replacing the loaded messages (optimistic and newer live ones are kept, and a message on the new page keeps the `files` / `grants` another hook fetched for it, except what the server hides on a deleted or removed message: its files (its author still sees the files of their own removed message) and a removed message's grants). Never rejects.
 

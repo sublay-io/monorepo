@@ -55,8 +55,8 @@ function SpaceHeader() {
   `true` while fetching the space.
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  Error message if the fetch failed.
+<ResponseField name="error" type="SublayError | null">
+  The last failure loading the space or running one of its operations (update, delete, join, leave), with the server's message and `code`. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 <ResponseField name="isMember" type="boolean">

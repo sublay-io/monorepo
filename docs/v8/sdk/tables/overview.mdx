@@ -34,7 +34,7 @@ function EventsTable() {
 
   return (
     <>
-      <button onClick={() => setSort("capacity", "desc")}>Sort by capacity</button>
+      <button onClick={() => setSort({ sortBy: "capacity", sortDir: "desc" })}>Sort by capacity</button>
       {rows.map((e) => (
         <div key={e.id}>{e.name} — {e.capacity}</div>
       ))}
@@ -52,7 +52,7 @@ The `name` you pass is the **logical** table name — Sublay applies the `custom
 
 Rows come back already paginated, sorted, and filtered according to the table's stored view. Adjust the view with `setPage`, `setSort`, `setFilters`, and `setIncludeDeleted`. Filters are `{ column, operator, value }` clauses (AND-combined) using the operators `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `in`, `contains`, `like`, `isNull`.
 
-On a **paranoid** table, soft-deleted rows are hidden by default; call `setIncludeDeleted(true)` to surface them, and `restoreRow(id)` to bring one back. `deleteRow(id)` soft-deletes on a paranoid table (pass `{ force: true }` to hard-delete) and hard-deletes otherwise.
+On a **paranoid** table, soft-deleted rows are hidden by default; call `setIncludeDeleted(true)` to surface them, and `restoreRow({ rowId })` to bring one back. `deleteRow({ rowId })` soft-deletes on a paranoid table (pass `force: true` to hard-delete) and hard-deletes otherwise.
 
 ## Hooks
 

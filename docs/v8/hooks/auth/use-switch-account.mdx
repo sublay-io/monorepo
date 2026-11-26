@@ -16,7 +16,7 @@ import { useAccounts, useSwitchAccount } from "@sublay/react-js";
 
 function AccountSwitcher() {
   const { accounts, activeAccount } = useAccounts();
-  const { switchAccount, isSwitching, error } = useSwitchAccount();
+  const { switchAccount, switching, error } = useSwitchAccount();
 
   return (
     <ul>
@@ -35,14 +35,14 @@ function AccountSwitcher() {
                      carries the reason and you stay signed in where you were. */
                 })
               }
-              disabled={isSwitching}
+              disabled={switching}
             >
               Switch
             </button>
           )}
         </li>
       ))}
-      {error && <p>{error}</p>}
+      {error && <p>{error.message}</p>}
     </ul>
   );
 }
@@ -52,7 +52,7 @@ function AccountSwitcher() {
 import { useSwitchAccount } from "@sublay/react-native";
 
 function SwitchButton({ userId }: { userId: string }) {
-  const { switchAccount, isSwitching } = useSwitchAccount();
+  const { switchAccount, switching } = useSwitchAccount();
 
   return (
     <Button
@@ -63,7 +63,7 @@ function SwitchButton({ userId }: { userId: string }) {
              unhandled rejection. */
         })
       }
-      disabled={isSwitching}
+      disabled={switching}
     />
   );
 }
@@ -96,13 +96,13 @@ The hook returns a `switchAccount` function that accepts:
   app.
 </ResponseField>
 
-<ResponseField name="isSwitching" type="boolean">
+<ResponseField name="switching" type="boolean">
   `true` while the switch is in progress (validating the target's stored
   credential, then swapping the session over).
 </ResponseField>
 
-<ResponseField name="error" type="string | null">
-  Error message if the switch failed, or `null` if no error occurred.
+<ResponseField name="error" type="SublayError | null">
+  The error if the switch failed, or `null` if no error occurred. A [`SublayError`](/v8/hooks/overview#sublayerror).
 </ResponseField>
 
 ## Failure Behavior

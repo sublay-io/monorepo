@@ -3,6 +3,8 @@ import { act, waitFor } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeChatMessage } from "../../../test-utils";
 import useLiveChatMessages from "./useLiveChatMessages";
+import { axiosPrivate as axiosPrivateInstance } from "../../../config/axios";
+import { okAxiosResponse, axiosErrorWithStatus } from "../../../test-utils";
 import type { ChatMessageListIncludeParam } from "../../../interfaces/models/ChatMessage";
 import { addOptimisticMessage, setThreadReplies, upsertMessage } from "../../../store/slices/chatSlice";
 
@@ -420,6 +422,86 @@ describe("useLiveChatMessages — refetch", () => {
     // Replaced: no gap between m2 and m8.
     expect(result.current.messages.map((m) => m.id)).toEqual(["m8", "m9"]);
     expect(axiosPrivate.calls("get")[2].config?.params).not.toHaveProperty("before", expect.anything());
+    vi.restoreAllMocks();
+  });
+});
+
+describe("useLiveChatMessages — two hooks opening one conversation", () => {
+  function holdTwo() {
+    const releases: Array<(fn: () => unknown) => void> = [];
+    for (let i = 0; i < 2; i++) {
+      vi.mocked(axiosPrivateInstance.get).mockImplementationOnce(
+        () =>
+          new Promise((resolve, reject) => {
+            releases.push((fn) => {
+              try {
+                resolve(fn());
+              } catch (e) {
+                reject(e);
+              }
+            });
+          }) as never,
+      );
+    }
+    return releases;
+  }
+  const page = (id: string) =>
+    okAxiosResponse(
+      { data: [makeChatMessage({ id, conversationId: "conversation-1" })], pagination: { hasMore: false } },
+      200,
+    );
+
+  it("stays loading until both opens have settled", async () => {
+    let releases!: ReturnType<typeof holdTwo>;
+    const { result } = renderHookWithAxios(
+      () => ({
+        a: useLiveChatMessages({ conversationId: "conversation-1", include: "files" }),
+        b: useLiveChatMessages({ conversationId: "conversation-1" }),
+      }),
+      { beforeRender: () => { releases = holdTwo(); } },
+    );
+    await waitFor(() => expect(releases).toHaveLength(2));
+    expect(result.current.a.loading).toBe(true);
+
+    await act(async () => {
+      releases[0](() => page("m1"));
+      await new Promise((r) => setTimeout(r, 10));
+    });
+    expect(result.current.a.loading).toBe(true);
+    expect(result.current.b.loading).toBe(true);
+
+    await act(async () => {
+      releases[1](() => page("m1"));
+      await new Promise((r) => setTimeout(r, 10));
+    });
+    expect(result.current.a.loading).toBe(false);
+    expect(result.current.b.loading).toBe(false);
+  });
+
+  it("one open landing clears the error the other open left", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    let releases!: ReturnType<typeof holdTwo>;
+    const { result } = renderHookWithAxios(
+      () => ({
+        a: useLiveChatMessages({ conversationId: "conversation-1", include: "files" }),
+        b: useLiveChatMessages({ conversationId: "conversation-1" }),
+      }),
+      { beforeRender: () => { releases = holdTwo(); } },
+    );
+    await waitFor(() => expect(releases).toHaveLength(2));
+
+    await act(async () => {
+      releases[0](() => { throw axiosErrorWithStatus(500, {}); });
+      await new Promise((r) => setTimeout(r, 10));
+    });
+    expect(result.current.a.error).toBeInstanceOf(Error);
+
+    await act(async () => {
+      releases[1](() => page("m1"));
+      await new Promise((r) => setTimeout(r, 10));
+    });
+    expect(result.current.a.error).toBeNull();
+    expect(result.current.b.messages.map((m) => m.id)).toEqual(["m1"]);
     vi.restoreAllMocks();
   });
 });

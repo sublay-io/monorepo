@@ -164,6 +164,14 @@ function useLiveChatMessages({
           errorLabel: isThread
             ? "Failed to load thread replies:"
             : "Failed to load messages:",
+          // `loading` clears once every load of this conversation (or thread)
+          // has settled, not when the first of two overlapping opens does.
+          onIdle: () =>
+            dispatch(
+              isThread
+                ? setThreadLoading({ parentMessageId: parentMessageId!, loading: false })
+                : setMessagesLoading({ conversationId, loading: false })
+            ),
         },
         async (isCurrent) => {
           if (!projectId || !conversationId) return;
@@ -179,33 +187,27 @@ function useLiveChatMessages({
             } else {
               dispatch(startThreadLoad({ parentMessageId: threadId }));
             }
-            try {
-              const {
-                data: items,
-                pagination: { hasMore: more },
-              } = await fetchMany({
-                conversationId,
+            const {
+              data: items,
+              pagination: { hasMore: more },
+            } = await fetchMany({
+              conversationId,
+              parentMessageId: threadId,
+              ...(after === undefined ? { before: null } : { after }),
+              limit,
+              sortDir: "asc",
+              include,
+            });
+            if (!isCurrent()) return;
+            // Thread replies come back ASC. Merged, not replaced, so a live
+            // reply that landed while this page was in flight is kept.
+            dispatch(
+              mergeThreadReplies({
                 parentMessageId: threadId,
-                ...(after === undefined ? { before: null } : { after }),
-                limit,
-                sortDir: "asc",
-                include,
-              });
-              if (!isCurrent()) return;
-              // Thread replies come back ASC. Merged, not replaced, so a live
-              // reply that landed while this page was in flight is kept.
-              dispatch(
-                mergeThreadReplies({
-                  parentMessageId: threadId,
-                  messages: items,
-                  hasMore: more,
-                })
-              );
-            } finally {
-              if (isCurrent()) {
-                dispatch(setThreadLoading({ parentMessageId: threadId, loading: false }));
-              }
-            }
+                messages: items,
+                hasMore: more,
+              })
+            );
             return;
           }
 
@@ -219,34 +221,28 @@ function useLiveChatMessages({
             before = oldest.id;
           }
           dispatch(setMessagesLoading({ conversationId, loading: true }));
-          try {
-            const {
-              data: items,
-              pagination: { hasMore: more },
-            } = await fetchMany({
-              conversationId,
-              parentMessageId,
-              before,
-              limit,
-              sortDir: "desc",
-              include,
-            });
-            if (!isCurrent()) return;
-            // Main stream comes back DESC (newest first for cursor efficiency).
-            // Redux stores messages ASC — reverse before dispatching.
-            const ascending = [...items].reverse();
-            if (kind === "refetch") {
-              dispatch(
-                replaceMessages({ conversationId, messages: ascending, hasMore: more })
-              );
-            } else {
-              ascending.forEach((msg) => dispatch(upsertMessage(msg)));
-              dispatch(setMessagesHasMore({ conversationId, hasMore: more }));
-            }
-          } finally {
-            if (isCurrent()) {
-              dispatch(setMessagesLoading({ conversationId, loading: false }));
-            }
+          const {
+            data: items,
+            pagination: { hasMore: more },
+          } = await fetchMany({
+            conversationId,
+            parentMessageId,
+            before,
+            limit,
+            sortDir: "desc",
+            include,
+          });
+          if (!isCurrent()) return;
+          // Main stream comes back DESC (newest first for cursor efficiency).
+          // Redux stores messages ASC — reverse before dispatching.
+          const ascending = [...items].reverse();
+          if (kind === "refetch") {
+            dispatch(
+              replaceMessages({ conversationId, messages: ascending, hasMore: more })
+            );
+          } else {
+            ascending.forEach((msg) => dispatch(upsertMessage(msg)));
+            dispatch(setMessagesHasMore({ conversationId, hasMore: more }));
           }
         }
       ),

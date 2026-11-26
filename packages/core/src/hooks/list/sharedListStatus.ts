@@ -139,6 +139,12 @@ export interface SharedListLoadOptions {
   kind?: string;
   /** Prefix for the logged failure; `null` when `load` logs it already. */
   errorLabel: string | null;
+  /**
+   * Called once no load of the current generation is running any more (after
+   * this one, and any sibling that ran alongside it, settled) — where a list
+   * whose loads can overlap clears its `loading` flag.
+   */
+  onIdle?: () => void;
 }
 
 /**
@@ -153,7 +159,7 @@ export async function runSharedListLoad(
   options: SharedListLoadOptions,
   load: (isCurrent: () => boolean) => Promise<void>,
 ): Promise<void> {
-  const { first, supersede = first, kind, errorLabel } = options;
+  const { first, supersede = first, kind, errorLabel, onIdle } = options;
   if (supersede) status.invalidate();
   const generation = status.generation;
   const isCurrent = () => generation === status.generation;
@@ -162,6 +168,9 @@ export async function runSharedListLoad(
   status.clearFailure();
   try {
     await load(isCurrent);
+    // A load of the current generation landed: a failure a sibling load left
+    // (another hook opening the same list) no longer stands.
+    if (isCurrent()) status.clearFailure();
   } catch (err) {
     if (!isCurrent()) return;
     status.failed = first ? "first" : "next";
@@ -170,6 +179,7 @@ export async function runSharedListLoad(
     if (errorLabel !== null) handleError(err, errorLabel);
   } finally {
     status.end(token);
+    if (isCurrent() && !status.inFlight) onIdle?.();
   }
 }
 

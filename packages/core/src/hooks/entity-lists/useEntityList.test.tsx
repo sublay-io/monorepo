@@ -460,6 +460,41 @@ describe("useEntityList — the list contract", () => {
     expect(params.get("limit")).toBe("3");
   });
 
+  it("warns in development about keys fetchEntities doesn't take", async () => {
+    vi.stubGlobal("__DEV__", true);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
+    const { result, unmount } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+
+    act(() => result.current.fetchEntities({ userId: "u" } as never));
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('"userId"'));
+
+    warn.mockClear();
+    act(() =>
+      result.current.fetchEntities({ filters: { userId: "u" }, options: { fetchImmediately: true } }),
+    );
+    expect(warn).not.toHaveBeenCalled();
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    unmount();
+    vi.unstubAllGlobals();
+  });
+
+  it("doesn't warn outside development", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
+    const { result, unmount } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+
+    act(() => result.current.fetchEntities({ userId: "u" } as never));
+    expect(warn).not.toHaveBeenCalledWith(expect.stringContaining("fetchEntities takes"));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    unmount();
+  });
+
   it("fetchEntities() with no argument loads the default first page", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "a1" }], false));
     const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {

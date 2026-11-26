@@ -40,6 +40,9 @@ import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
 
 import { handleError } from "../../utils/handleError";
 import type { SublayError } from "../../errors/SublayError";
+import { warnStrayFetchKeys } from "../../utils/warnStrayFetchKeys";
+
+const FETCH_KEYS = ["filters", "config", "options"] as const;
 
 export interface UseSpaceListProps {
   listId: string;
@@ -192,11 +195,9 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
 
   // Fetch spaces function (always triggers a fetch)
   const handleFetchSpaces = useCallback(
-    ({
-      filters: newFilters = {},
-      config: newConfig,
-      options,
-    }: SpaceListFetchSpacesProps = {}) => {
+    (props: SpaceListFetchSpacesProps = {}) => {
+      warnStrayFetchKeys("fetchSpaces", props, FETCH_KEYS);
+      const { filters: newFilters = {}, config: newConfig, options } = props;
       // Apply config defaults if not provided
       const configWithDefaults = {
         limit: 20,

@@ -42,6 +42,9 @@ import { KeywordsFilters } from "../../interfaces/entity-filters/KeywordsFilters
 
 import { handleError } from "../../utils/handleError";
 import type { SublayError } from "../../errors/SublayError";
+import { warnStrayFetchKeys } from "../../utils/warnStrayFetchKeys";
+
+const FETCH_ENTITIES_KEYS = ["filters", "sort", "config", "options"] as const;
 
 /** A list filter value as an entity field: `"none"` and no filter both mean no value. */
 const noneToUnset = (value: string | null | undefined): string | undefined =>
@@ -237,12 +240,14 @@ function useEntityList({
 
   // Fetch entities function (always triggers a fetch)
   const handleFetchEntities = useCallback(
-    ({
-      filters: newFilters = {},
-      sort: newSort,
-      config: newConfig,
-      options,
-    }: EntityListFetchEntitiesProps = {}) => {
+    (props: EntityListFetchEntitiesProps = {}) => {
+      warnStrayFetchKeys("fetchEntities", props, FETCH_ENTITIES_KEYS);
+      const {
+        filters: newFilters = {},
+        sort: newSort,
+        config: newConfig,
+        options,
+      } = props;
       // Apply config defaults if not provided
       // Each call sets the whole config: a field left out goes back to its
       // default rather than being carried over from the last fetch (loadMore

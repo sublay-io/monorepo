@@ -38,6 +38,9 @@ import type {
 
 import { handleError } from "../../utils/handleError";
 import type { SublayError } from "../../errors/SublayError";
+import { warnStrayFetchKeys } from "../../utils/warnStrayFetchKeys";
+
+const FETCH_KEYS = ["filters", "config", "options"] as const;
 
 export interface UseWorkspaceListProps {
   listId: string;
@@ -185,11 +188,9 @@ function useWorkspaceList({
 
   // Fetch workspaces (always triggers a fetch of page 1)
   const handleFetchWorkspaces = useCallback(
-    ({
-      filters: newFilters = {},
-      config: newConfig,
-      options,
-    }: WorkspaceListFetchWorkspacesProps = {}) => {
+    (props: WorkspaceListFetchWorkspacesProps = {}) => {
+      warnStrayFetchKeys("fetchWorkspaces", props, FETCH_KEYS);
+      const { filters: newFilters = {}, config: newConfig, options } = props;
       const configWithDefaults = {
         limit: 20,
         ...newConfig,

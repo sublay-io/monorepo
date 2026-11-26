@@ -238,7 +238,8 @@ function useLiveChatMessages({
             }
           }
         },
-        isThread ? "Failed to load thread replies:" : "Failed to load messages:"
+        isThread ? "Failed to load thread replies:" : "Failed to load messages:",
+        kind
       ),
     [status, store, projectId, conversationId, parentMessageId, isThread, limit, include, fetchMany, dispatch]
   );
@@ -266,7 +267,9 @@ function useLiveChatMessages({
   const loadMore = useCallback(async () => {
     if (!projectId || !conversationId || status.inFlight) return;
     if (status.failed === "first") {
-      await loadPage("open");
+      // A failed refetch is retried as a refetch (a fresh start), so no gap is
+      // left between what was held and the latest page.
+      await loadPage(status.failedKind === "refetch" ? "refetch" : "open");
       return;
     }
     const state = store.getState();

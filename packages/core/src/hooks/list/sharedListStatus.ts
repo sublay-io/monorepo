@@ -1,5 +1,7 @@
 import { useMemo, useSyncExternalStore } from "react";
 import { useStore } from "react-redux";
+import type { Store } from "@reduxjs/toolkit";
+import type { SublayState } from "../../store/sublayReducers";
 import { handleError } from "../../utils/handleError";
 import { toError } from "../../utils/toError";
 
@@ -22,6 +24,8 @@ export class SharedListStatus {
   /** A reset is scheduled (a debounced filter change): no page loads until it runs. */
   pendingReset = false;
   failed: "first" | "next" | null = null;
+  /** The `kind` the failed load was run with (see `runSharedListLoad`), so a retry repeats it. */
+  failedKind: string | null = null;
   private error: Error | null = null;
   private listeners = new Set<() => void>();
 
@@ -44,19 +48,36 @@ export class SharedListStatus {
   invalidate() {
     this.generation++;
     this.inFlight = false;
+    this.pendingReset = false;
     this.failed = null;
+    this.failedKind = null;
     this.setError(null);
   }
 }
 
+type SublayStore = Pick<Store<{ sublay: SublayState }>, "getState" | "subscribe">;
+
 // Keyed by the Redux store, so two providers (or two tests) never share one.
 const registry = new WeakMap<object, Map<string, SharedListStatus>>();
 
-export function getSharedListStatus(store: object, key: string): SharedListStatus {
+const readEpoch = (store: SublayStore) => store.getState().sublay?.accountEpoch ?? 0;
+
+export function getSharedListStatus(store: SublayStore, key: string): SharedListStatus {
   let lists = registry.get(store);
   if (!lists) {
-    lists = new Map();
-    registry.set(store, lists);
+    const created = new Map<string, SharedListStatus>();
+    lists = created;
+    registry.set(store, created);
+    // An account change (`resetAccountScopedState`) empties the lists in the
+    // store; their status starts over with them: errors cleared, and a load
+    // still in flight for the previous account dropped when it lands.
+    let epoch = readEpoch(store);
+    store.subscribe(() => {
+      const next = readEpoch(store);
+      if (next === epoch) return;
+      epoch = next;
+      created.forEach((status) => status.invalidate());
+    });
   }
   let status = lists.get(key);
   if (!status) {
@@ -71,7 +92,7 @@ export function useSharedListStatus(key: string): {
   status: SharedListStatus;
   error: Error | null;
 } {
-  const store = useStore();
+  const store = useStore<{ sublay: SublayState }>();
   const status = useMemo(() => getSharedListStatus(store, key), [store, key]);
   const error = useSyncExternalStore(status.subscribe, status.getError, status.getError);
   return { status, error };
@@ -83,25 +104,30 @@ export function useSharedListStatus(key: string): {
  * load or an `invalidate()`, it must write nothing (not even `loading:
  * false`). A failure is recorded on the status (`error`, `failed`) and
  * logged under `errorLabel` (`null`: `load` logs it already); the returned
- * promise never rejects.
+ * promise never rejects. `kind` (default: "first" or "next") is kept as
+ * `failedKind` when the load fails, for a retry that has to repeat the same
+ * kind of load.
  */
 export async function runSharedListLoad(
   status: SharedListStatus,
   first: boolean,
   load: (isCurrent: () => boolean) => Promise<void>,
   errorLabel: string | null,
+  kind?: string,
 ): Promise<void> {
   const generation = ++status.generation;
   const isCurrent = () => generation === status.generation;
   status.inFlight = true;
   status.pendingReset = false;
   status.failed = null;
+  status.failedKind = null;
   status.setError(null);
   try {
     await load(isCurrent);
   } catch (err) {
     if (!isCurrent()) return;
     status.failed = first ? "first" : "next";
+    status.failedKind = kind ?? status.failed;
     status.setError(toError(err));
     if (errorLabel !== null) handleError(err, errorLabel);
   } finally {

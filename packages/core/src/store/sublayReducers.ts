@@ -10,6 +10,7 @@ import accountsReducer from "./slices/accountsSlice";
 import chatReducer from "./slices/chatSlice";
 import tablesReducer from "./slices/tablesSlice";
 import fileLinksReducer from "./slices/fileLinksSlice";
+import accountEpochReducer from "./slices/accountEpochSlice";
 
 /**
  * Combined reducer for all Sublay feature slices.
@@ -43,6 +44,7 @@ export const sublayReducers = combineReducers({
   chat: chatReducer,
   tables: tablesReducer,
   fileLinks: fileLinksReducer,
+  accountEpoch: accountEpochReducer,
 });
 
 export type SublayState = ReturnType<typeof sublayReducers>;

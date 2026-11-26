@@ -451,7 +451,10 @@ function toAuthRejection(error: unknown): AuthRejection {
   return rejection;
 }
 
-const limitRejection = (): AuthRejection => ({ message: ACCOUNT_LIMIT_MESSAGE });
+/** A rejection for a failure the SDK found itself (no server answer). */
+const sdkRejection = (message: string): AuthRejection => ({ message });
+
+const limitRejection = (): AuthRejection => sdkRejection(ACCOUNT_LIMIT_MESSAGE);
 
 /** The message of a rejection payload: an `AuthRejection` or a plain string. */
 function rejectionMessage(payload: unknown): string | undefined {
@@ -628,7 +631,7 @@ export const signOutThunk = createAsyncThunk(
     const pushDevice = state.sublay.accounts.deviceIdentifier;
 
     if (!refreshToken) {
-      throw new SublayError("No refresh token");
+      return rejectWithValue(sdkRejection("No refresh token"));
     }
 
     try {
@@ -767,7 +770,7 @@ export interface RefreshRejectionMeta {
 export const requestNewAccessTokenThunk = createAsyncThunk<
   string,
   { projectId: string },
-  { rejectValue: string | AuthRejection; rejectedMeta: RefreshRejectionMeta }
+  { rejectValue: AuthRejection; rejectedMeta: RefreshRejectionMeta }
 >(
   "auth/requestNewAccessToken",
   async (
@@ -794,7 +797,7 @@ export const requestNewAccessTokenThunk = createAsyncThunk<
       // not about the network: an entry carrying no usable refresh token is
       // exactly an entry that needs a re-authentication, which is the same
       // reading `activateStoredAccount` gives the identical case.
-      return rejectWithValue("No refresh token available", {
+      return rejectWithValue(sdkRejection("No refresh token available"), {
         credentialRejected: true,
       });
     }
@@ -853,7 +856,7 @@ export const verifyExternalUserThunk = createAsyncThunk(
           projectId: data.projectId,
           refreshToken: result?.refreshToken,
         });
-        return rejectWithValue(ACCOUNT_LIMIT_MESSAGE);
+        return rejectWithValue(limitRejection());
       }
 
       // Update auth state
@@ -953,7 +956,7 @@ export const changePasswordThunk = createAsyncThunk(
       // Re-read: the bootstrap we just waited on is what populates `user`.
       const settled = (getState() as RootState).sublay.auth;
       if (!settled.user) {
-        return rejectWithValue("No user is authenticated");
+        return rejectWithValue(sdkRejection("No user is authenticated"));
       }
 
       // ── NAME THIS DEVICE. NOT THIS SESSION. ──────────────────────────────
@@ -1021,7 +1024,7 @@ export const setPasswordThunk = createAsyncThunk(
       const authorization = await withAuth(state.sublay.auth.accessToken);
 
       if (!(getState() as RootState).sublay.auth.user) {
-        return rejectWithValue("No user is authenticated");
+        return rejectWithValue(sdkRejection("No user is authenticated"));
       }
 
       await authService.setPassword(
@@ -1123,7 +1126,9 @@ export const signOutAllThunk = createAsyncThunk(
 
       if (blocked) {
         return rejectWithValue(
-          `Failed to sign out ${blockedOutcomes.length} of ${outcomes.length} accounts. Their sessions are still active — retry.`
+          sdkRejection(
+            `Failed to sign out ${blockedOutcomes.length} of ${outcomes.length} accounts. Their sessions are still active — retry.`
+          )
         );
       }
 
@@ -1233,7 +1238,7 @@ export const initializeAuthThunk = createAsyncThunk(
         // Safe to key on the payload: `verifyExternalUserThunk` has no caller
         // outside this thunk and is not exported from `index.ts`, so nothing
         // downstream rethrows its payload as a user-facing message.
-        if (verified.payload === ACCOUNT_LIMIT_MESSAGE) {
+        if (rejectionMessage(verified.payload) === ACCOUNT_LIMIT_MESSAGE) {
           throw new SublayError(ACCOUNT_LIMIT_MESSAGE);
         }
       }

@@ -379,7 +379,7 @@ describe("sign-up and sign-in rejections carry the server's error", () => {
 });
 
 describe("signOutThunk", () => {
-  it("throws a guard error when there is no refresh token", async () => {
+  it("rejects with a payload when there is no refresh token", async () => {
     const store = makeSublayStore();
 
     const result = await store.dispatch(signOutThunk({ projectId: "project-1" }));
@@ -390,7 +390,8 @@ describe("signOutThunk", () => {
     if (!signOutThunk.rejected.match(result)) {
       throw new Error("expected signOutThunk to reject");
     }
-    expect(result.error.message).toBe("No refresh token");
+    // A payload, so `useAuth().signOut` reports the reason, not "Unknown error".
+    expect(result.payload).toEqual({ message: "No refresh token" });
   });
 
   it("resets auth state on a standard sign-out (no other accounts)", async () => {
@@ -661,7 +662,7 @@ describe("requestNewAccessTokenThunk", () => {
     const result = await store.dispatch(requestNewAccessTokenThunk({ projectId: "project-1" }));
 
     expect(requestNewAccessTokenThunk.rejected.match(result)).toBe(true);
-    expect(result.payload).toBe("No refresh token available");
+    expect(result.payload).toEqual({ message: "No refresh token available" });
     expect(axios.calls("post")).toHaveLength(0);
   });
 
@@ -708,7 +709,7 @@ describe("changePasswordThunk", () => {
     // Regression: this guard used to `throw`, which leaves `payload` undefined —
     // and `useAuth` rethrows `new Error(result.payload)`, so the caller saw
     // literally "Error: undefined" instead of the reason.
-    expect(result.payload).toBe("No user is authenticated");
+    expect(result.payload).toEqual({ message: "No user is authenticated" });
   });
 
   it("succeeds when a user is authenticated", async () => {
@@ -852,7 +853,7 @@ describe("setPasswordThunk", () => {
     );
 
     expect(setPasswordThunk.rejected.match(result)).toBe(true);
-    expect(result.payload).toBe("No user is authenticated");
+    expect(result.payload).toEqual({ message: "No user is authenticated" });
   });
 
   it("succeeds when a user is authenticated", async () => {
@@ -1017,7 +1018,7 @@ describe("account-management thunks — cold start", () => {
 
     const result = await pending;
     expect(changePasswordThunk.rejected.match(result)).toBe(true);
-    expect(result.payload).toBe("No user is authenticated");
+    expect(result.payload).toEqual({ message: "No user is authenticated" });
     expect(axios.calls("post")).toHaveLength(0);
   });
 });
@@ -1658,7 +1659,7 @@ describe("account cap — Gate 2 (post-authentication, all four entry points)", 
     if (!verifyExternalUserThunk.rejected.match(result)) {
       throw new Error("expected the verification to reject");
     }
-    expect(result.payload).toBe(ACCOUNT_LIMIT_MESSAGE);
+    expect(result.payload).toEqual({ message: ACCOUNT_LIMIT_MESSAGE });
 
     const calls = axios.calls("post");
     expect(calls.map((c) => c.url)).toEqual([

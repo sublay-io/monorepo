@@ -182,6 +182,16 @@ describe("useAuth", () => {
     expect((thrown as { verificationId?: string }).verificationId).toBeUndefined();
   });
 
+  it("signOut with no refresh token rejects with the reason", async () => {
+    const { result } = renderHookWithAxios(() => useAuth(), { projectId: "project-1" });
+
+    const err = await result.current.signOut().catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(SublayError);
+    expect((err as SublayError).message).toBe("No refresh token");
+    expect((err as SublayError).code).toBeUndefined();
+  });
+
   it("signOut clears the token state", async () => {
     const { result, axiosPublic } = renderHookWithAxios(() => useAuth(), {
       projectId: "project-1",

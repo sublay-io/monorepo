@@ -76,7 +76,7 @@ Server rejections surface as a [`SublayError`](/v8/hooks/overview#sublayerror) c
 | `400` | `reputation-grant/self-grant` | The recipient is the logged-in user. |
 | `400` | `reputation-grant/space-mismatch` | The grant names a target and a `spaceId` that isn't the target's space (or any `spaceId` when the target is in no space). Omit `spaceId`, or send the target's own. |
 | `403` | `reputation-grant/user-grants-disabled` | The project has `settings.reputationGrants.allowUserInitiated` set to `false` (**Settings → SDK** in the dashboard). Route the grant through your backend with a service key instead. |
-| `403` | `database/tables-not-available` | The project lacks a table the grant needs — `spaces` for a `spaceId`, or the target's bundle for a `targetType`. `missingTables` names them. |
+| `403` | `database/tables-not-available` | The project lacks a table the grant needs — `spaces` for a `spaceId`, or the target's bundle for a `targetType`. `missingTables` (on the error's `body`) names them. |
 | `403` | `user/suspended` | A suspended user cannot send grants (they can still receive them). |
 | `404` | `reputation-grant/user-not-found` | The recipient doesn't exist — or one of the two parties has blocked the other. The two answers are identical on purpose. |
 | `404` | `reputation-grant/space-not-found` | The `spaceId` names no space in this project, or one whose content the sender can't read. Checked before any balance is touched. |

@@ -7,7 +7,7 @@ import { getAuthorizedToken } from "../../config/authGate";
 import { ContentSearchResult } from "./useSearchContent";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
-import { SublayError, toSublayError } from "../../errors/SublayError";
+import { SublayError, toSublayError, isPlainObject } from "../../errors/SublayError";
 
 function safeParseJson(
   text: string
@@ -30,6 +30,7 @@ function responseError(status: number, text: string): SublayError {
     code: textField(body?.code),
     param: textField(body?.param),
     status,
+    body: isPlainObject(body) ? body : undefined,
   });
 }
 
@@ -296,6 +297,7 @@ export default function useAskContent(): UseAskContentReturn {
                   new SublayError(textField(parsed?.error) ?? "The answer stream failed", {
                     code: textField(parsed?.code),
                     param: textField(parsed?.param),
+                    body: isPlainObject(parsed) ? parsed : undefined,
                   }),
                 );
                 setStreaming(false);

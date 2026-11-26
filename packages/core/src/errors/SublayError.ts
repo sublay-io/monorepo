@@ -6,8 +6,10 @@
  * HTTP status). When it didn't (no network, a timeout, a failure inside the
  * SDK), `message` describes what went wrong and there is no `code`.
  *
- * `cause` holds the original thrown value (the HTTP client's error, for a
- * failed request).
+ * `body` is the server's whole JSON error body as sent, extra fields included
+ * (for example `ownedWorkspaces`, `missingTables`, `verificationId`). `cause`
+ * holds the original thrown value (the HTTP client's error, for a failed
+ * request).
  */
 export class SublayError extends Error {
   /** The server's machine-readable error code, e.g. `"space/not-found"`. */
@@ -16,6 +18,11 @@ export class SublayError extends Error {
   readonly status?: number;
   /** The request field the error is about, when the server names one. */
   readonly param?: string;
+  /**
+   * The server's JSON error body as sent (`error`, `code`, `param` and any
+   * extra fields). Present only when the server answered with a JSON object.
+   */
+  readonly body?: Record<string, unknown>;
   /** The original thrown value this error was made from. */
   readonly cause?: unknown;
 
@@ -25,6 +32,7 @@ export class SublayError extends Error {
       code?: string;
       status?: number;
       param?: string;
+      body?: Record<string, unknown>;
       cause?: unknown;
     } = {}
   ) {
@@ -33,6 +41,7 @@ export class SublayError extends Error {
     if (options.code !== undefined) this.code = options.code;
     if (options.status !== undefined) this.status = options.status;
     if (options.param !== undefined) this.param = options.param;
+    if (options.body !== undefined) this.body = options.body;
     if (options.cause !== undefined) this.cause = options.cause;
 
     // Restore the prototype chain for `instanceof` across transpile targets.
@@ -44,7 +53,13 @@ const UNKNOWN_ERROR_MESSAGE = "Unknown error";
 
 const ABORT_NAMES = new Set(["AbortError", "CanceledError"]);
 
-type ErrorBody = { error?: unknown; code?: unknown; param?: unknown };
+
+/** A plain object (a parsed JSON body), not an array or a class instance. */
+export function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null) return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
 
 const nonEmptyString = (value: unknown): string | undefined =>
   typeof value === "string" && value.length > 0 ? value : undefined;
@@ -94,10 +109,7 @@ export function toSublayError(err: unknown): SublayError {
 
   const http = readHttpFailure(err);
   if (http) {
-    const body =
-      typeof http.body === "object" && http.body !== null
-        ? (http.body as ErrorBody)
-        : null;
+    const body = isPlainObject(http.body) ? http.body : null;
     const message =
       nonEmptyString(body?.error) ??
       nonEmptyString((err as { message?: unknown }).message) ??
@@ -106,6 +118,7 @@ export function toSublayError(err: unknown): SublayError {
       code: nonEmptyString(body?.code),
       param: nonEmptyString(body?.param),
       status: http.status,
+      body: body ?? undefined,
       cause: err,
     });
   }
@@ -145,6 +158,7 @@ export interface SublayErrorRecord {
   code?: string;
   status?: number;
   param?: string;
+  body?: Record<string, unknown>;
 }
 
 // The error each record was made from, so reading it back gives the same
@@ -158,6 +172,7 @@ export function toSublayErrorRecord(err: unknown): SublayErrorRecord {
   if (error.code !== undefined) record.code = error.code;
   if (error.status !== undefined) record.status = error.status;
   if (error.param !== undefined) record.param = error.param;
+  if (error.body !== undefined) record.body = error.body;
   originals.set(record, error);
   return record;
 }
@@ -170,19 +185,11 @@ export function fromSublayErrorRecord(record: SublayErrorRecord): SublayError {
       code: record.code,
       status: record.status,
       param: record.param,
+      body: record.body,
     })
   );
 }
 
-/**
- * The raw response body behind a failure, for the fields a few endpoints send
- * beyond `error` / `code` / `param` (a `verificationId`, a conflicting row).
- * Reads a `SublayError`'s `cause`, or the error itself. Internal.
- */
-export function errorResponseBody(err: unknown): unknown {
-  const source = err instanceof SublayError ? err.cause : err;
-  return readHttpFailure(source)?.body ?? null;
-}
 
 /**
  * For `.catch()` after an RTK Query `.unwrap()`: rethrows the failure as a

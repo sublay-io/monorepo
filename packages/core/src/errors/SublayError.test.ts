@@ -76,6 +76,39 @@ describe("toSublayError", () => {
     expect(error.cause).toBe(original);
   });
 
+  it("keeps an axios response's whole JSON body, extra fields included", () => {
+    const sent = {
+      error: "The member owns workspaces.",
+      code: "workspace/owns-descendants",
+      ownedWorkspaces: [{ id: "w1", name: "Design" }],
+      ownedCount: 1,
+    };
+
+    const error = toSublayError(axiosFailure(409, sent));
+
+    expect(error.body).toEqual(sent);
+    expect(error.body?.ownedCount).toBe(1);
+    expect(error.code).toBe("workspace/owns-descendants");
+  });
+
+  it("keeps an RTK Query response's JSON body", () => {
+    const sent = { error: "Missing tables.", code: "database/tables-not-available", missingTables: ["spaces"] };
+
+    const error = toSublayError({ status: 403, data: sent });
+
+    expect(error.body).toEqual(sent);
+    expect(error.body?.missingTables).toEqual(["spaces"]);
+  });
+
+  it("has no body for a non-JSON response or a failure with no answer", () => {
+    expect(toSublayError(axiosFailure(502, "<html>Bad gateway</html>")).body).toBeUndefined();
+    expect(
+      toSublayError({ status: "PARSING_ERROR", originalStatus: 502, data: "<html></html>" }).body,
+    ).toBeUndefined();
+    expect(toSublayError(axiosFailure(500, ["not", "an", "object"])).body).toBeUndefined();
+    expect(toSublayError(new Error("offline")).body).toBeUndefined();
+  });
+
   it("takes a network error's message, with no code or status", () => {
     const original = new AxiosError("Network Error", "ERR_NETWORK");
 
@@ -143,6 +176,7 @@ describe("SublayError records", () => {
       code: "user/username-taken",
       param: "username",
       status: 409,
+      body: { error: "Taken.", code: "user/username-taken", param: "username" },
     });
 
     const error = fromSublayErrorRecord(record);

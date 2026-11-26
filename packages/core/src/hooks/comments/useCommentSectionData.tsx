@@ -48,7 +48,7 @@ import {
 } from "../entities";
 import { isUUID } from "../../utils/isUUID";
 import { useStableObject } from "../useStableObject";
-import { SublayError, toSublayError, errorResponseBody } from "../../errors/SublayError";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 /**
  * Whether an entity's id field is the one an id prop names. Compared as
@@ -910,7 +910,6 @@ export function useCommentSectionDataInternal(
         settleCounts(false);
 
         const failed = toSublayError(err);
-        const body = errorResponseBody(err) as { error?: unknown } | null;
         // A write refused because the user is suspended arrives as a
         // `SuspendedError` (the response interceptor converts the 403): its
         // details are on the error itself.
@@ -923,7 +922,7 @@ export function useCommentSectionDataInternal(
             }
           : {
               code: failed.code,
-              message: typeof body?.error === "string" ? body.error : undefined,
+              message: typeof failed.body?.error === "string" ? failed.body.error : undefined,
               status: failed.status,
               parentCommentId: newParentId,
             };

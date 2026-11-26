@@ -40,7 +40,7 @@ import type {
   EmailVerificationOptions,
   EmailVerificationRequiredResult,
 } from "../../interfaces/EmailVerification";
-import { toSublayError, errorResponseBody } from "../../errors/SublayError";
+import { toSublayError } from "../../errors/SublayError";
 import { SublayError } from "../../errors/SublayError";
 
 // Account-management endpoints (change/set password, confirm account deletion)
@@ -437,13 +437,13 @@ async function refuseAtAccountLimit({
  */
 function toAuthRejection(error: unknown): AuthRejection {
   const failure = toSublayError(error);
-  const data = errorResponseBody(error) as { verificationId?: unknown } | null;
   const rejection: AuthRejection = { message: failure.message };
   if (failure.code !== undefined) rejection.code = failure.code;
   if (failure.param !== undefined) rejection.param = failure.param;
   if (failure.status !== undefined) rejection.status = failure.status;
-  if (typeof data?.verificationId === "string") {
-    rejection.verificationId = data.verificationId;
+  const verificationId = failure.body?.verificationId;
+  if (typeof verificationId === "string") {
+    rejection.verificationId = verificationId;
   }
   return rejection;
 }

@@ -259,7 +259,7 @@ describe("useAskContent", () => {
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.error?.message).toBe("Semantic search requires a paid plan");
+    expect(result.current.error?.message).toBe("Semantic search requires a paid plan");    expect(result.current.error?.body).toMatchObject({ code: "project/plan-required" });
     expect(mockedRefresh).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });

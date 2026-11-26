@@ -43,8 +43,12 @@ Every hook follows the same rules for its flags, errors and functions.
   The request field the error is about, when the server names one (for example `"username"`).
 </ResponseField>
 
+<ResponseField name="body" type="Record<string, unknown> | undefined">
+  The server's JSON error body exactly as sent: `error`, `code`, `param` and any extra fields a response carries (each hook's page lists them), such as `ownedWorkspaces` and `ownedCount`, `missingTables`, `verificationId`, or a 500's `details`. Present only when the server answered with a JSON object; a non-JSON answer (an HTML error page) and a failure with no answer have no `body`.
+</ResponseField>
+
 <ResponseField name="cause" type="unknown">
-  The original thrown value, such as the HTTP client's error. A few error responses carry fields beyond `error`, `code` and `param` (each hook's page lists them); they are in that response's body, `cause.response.data`.
+  The original thrown value, such as the HTTP client's error.
 </ResponseField>
 
 Branch on `code`, which stays the same when the server rewords a message:

@@ -1,3 +1,4 @@
+import useProject from "../projects/useProject";
 import { Reaction, ReactionType } from "../../interfaces/models/Reaction";
 import useFetchCommentReactions from "./useFetchCommentReactions";
 import { useListEngine } from "../list/useListEngine";
@@ -41,6 +42,9 @@ function useFetchCommentReactionsWrapper(
 
   const fetchCommentReactions = useFetchCommentReactions();
 
+  // A different project is a different list.
+  const { projectId } = useProject();
+
   // The one request builder for every page.
   const buildParams = (page: number) => ({
     commentId,
@@ -52,7 +56,7 @@ function useFetchCommentReactionsWrapper(
 
   const list = useListEngine<Reaction, number>({
     enabled: !!commentId,
-    resetKey: JSON.stringify(buildParams(1)),
+    resetKey: JSON.stringify([projectId, buildParams(1)]),
     autoLoad: autoFetch,
     fetchPage: pageNumberPaging((page) => fetchCommentReactions(buildParams(page))),
     errorLabel: "Failed to fetch reactions:",

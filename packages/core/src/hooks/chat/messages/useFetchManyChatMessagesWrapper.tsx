@@ -1,3 +1,4 @@
+import useProject from "../../projects/useProject";
 import {
   ChatMessage,
   ChatMessageListIncludeParam,
@@ -67,6 +68,9 @@ function useFetchManyChatMessagesWrapper(
 
   const fetchMany = useFetchManyChatMessages();
 
+  // A different project is a different list.
+  const { projectId } = useProject();
+
   // The one request builder for every page. The cursor is the id of the last
   // message loaded, the furthest one in the direction of travel (the oldest
   // for "desc", the newest for "asc").
@@ -89,7 +93,7 @@ function useFetchManyChatMessagesWrapper(
     enabled: !!conversationId,
     // Serialized, so an inline `filters` object or `include` array (a fresh
     // reference every render) doesn't restart the list.
-    resetKey: JSON.stringify(buildParams(null)),
+    resetKey: JSON.stringify([projectId, buildParams(null)]),
     fetchPage: async (cursor) => {
       const res = await fetchMany(buildParams(cursor));
       const last = res.data[res.data.length - 1];

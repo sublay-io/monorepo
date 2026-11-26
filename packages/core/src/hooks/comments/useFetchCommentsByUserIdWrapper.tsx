@@ -1,3 +1,4 @@
+import useProject from "../projects/useProject";
 import { useCallback } from "react";
 import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import { CommentsSortByOptions } from "../../interfaces/CommentsSortByOptions";
@@ -52,7 +53,10 @@ function useFetchCommentsByUserIdWrapper(
 
   const fetchCommentsByUserId = useFetchCommentsByUserId();
 
+  // A different project is a different list.
+  const { projectId } = useProject();
   const resetKey = JSON.stringify({
+    projectId,
     userId,
     entityId,
     sourceId,

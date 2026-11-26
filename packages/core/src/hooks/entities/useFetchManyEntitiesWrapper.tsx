@@ -1,3 +1,4 @@
+import useProject from "../projects/useProject";
 import { useState } from "react";
 import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import { EntityListSortByOptions, SortByReaction, SortDirection, SortType } from "../../interfaces/EntityListSortByOptions";
@@ -113,6 +114,9 @@ function useFetchManyEntitiesWrapper(
   const [sortDir, setSortDir] = useState<SortDirection>(defaultSortDir);
   const [sortType, setSortType] = useState<SortType>(defaultSortType);
 
+  // A different project is a different list.
+  const { projectId } = useProject();
+
   // The one request builder for every page: a param can't be sent with page 1
   // and left off page 2.
   const buildParams = (page: number) => ({
@@ -142,7 +146,7 @@ function useFetchManyEntitiesWrapper(
 
   // Serialized, so an inline filter object or `include` array (a fresh
   // reference every render) doesn't restart the list.
-  const resetKey = JSON.stringify(buildParams(1));
+  const resetKey = JSON.stringify([projectId, buildParams(1)]);
 
   const list = useListEngine<Entity, number>({
     enabled: true,

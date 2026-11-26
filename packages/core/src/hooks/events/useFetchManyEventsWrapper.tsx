@@ -1,3 +1,4 @@
+import useProject from "../projects/useProject";
 import { useState } from "react";
 import {
   Event,
@@ -99,6 +100,9 @@ function useFetchManyEventsWrapper(
   const [sortBy, setSortBy] = useState<EventSortBy>(defaultSortBy);
   const [sortDir, setSortDir] = useState<EventSortDir | null>(defaultSortDir);
 
+  // A different project is a different list.
+  const { projectId } = useProject();
+
   // The one request builder for every page: a param can't be sent with page 1
   // and left off page 2.
   const buildParams = (page: number) => ({
@@ -122,7 +126,7 @@ function useFetchManyEventsWrapper(
 
   // Serialized, so an inline filter object or array (a fresh reference every
   // render) doesn't restart the list.
-  const resetKey = JSON.stringify(buildParams(1));
+  const resetKey = JSON.stringify([projectId, buildParams(1)]);
 
   const list = useListEngine<Event, number>({
     enabled: true,

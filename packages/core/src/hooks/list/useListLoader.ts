@@ -107,26 +107,37 @@ export function useListLoader<TItem, TCursor>(
 
   const run = useCallback(async (first: boolean) => {
     const generation = ++generationRef.current;
+    // The options of the query this load is for: a page that lands after the
+    // next query has rendered (but before its effect has reset the list) is
+    // handed to this query's `onPage`, or dropped once the key moved on.
+    const request = latest.current;
     loadingRef.current = true;
     failedRef.current = null;
     setLoading(true);
     setError(null);
     try {
-      const page = await latest.current.fetchPage(first ? null : cursorRef.current);
-      if (generation !== generationRef.current) return;
-      latest.current.onPage(page, first);
+      const page = await request.fetchPage(first ? null : cursorRef.current);
+      if (
+        generation !== generationRef.current ||
+        latest.current.resetKey !== request.resetKey ||
+        latest.current.enabled !== request.enabled
+      ) {
+        return;
+      }
+      request.onPage(page, first);
       loadedRef.current = true;
       cursorRef.current = page.nextCursor;
       hasMoreRef.current = page.hasMore;
       setHasMore(page.hasMore);
     } catch (err) {
       if (generation !== generationRef.current) return;
+      if (latest.current.resetKey !== request.resetKey) return;
       failedRef.current = first ? "first" : "next";
       // The failed load is still to do: `loadMore()` retries it.
       hasMoreRef.current = true;
       setHasMore(true);
       setError(toError(err));
-      handleError(err, latest.current.errorLabel);
+      handleError(err, request.errorLabel);
     } finally {
       if (generation === generationRef.current) {
         loadingRef.current = false;

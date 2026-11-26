@@ -60,6 +60,22 @@ describe("toSublayError", () => {
     expect(error.code).toBeUndefined();
   });
 
+  it("keeps the status of an RTK Query response whose body isn't JSON", () => {
+    const original = {
+      status: "PARSING_ERROR",
+      originalStatus: 502,
+      data: "<html>Bad gateway</html>",
+      error: "SyntaxError: Unexpected token '<'",
+    };
+
+    const error = toSublayError(original);
+
+    expect(error.status).toBe(502);
+    expect(error.message).toBe("Request failed with status 502");
+    expect(error.code).toBeUndefined();
+    expect(error.cause).toBe(original);
+  });
+
   it("takes a network error's message, with no code or status", () => {
     const original = new AxiosError("Network Error", "ERR_NETWORK");
 

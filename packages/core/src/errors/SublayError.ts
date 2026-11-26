@@ -50,8 +50,8 @@ const nonEmptyString = (value: unknown): string | undefined =>
 /**
  * The status and body of a failed HTTP request, from either client the SDK
  * uses: axios (`err.response`) or RTK Query's `fetchBaseQuery` (`{ status,
- * data }`, with a numeric status). `null` for anything that isn't a server
- * answer.
+ * data }` with a numeric status, or a `PARSING_ERROR` with its
+ * `originalStatus`). `null` for anything that isn't a server answer.
  */
 function readHttpFailure(
   err: unknown
@@ -62,9 +62,14 @@ function readHttpFailure(
   if (response && typeof response.status === "number") {
     return { status: response.status, body: response.data };
   }
-  const rtk = err as { status?: unknown; data?: unknown };
+  const rtk = err as { status?: unknown; originalStatus?: unknown; data?: unknown };
   if (typeof rtk.status === "number" && "data" in rtk) {
     return { status: rtk.status, body: rtk.data };
+  }
+  // A response whose body isn't JSON (a proxy's HTML error page): RTK Query
+  // reports `status: "PARSING_ERROR"` with the real status as `originalStatus`.
+  if (rtk.status === "PARSING_ERROR" && typeof rtk.originalStatus === "number") {
+    return { status: rtk.originalStatus, body: rtk.data };
   }
   return null;
 }

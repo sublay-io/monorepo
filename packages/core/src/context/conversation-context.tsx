@@ -134,17 +134,21 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           // A fresh start: an older page still in flight (`loadMore`) must
           // not land after it and reopen the gap.
           messagesStatus.invalidate();
-          const latest = await fetchMany({ conversationId, sortDir: "desc" });
-          dispatch(
-            replaceMessages({
-              conversationId,
-              // Newest first from the server; the store keeps messages ascending.
-              messages: [...latest.data].reverse(),
-              hasMore: latest.pagination.hasMore,
-            }),
-          );
-          // The dropped page (if one was loading) won't clear `loading`.
-          dispatch(setMessagesLoading({ conversationId, loading: false }));
+          try {
+            const latest = await fetchMany({ conversationId, sortDir: "desc" });
+            dispatch(
+              replaceMessages({
+                conversationId,
+                // Newest first from the server; the store keeps messages ascending.
+                messages: [...latest.data].reverse(),
+                hasMore: latest.pagination.hasMore,
+              }),
+            );
+          } finally {
+            // The dropped page (if one was loading) won't clear `loading`,
+            // whether this fetch lands or fails.
+            dispatch(setMessagesLoading({ conversationId, loading: false }));
+          }
           messagesStatus.clearFailure();
           return;
         }

@@ -753,6 +753,35 @@ describe("ConversationProvider", () => {
       expect(result.current.messagesLoading).toBe(false);
     });
 
+    it("doesn't leave messagesLoading stuck when the fallback fetch fails too, with an older page in flight", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")], true),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      await waitForMarked(axiosPrivate, "message-1");
+
+      vi.mocked(axiosPrivateInstance.get).mockImplementationOnce(
+        () => new Promise(() => {}) as never,
+      );
+      act(() => {
+        result.current.loadMore!();
+      });
+      await waitFor(() => expect(result.current.messagesLoading).toBe(true));
+      const invalid = { error: "Invalid cursor", code: "chat/invalid-cursor", param: "after" };
+      axiosPrivate.mockError("get", 400, invalid);
+      axiosPrivate.mockError("get", 500);
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+      await waitFor(() => expect(catchUpCalls(axiosPrivate)).toHaveLength(3));
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      vi.mocked(console.error).mockRestore();
+    });
+
     it("anchors on the newest real message, not an optimistic one, when the socket drops", async () => {
       const fakeSocket = createFakeSocket();
       fakeSocket.connected = true;

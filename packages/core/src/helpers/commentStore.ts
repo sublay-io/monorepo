@@ -194,6 +194,26 @@ export function applyRepliesPage(
 }
 
 /**
+ * Store a comment's first page of replies again (a refetch): the replies
+ * loaded before are unlinked from the parent — except the viewer's own new
+ * ones — and the page is applied as by `applyRepliesPage`.
+ */
+export function replaceRepliesPage(
+  store: CommentStore,
+  parentId: string,
+  page: CursorPaginatedResponse<Comment>,
+): CommentStore {
+  const parent = store.nodes[parentId];
+  if (!parent) return applyRepliesPage(store, parentId, page);
+  const kept = parent.childIds.filter((id) => store.nodes[id]?.new);
+  const cleared: CommentStore = {
+    ...store,
+    nodes: { ...store.nodes, [parentId]: { ...parent, childIds: kept } },
+  };
+  return applyRepliesPage(cleared, parentId, page);
+}
+
+/**
  * Insert a deep-linked comment: the parent first, then the target. The parent
  * lists the target as a child and — unless its replies were already loaded —
  * stays "not loaded", so it has more to load exactly when its `repliesCount`

@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ChatMessage,
   ChatMessageListIncludeParam,
 } from "../../../interfaces/models/ChatMessage";
-import { handleError } from "../../../utils/handleError";
+import { useListEngine } from "../../list/useListEngine";
 import useFetchManyChatMessages, {
   MessageFilters,
 } from "./useFetchManyChatMessages";
@@ -32,10 +31,18 @@ export interface UseFetchManyChatMessagesWrapperProps extends SpaceReputationCon
 export interface UseFetchManyChatMessagesWrapperValues {
   messages: ChatMessage[];
   loading: boolean;
+  /** The last load failure. Cleared when the next load starts; `loadMore()` retries it. */
+  error: Error | null;
+  /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
-  loadMore: () => void;
-  /** Re-fetch the first page from scratch (e.g. to pick up new matches). */
-  refetch: () => void;
+  /**
+   * Load the next page in the list's order (older messages with `"desc"`,
+   * newer with `"asc"`), or retry the load that failed. Does nothing while
+   * loading or when there is nothing more. Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /** Reload the first page (e.g. to pick up new matches). Never rejects. */
+  refetch: () => Promise<void>;
 }
 
 /**
@@ -58,99 +65,52 @@ function useFetchManyChatMessagesWrapper(
     spaceReputation,
   } = props;
 
-  // Forwarded to the leaf fetcher, which flattens it via
-  // buildSpaceReputationParams before it reaches the serializer.
-  const reputation = { spaceReputation };
-  const reputationKey = JSON.stringify(reputation);
-
   const fetchMany = useFetchManyChatMessages();
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
+  // The one request builder for every page. The cursor is the id of the last
+  // message loaded, the furthest one in the direction of travel (the oldest
+  // for "desc", the newest for "asc").
+  const buildParams = (cursor: string | null) => ({
+    conversationId,
+    parentMessageId,
+    limit,
+    sortDir,
+    include,
+    filters,
+    spaceReputation,
+    ...(cursor === null
+      ? {}
+      : sortDir === "asc"
+        ? { after: cursor }
+        : { before: cursor }),
+  });
 
-  // Cursor for the next page: the id of the last message loaded, which is the
-  // furthest one in the direction of travel (the oldest for "desc", the newest
-  // for "asc").
-  const cursorRef = useRef<string | null>(null);
-  const loadingRef = useRef(false);
-  const hasMoreRef = useRef(true);
+  const list = useListEngine<ChatMessage, string>({
+    enabled: !!conversationId,
+    // Serialized, so an inline `filters` object or `include` array (a fresh
+    // reference every render) doesn't restart the list.
+    resetKey: JSON.stringify(buildParams(null)),
+    fetchPage: async (cursor) => {
+      const res = await fetchMany(buildParams(cursor));
+      const last = res.data[res.data.length - 1];
+      return {
+        items: res.data,
+        hasMore: res.pagination.hasMore,
+        // An empty page leaves the cursor where it was.
+        nextCursor: last ? last.id : cursor,
+      };
+    },
+    errorLabel: "Failed to fetch messages:",
+  });
 
-  // Stable primitive for dependency arrays — `filters` is a fresh object each
-  // render unless the caller memoizes it.
-  const filtersKey = JSON.stringify(filters ?? {});
-  const includeKey = Array.isArray(include) ? include.join(",") : include ?? "";
-
-  const advanceCursor = (page: ChatMessage[]) => {
-    const last = page[page.length - 1];
-    if (last) cursorRef.current = last.id;
+  return {
+    messages: list.items,
+    loading: list.loading,
+    error: list.error,
+    hasMore: list.hasMore,
+    loadMore: list.loadMore,
+    refetch: list.refetch,
   };
-
-  const refetch = useCallback(async () => {
-    if (!conversationId) return;
-    loadingRef.current = true;
-    setLoading(true);
-    hasMoreRef.current = true;
-    setHasMore(true);
-    try {
-      const res = await fetchMany({
-        conversationId,
-        parentMessageId,
-        limit,
-        sortDir,
-        include,
-        filters,
-        ...reputation,
-      });
-      cursorRef.current = null;
-      setMessages(res.data);
-      hasMoreRef.current = res.pagination.hasMore;
-      setHasMore(res.pagination.hasMore);
-      advanceCursor(res.data);
-    } catch (err) {
-      handleError(err, "Failed to fetch messages");
-    } finally {
-      loadingRef.current = false;
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeKey, filtersKey, reputationKey]);
-
-  const loadMore = useCallback(async () => {
-    if (loadingRef.current || !hasMoreRef.current || !cursorRef.current) return;
-    loadingRef.current = true;
-    setLoading(true);
-    try {
-      const res = await fetchMany({
-        conversationId,
-        parentMessageId,
-        limit,
-        sortDir,
-        include,
-        filters,
-        ...reputation,
-        ...(sortDir === "asc"
-          ? { after: cursorRef.current }
-          : { before: cursorRef.current }),
-      });
-      setMessages((prev) => [...prev, ...res.data]);
-      hasMoreRef.current = res.pagination.hasMore;
-      setHasMore(res.pagination.hasMore);
-      advanceCursor(res.data);
-    } catch (err) {
-      handleError(err, "Failed to load more messages");
-    } finally {
-      loadingRef.current = false;
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeKey, filtersKey, reputationKey]);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  return { messages, loading, hasMore, loadMore, refetch };
 }
 
 export default useFetchManyChatMessagesWrapper;

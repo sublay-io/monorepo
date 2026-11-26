@@ -21,6 +21,7 @@ import {
   CommentsSortByOptions,
 } from "../../interfaces/CommentsSortByOptions";
 import { handleError } from "../../utils/handleError";
+import { toError } from "../../utils/toError";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import {
   CommentStore,
@@ -89,6 +90,12 @@ export interface UseEntityCommentsValues {
    * (failures land in `error`).
    */
   loadMore: () => Promise<void>;
+  /**
+   * Reload the top-level comments from the first page with the current sort.
+   * What is loaded stays until the new first page replaces it. Never throws
+   * (failures land in `error`; `loadMore()` retries).
+   */
+  refetch: () => Promise<void>;
   /** A loaded comment by id (without nested `replies`). */
   getComment: (commentId: string) => Comment | undefined;
 }
@@ -123,8 +130,6 @@ export type CommentStoreSeed = (
 export const CommentSectionInternalContext =
   createContext<CommentSectionInternals | null>(null);
 
-const toError = (err: unknown): Error =>
-  err instanceof Error ? err : new Error(String(err));
 
 /** Dev-mode hint when the section's own request is over the server's row budget. */
 function reportBudgetError(err: unknown) {
@@ -203,6 +208,7 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
   const cursorRef = useRef<string | null>(null);
   const generationRef = useRef(0);
   const seedRef = useRef<CommentStoreSeed | null>(null);
+  const refetchFailedRef = useRef(false);
 
   // The reaction only matters to `top`; keyed on the effective value so
   // changing it under another sort doesn't reset the section.
@@ -224,11 +230,13 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
 
   // Everything one top-level page request needs, kept current for loadMore.
   const requestRef =
-    useRef<() => Promise<CursorPaginatedResponse<Comment>>>(undefined);
-  requestRef.current = () =>
+    useRef<(cursor: string | null) => Promise<CursorPaginatedResponse<Comment>>>(
+      undefined,
+    );
+  requestRef.current = (cursor) =>
     fetchManyComments({
       entityId: entityId as string,
-      cursor: cursorRef.current,
+      cursor,
       limit,
       ...oneWaySortFields(sectionSort.sortBy, sectionSort.sortDir),
       sortByReaction: sectionSort.sortByReaction,
@@ -249,31 +257,43 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
       ...reputation,
     });
 
-  const runFetch = useCallback(async (reset: boolean) => {
+  // `reset`: start over from the first page. `keep`: leave what is loaded in
+  // place until that page arrives (a refetch) instead of clearing it first.
+  const runFetch = useCallback(async (reset: boolean, keep = false) => {
     const generation = reset ? ++generationRef.current : generationRef.current;
     loadingRef.current = true;
     setLoading(true);
     // A new attempt (reset or retry) starts clean.
     setError(null);
-    if (reset) {
-      cursorRef.current = null;
-      hasMoreRef.current = true;
-      setHasMore(true);
+    const startOver = (previous: CommentStore) => {
       const empty = emptyCommentStore();
       const seed = seedRef.current;
-      setStore((previous) => (seed ? seed(empty, previous) : empty));
+      return seed ? seed(empty, previous) : empty;
+    };
+    if (reset) {
+      cursorRef.current = null;
+      if (!keep) {
+        hasMoreRef.current = true;
+        setHasMore(true);
+        setStore(startOver);
+      }
     }
     try {
-      const response = await requestRef.current!();
+      const response = await requestRef.current!(reset ? null : cursorRef.current);
       if (generation !== generationRef.current) return;
       const { data, pagination } = response;
-      setStore((prev) => insertComments(prev, data));
+      setStore((prev) => insertComments(reset && keep ? startOver(prev) : prev, data));
       cursorRef.current = pagination.nextCursor;
       hasMoreRef.current = pagination.hasMore;
       setHasMore(pagination.hasMore);
       setError(null);
     } catch (err) {
       if (generation !== generationRef.current) return;
+      // The failed load is still to do: `loadMore()` retries it. A failed
+      // refetch keeps what was loaded, so its retry is a refetch again.
+      if (reset && keep) refetchFailedRef.current = true;
+      hasMoreRef.current = true;
+      setHasMore(true);
       setError(toError(err));
       reportBudgetError(err);
       handleError(err, "Failed to load comments:");
@@ -294,6 +314,7 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
       return;
     }
     setStoreEntityId(entityId);
+    refetchFailedRef.current = false;
     runFetch(true);
   }, [
     entityId,
@@ -311,8 +332,20 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
   ]);
 
   const loadMore = useCallback(async () => {
-    if (!entityId || loadingRef.current || !hasMoreRef.current) return;
+    if (!entityId || loadingRef.current) return;
+    if (refetchFailedRef.current) {
+      refetchFailedRef.current = false;
+      await runFetch(true, true);
+      return;
+    }
+    if (!hasMoreRef.current) return;
     await runFetch(false);
+  }, [entityId, runFetch]);
+
+  const refetch = useCallback(async () => {
+    if (!entityId) return;
+    refetchFailedRef.current = false;
+    await runFetch(true, true);
   }, [entityId, runFetch]);
 
   const { comments, newComments } = useMemo(
@@ -357,6 +390,7 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
       sortByReaction,
       setSortByReaction,
       loadMore,
+      refetch,
       getComment,
     },
     internals,

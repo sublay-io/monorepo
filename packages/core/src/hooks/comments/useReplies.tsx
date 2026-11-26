@@ -2,12 +2,14 @@ import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { Comment } from "../../interfaces/models/Comment";
 import { handleError } from "../../utils/handleError";
+import { toError } from "../../utils/toError";
 import useFetchManyComments from "./useFetchManyComments";
 import { isUUID } from "../../utils/isUUID";
 import { CommentSectionInternalContext } from "./useEntityComments";
 import {
   applyRepliesPage,
   nodeRepliesHasMore,
+  replaceRepliesPage,
   selectReplies,
 } from "../../helpers/commentStore";
 import {
@@ -55,10 +57,15 @@ export interface UseRepliesValues {
    * more; never throws (failures land in `error`).
    */
   loadMore: (options?: LoadMoreRepliesOptions) => Promise<void>;
+  /**
+   * Reload this comment's replies from the first page, nested as a first load
+   * is. The replies loaded so far stay until the new page replaces them; the
+   * viewer's own new replies are kept. Never throws (failures land in
+   * `error`; `loadMore()` retries the refetch).
+   */
+  refetch: (options?: LoadMoreRepliesOptions) => Promise<void>;
 }
 
-const toError = (err: unknown): Error =>
-  err instanceof Error ? err : new Error(String(err));
 
 /**
  * A comment's replies inside a `CommentSectionProvider`. Never fetches on its
@@ -86,8 +93,10 @@ function useReplies({
   // section reset (sort change) makes an older failure stale, so it no longer
   // shows.
   const [failures, setFailures] = useState<
-    Record<string, { error: Error; generation: number }>
+    Record<string, { error: Error; generation: number; refetch: boolean }>
   >({});
+  const failuresRef = useRef(failures);
+  failuresRef.current = failures;
   const loading = loadingIds.has(commentId);
   const failure = failures[commentId];
   const error =
@@ -110,17 +119,17 @@ function useReplies({
   const latest = useRef({ internals, hasMore, replyDepthProp, limit });
   latest.current = { internals, hasMore, replyDepthProp, limit };
 
-  const loadMore = useCallback(
-    async (options: LoadMoreRepliesOptions = {}) => {
-      const { internals: ctx, hasMore: more, replyDepthProp: depthProp, limit: defaultLimit } =
+  const load = useCallback(
+    async (options: LoadMoreRepliesOptions, refetch: boolean) => {
+      const { internals: ctx, replyDepthProp: depthProp, limit: defaultLimit } =
         latest.current;
-      if (!ctx || inFlightRef.current.has(commentId) || !more) return;
+      if (!ctx || inFlightRef.current.has(commentId)) return;
       if (!commentId || !isUUID(commentId)) return;
       const current = ctx.store.nodes[commentId];
       if (!current) return;
 
       const pageLimit = options.limit ?? defaultLimit;
-      const firstLoad = !current.repliesLoaded;
+      const firstLoad = refetch || !current.repliesLoaded;
 
       // Default rule: nest on the first load, plain pages after (D8). An
       // explicit depth (hook prop or this call) is sent as-is; the section's
@@ -156,7 +165,7 @@ function useReplies({
         // sent as the level sort; nested levels inherit it on the server.
         const response = await fetchManyComments({
           parentCommentId: commentId,
-          cursor: current.repliesCursor,
+          cursor: refetch ? null : current.repliesCursor,
           limit: pageLimit,
           ...oneWaySortFields(ctx.replySort.sortBy, ctx.replySort.sortDir),
           sortByReaction: ctx.replySort.sortByReaction,
@@ -167,13 +176,17 @@ function useReplies({
         if (generation !== ctx.generationRef.current) return;
         // Stored under the comment it was fetched for, whichever comment
         // this instance shows by now.
-        ctx.setStore((prev) => applyRepliesPage(prev, commentId, response));
+        ctx.setStore((prev) =>
+          refetch
+            ? replaceRepliesPage(prev, commentId, response)
+            : applyRepliesPage(prev, commentId, response),
+        );
         clearFailure();
       } catch (err) {
         if (generation !== ctx.generationRef.current) return;
         setFailures((prev) => ({
           ...prev,
-          [commentId]: { error: toError(err), generation },
+          [commentId]: { error: toError(err), generation, refetch },
         }));
         handleError(err, "Failed to fetch replies:");
       } finally {
@@ -189,6 +202,26 @@ function useReplies({
     [commentId, fetchManyComments],
   );
 
+  const loadMore = useCallback(
+    async (options: LoadMoreRepliesOptions = {}) => {
+      const ctx = latest.current.internals;
+      const failed = failuresRef.current[commentId];
+      // A failed refetch is retried as a refetch.
+      if (failed?.refetch && failed.generation === ctx?.generationRef.current) {
+        await load(options, true);
+        return;
+      }
+      if (!latest.current.hasMore) return;
+      await load(options, false);
+    },
+    [commentId, load],
+  );
+
+  const refetch = useCallback(
+    (options: LoadMoreRepliesOptions = {}) => load(options, true),
+    [load],
+  );
+
   return {
     comment: node?.comment,
     replies,
@@ -197,6 +230,7 @@ function useReplies({
     error,
     hasMore,
     loadMore,
+    refetch,
   };
 }
 

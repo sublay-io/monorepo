@@ -19,6 +19,8 @@ Every hook that returns a paged list with paging controls (`useEntityList`, `use
 - **`loadMore: () => Promise<void>`** — loads the next page in the list's own reading order, or retries the load that failed (a failed first page is retried as the first page). Does nothing while a load is running or when there is nothing more. Never rejects: failures land in `error`.
 - **`refetch: () => Promise<void>`** — reloads from the first page with the current filters and sort. What is loaded stays until the new first page replaces it. Never rejects.
 
+A list that loads its next page on its own (on scroll, or when a sentinel comes into view) should not call `loadMore()` while `error` is set: `hasMore` stays `true` after a failure, so an automatic trigger would retry over and over while the server keeps failing. Show the error with a "Try again" button that calls `loadMore()` instead, as in the example below.
+
 A response that arrives after the query changed (new filters, sort or ids, or a `refetch` that started since) is dropped. Two `loadMore()` calls in the same tick load one page, and filter objects or `include` arrays written inline don't cause refetching.
 
 The store-backed lists (`useEntityList`, `useSpaceList`, `useWorkspaceList`, `useAppNotifications`, `useConversations`, `useLiveChatMessages`) share `loading` and `error` across every mounted hook on the same list: the same `listId`, the same conversation or thread, the one notifications list, the one inbox. On `useEntityList`, `useSpaceList` and `useWorkspaceList`, `loadMore` also does nothing while a debounced filter change is waiting to be fetched.

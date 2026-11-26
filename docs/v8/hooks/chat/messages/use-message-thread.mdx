@@ -85,8 +85,8 @@ function ThreadPanel({
   Reloads the thread from its first reply. Never rejects: a failure lands in `error`.
 </ResponseField>
 
-<ResponseField name="sendReply" type="(params: Omit<SendMessageParams, 'parentMessageId'>) => Promise<ChatMessage>">
-  Sends a reply to this thread. Accepts the same parameters as `useSendMessage` except `parentMessageId` (set automatically). Returns the confirmed [ChatMessage](/v8/data-models/chat-message).
+<ResponseField name="sendReply" type="(params: Omit<SendMessageParams, 'parentMessageId'>) => Promise<SendMessageResult>">
+  Sends a reply to this thread. Accepts the same parameters as `useSendMessage` except `parentMessageId` (set automatically). Resolves to the same `SendMessageResult` as [`useSendMessage`](/v8/hooks/chat/messages/use-send-message): the server-confirmed [ChatMessage](/v8/data-models/chat-message), without `reactionCounts`, `userReactions` and `grants`, with `localId` echoed back.
 </ResponseField>
 
 ## Notes

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchManyReputationGrants` returns a callable that fetches one page of reputation grants. It is the low-level fetcher — for a ready-to-render list with accumulated state, `loadMore`, and `refresh`, use [`useFetchManyReputationGrantsWrapper`](/v8/hooks/reputation/use-fetch-many-reputation-grants-wrapper).
+`useFetchManyReputationGrants` returns a callable that fetches one page of reputation grants. It is the low-level fetcher — for a ready-to-render list with accumulated state, `loadMore`, and `refetch`, use [`useFetchManyReputationGrantsWrapper`](/v8/hooks/reputation/use-fetch-many-reputation-grants-wrapper).
 
 Exactly one filter shape per call — by recipient, by sender, or by target. The shapes are mutually exclusive and are not AND-ed.
 

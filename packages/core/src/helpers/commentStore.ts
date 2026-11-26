@@ -194,6 +194,31 @@ export function applyRepliesPage(
 }
 
 /**
+ * Carry the viewer's own new top-level comments (and everything under them)
+ * from `previous` into `next`, for a reload that starts the list over from its
+ * first page. Comments `next` already holds are left as they are there.
+ */
+export function keepNewComments(
+  previous: CommentStore,
+  next: CommentStore,
+): CommentStore {
+  const newRoots = previous.rootIds.filter((id) => previous.nodes[id]?.new);
+  if (newRoots.length === 0) return next;
+  const nodes = { ...next.nodes };
+  const rootIds = [...next.rootIds];
+  const stack = [...newRoots];
+  while (stack.length) {
+    const id = stack.pop()!;
+    const node = previous.nodes[id];
+    if (!node || nodes[id]) continue;
+    nodes[id] = node;
+    stack.push(...node.childIds);
+  }
+  for (const id of newRoots) if (!rootIds.includes(id)) rootIds.push(id);
+  return { nodes, rootIds };
+}
+
+/**
  * Store a comment's first page of replies again (a refetch): the replies
  * loaded before are unlinked from the parent — except the viewer's own new
  * ones — and the page is applied as by `applyRepliesPage`.

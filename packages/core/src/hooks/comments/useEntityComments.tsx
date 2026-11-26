@@ -1,3 +1,4 @@
+import useProject from "../projects/useProject";
 import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import {
   createContext,
@@ -27,6 +28,7 @@ import {
   CommentStore,
   emptyCommentStore,
   insertComments,
+  keepNewComments,
   selectRootComments,
 } from "../../helpers/commentStore";
 import {
@@ -172,6 +174,8 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
   const includeKey = JSON.stringify(include);
 
   const fetchManyComments = useFetchManyComments();
+  // A different project is a different list.
+  const { projectId } = useProject();
   // Each comment carries the signed-in user's own reaction (`userReaction`),
   // so the list is fetched again when the user signs in, signs out or
   // switches accounts.
@@ -282,7 +286,13 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
       const response = await requestRef.current!(reset ? null : cursorRef.current);
       if (generation !== generationRef.current) return;
       const { data, pagination } = response;
-      setStore((prev) => insertComments(reset && keep ? startOver(prev) : prev, data));
+      // A refetch keeps the viewer's own new comments (and the highlight seed).
+      setStore((prev) =>
+        insertComments(
+          reset && keep ? keepNewComments(prev, startOver(prev)) : prev,
+          data,
+        ),
+      );
       cursorRef.current = pagination.nextCursor;
       hasMoreRef.current = pagination.hasMore;
       setHasMore(pagination.hasMore);
@@ -328,6 +338,7 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
     includeKey,
     reputation,
     userId,
+    projectId,
     runFetch,
   ]);
 

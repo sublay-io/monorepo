@@ -29,6 +29,6 @@ export function warnStrayFetchKeys(
   console.warn(
     `[Sublay] ${fn} takes one object, { ${allowed.join(", ")} }; ` +
       `${stray.map((key) => `"${key}"`).join(", ")} ${stray.length === 1 ? "is" : "are"} ignored. ` +
-      `Filters go under \`filters\`, e.g. ${fn}({ filters: { ${stray[0]}: … } }).`
+      `Put each setting under its group: ${allowed.map((key) => `\`${key}\``).join(", ")}.`
   );
 }

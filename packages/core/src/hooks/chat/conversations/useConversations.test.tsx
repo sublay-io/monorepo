@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 
 import {
@@ -365,5 +365,43 @@ describe("useConversations", () => {
         expect(axiosPrivate.calls("get")[n - 1].config?.params).toEqual({ limit: "20" });
       }
     });
+  });
+});
+
+describe("useConversations — the list contract", () => {
+  it("a failed first page sets error; loadMore retries page 1 and clears it", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const first = makeConversationPreview({ id: "conversation-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(() => useConversations(), {
+      beforeRender: ({ axiosPrivate }) => axiosPrivate.mockError("get", 500),
+    });
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.loading).toBe(false);
+    expect(result.current.hasMore).toBe(true);
+
+    axiosPrivate.mockResponse("get", listPage([first], "cursor-2"));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(result.current.error).toBeNull();
+    expect(result.current.conversations.map((c) => c.id)).toEqual(["conversation-1"]);
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(2);
+    expect(calls[1].config?.params).toEqual({ limit: "20" });
+    vi.restoreAllMocks();
+  });
+
+  it("refetch never rejects; a failure lands in error", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const first = makeConversationPreview({ id: "conversation-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(() => useConversations(), {
+      beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", listPage([first])),
+    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    axiosPrivate.mockNetworkError("get");
+    await expect(result.current.refetch()).resolves.toBeUndefined();
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.conversations.map((c) => c.id)).toEqual(["conversation-1"]);
+    vi.restoreAllMocks();
   });
 });

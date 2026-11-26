@@ -99,7 +99,7 @@ describe("useAppNotifications", () => {
     });
   });
 
-  it("loadMore advances the page, which triggers a fetch for page 2", async () => {
+  it("loadMore fetches page 2", async () => {
     // Page-aware (rather than one-shot) responses, since the user-fallback sync in
     // useUser() can cause this hook's reset effect to legitimately re-run once;
     // a one-shot mock would then be consumed out of order.
@@ -129,7 +129,9 @@ describe("useAppNotifications", () => {
     act(() => store.dispatch(setUser(makeAuthUser())));
     await waitFor(() => expect(result.current.appNotifications).toHaveLength(1));
 
-    act(() => result.current.loadMore());
+    await act(async () => {
+      await result.current.loadMore();
+    });
 
     await waitFor(() =>
       expect(
@@ -158,7 +160,7 @@ describe("useAppNotifications", () => {
     expect(result.current.unreadAppNotificationsCount).toBe(0);
   });
 
-  it("resetAppNotifications is exposed and re-fetches page 1", async () => {
+  it("refetch is exposed and re-fetches page 1", async () => {
     const { result, store } = renderHookWithStore(() => useAppNotifications(), {
       projectId: "test-project",
     });
@@ -172,7 +174,7 @@ describe("useAppNotifications", () => {
       }),
     );
     await act(async () => {
-      await result.current.resetAppNotifications();
+      await result.current.refetch();
     });
 
     expect(result.current.appNotifications.map((n) => n.id)).toEqual(["n-refreshed"]);

@@ -85,7 +85,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   // the latest page the way the mount fetch does. If the server can't page
   // from the anchor (`chat/invalid-cursor`: that message is gone), start the
   // conversation over from its latest page, once: the messages held before it
-  // are replaced, so no gap is left between them and the page that `loadOlder`
+  // are replaced, so no gap is left between them and the page that `loadMore`
   // (which pages from the oldest held message) could never fill.
   //
   // `anchorId` is the newest message loaded when the socket dropped. Paging

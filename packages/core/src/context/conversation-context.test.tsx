@@ -672,7 +672,7 @@ describe("ConversationProvider", () => {
       // Older history continues from the page, right below it.
       axiosPrivate.mockResponse("get", page([msg("message-1b", "2024-01-01T00:00:01.500Z")]));
       await act(async () => {
-        await result.current.loadOlder!();
+        await result.current.loadMore!();
       });
       const all = catchUpCalls(axiosPrivate);
       expect(all).toHaveLength(3);

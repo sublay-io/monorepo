@@ -71,6 +71,12 @@ export const appNotificationsSlice = createSlice({
       }
     },
 
+    // The page last loaded (set when a page lands, so a failed page is
+    // fetched again rather than skipped)
+    setPage: (state, action: PayloadAction<number>) => {
+      state.page = action.payload;
+    },
+
     // Set loading state
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
@@ -160,6 +166,7 @@ export const {
   setNotificationTemplates,
   resetNotifications,
   loadMore,
+  setPage,
   setLoading,
   addNotifications,
   markAsReadLocally,

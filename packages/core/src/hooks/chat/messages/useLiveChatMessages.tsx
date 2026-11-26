@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../../store/hooks";
+import type { SublayState } from "../../../store/sublayReducers";
+import {
+  runSharedListLoad,
+  useSharedListStatus,
+} from "../../list/sharedListStatus";
 import {
   selectMessages,
   selectMessagesLoading,
@@ -9,6 +15,7 @@ import {
   selectThreadHasMore,
   selectThreadCursor,
   upsertMessage,
+  replaceMessages,
   setMessagesLoading,
   setMessagesHasMore,
   mergeThreadReplies,
@@ -44,8 +51,26 @@ export interface UseLiveChatMessagesProps {
 export interface UseLiveChatMessagesValues {
   messages: ChatMessage[];
   loading: boolean;
+  /**
+   * The last load failure, shared by every hook showing this conversation (or
+   * thread). Cleared when the next load starts; `loadMore()` retries it.
+   */
+  error: Error | null;
+  /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
-  loadOlder: () => Promise<void>;
+  /**
+   * Load the next page in reading order: older messages in a conversation,
+   * newer replies in a thread (`parentMessageId`). Retries the load that
+   * failed (a failed first page included). Does nothing while a page is
+   * loading or when there is nothing more. Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /**
+   * Reload from the first page: a conversation's latest messages replace the
+   * ones loaded (optimistic and newer live messages are kept); a thread
+   * starts over from its first reply. Never rejects.
+   */
+  refetch: () => Promise<void>;
 }
 
 /**
@@ -102,147 +127,166 @@ function useLiveChatMessages({
   const loading = isThread ? threadLoading : mainLoading;
   const hasMore = isThread ? threadHasMore : mainHasMore;
 
-  // Keep fresh refs to message arrays so loadOlder can read cursors without
-  // closing over stale state
-  const mainMessagesRef = useRef(mainMessages);
-  mainMessagesRef.current = mainMessages;
+  // Kept fresh for the reconnect catch-up.
   const threadCursorRef = useRef(threadCursor);
   threadCursorRef.current = threadCursor;
   const threadHasMoreRef = useRef(threadHasMore);
   threadHasMoreRef.current = threadHasMore;
 
-  // Fetch a page of messages. `before` is the id of the oldest message held
-  // (null for the first page).
-  const fetchPage = useCallback(
-    async (before: string | null) => {
-      if (!projectId || !conversationId) return;
+  // Load bookkeeping shared by every hook showing this conversation (or
+  // thread).
+  const store = useStore<{ sublay: SublayState }>();
+  const { status, error } = useSharedListStatus(
+    isThread ? `chatThread:${parentMessageId}` : `chatMessages:${conversationId}`
+  );
 
-      try {
-        const {
-          data: items,
-          pagination: { hasMore: more },
-        } = await fetchMany({
-          conversationId,
-          parentMessageId,
-          before,
-          limit,
-          sortDir: isThread ? "asc" : "desc",
-          include,
-        });
+  // - "open": the first page, as on mount. Main stream: merged into the
+  //   messages already held (a conversation opened before keeps them).
+  //   Thread: the fetched run starts over.
+  // - "refetch": the first page as a fresh start. Main stream: replaces the
+  //   loaded messages (`replaceMessages`). Thread: same as "open".
+  // - "next": the next page in reading order. Main stream: older messages,
+  //   `before` the oldest loaded one. Thread: newer replies, `after` the
+  //   thread cursor (the newest reply fetched in order — not the newest
+  //   loaded, which may be a live reply beyond a gap).
+  const loadPage = useCallback(
+    (kind: "open" | "refetch" | "next") =>
+      runSharedListLoad(
+        status,
+        kind !== "next",
+        async (isCurrent) => {
+          if (!projectId || !conversationId) return;
 
-        if (isThread) {
-          // Thread replies come back ASC. Merged, not replaced, so a live
-          // reply that landed while this page was in flight is kept.
-          dispatch(
-            mergeThreadReplies({
-              parentMessageId: parentMessageId!,
-              messages: items,
-              hasMore: more,
-            })
-          );
-        } else {
-          // Main stream comes back DESC (newest first for cursor efficiency).
-          // Redux stores messages ASC — reverse before dispatching.
-          const ascending = [...items].reverse();
-          ascending.forEach((msg) => dispatch(upsertMessage(msg)));
-          dispatch(setMessagesHasMore({ conversationId, hasMore: more }));
-        }
-      } catch (err) {
-        handleError(err, "Failed to load messages");
-      }
-    },
-    [projectId, conversationId, parentMessageId, isThread, limit, include, fetchMany, dispatch]
+          if (isThread) {
+            const threadId = parentMessageId!;
+            let after: string | undefined;
+            if (kind === "next") {
+              const cursor = selectThreadCursor(threadId)(store.getState());
+              if (!cursor) return;
+              after = cursor.id;
+              dispatch(setThreadLoading({ parentMessageId: threadId, loading: true }));
+            } else {
+              dispatch(startThreadLoad({ parentMessageId: threadId }));
+            }
+            try {
+              const {
+                data: items,
+                pagination: { hasMore: more },
+              } = await fetchMany({
+                conversationId,
+                parentMessageId: threadId,
+                ...(after === undefined ? { before: null } : { after }),
+                limit,
+                sortDir: "asc",
+                include,
+              });
+              if (!isCurrent()) return;
+              // Thread replies come back ASC. Merged, not replaced, so a live
+              // reply that landed while this page was in flight is kept.
+              dispatch(
+                mergeThreadReplies({
+                  parentMessageId: threadId,
+                  messages: items,
+                  hasMore: more,
+                })
+              );
+            } finally {
+              if (isCurrent()) {
+                dispatch(setThreadLoading({ parentMessageId: threadId, loading: false }));
+              }
+            }
+            return;
+          }
+
+          let before: string | null = null;
+          if (kind === "next") {
+            // Optimistic `temp-` messages have no server row to page from.
+            const oldest = selectMessages(conversationId)(store.getState()).find(
+              (m) => !m.id.startsWith("temp-")
+            );
+            if (!oldest) return;
+            before = oldest.id;
+          }
+          dispatch(setMessagesLoading({ conversationId, loading: true }));
+          try {
+            const {
+              data: items,
+              pagination: { hasMore: more },
+            } = await fetchMany({
+              conversationId,
+              parentMessageId,
+              before,
+              limit,
+              sortDir: "desc",
+              include,
+            });
+            if (!isCurrent()) return;
+            // Main stream comes back DESC (newest first for cursor efficiency).
+            // Redux stores messages ASC — reverse before dispatching.
+            const ascending = [...items].reverse();
+            if (kind === "refetch") {
+              dispatch(
+                replaceMessages({ conversationId, messages: ascending, hasMore: more })
+              );
+            } else {
+              ascending.forEach((msg) => dispatch(upsertMessage(msg)));
+              dispatch(setMessagesHasMore({ conversationId, hasMore: more }));
+            }
+          } finally {
+            if (isCurrent()) {
+              dispatch(setMessagesLoading({ conversationId, loading: false }));
+            }
+          }
+        },
+        isThread ? "Failed to load thread replies:" : "Failed to load messages:"
+      ),
+    [status, store, projectId, conversationId, parentMessageId, isThread, limit, include, fetchMany, dispatch]
   );
 
   // Initial fetch on mount
   useEffect(() => {
     if (!projectId || !conversationId) return;
-
-    const initialFetch = async () => {
-      if (isThread) {
-        dispatch(startThreadLoad({ parentMessageId: parentMessageId! }));
-      } else {
-        dispatch(setMessagesLoading({ conversationId, loading: true }));
-      }
-
-      await fetchPage(null);
-
-      if (isThread) {
-        dispatch(setThreadLoading({ parentMessageId: parentMessageId!, loading: false }));
-      } else {
-        dispatch(setMessagesLoading({ conversationId, loading: false }));
-      }
-    };
-
-    initialFetch();
+    loadPage("open");
     // Re-runs on the conversation/thread identity AND on `include`, which
     // changes what a message row CONTAINS: adding or dropping "grants" (or
     // "files") on a mounted hook has to refetch, or the caller has changed a
     // prop that silently does nothing until the conversation changes.
     //
-    // `fetchPage` is deliberately left out even though it is called here. It is
-    // a `useCallback` over exactly these deps plus `fetchMany`/`dispatch`, so
-    // listing it would add nothing but the risk of a refetch loop if either of
-    // those two ever stops being stable. `includeKey` is a primitive, so no
-    // re-render can re-arm this effect on identity alone.
+    // `loadPage` is deliberately left out even though it is called here. It
+    // is a `useCallback` over exactly these deps plus stable references
+    // (`status`, `store`, `fetchMany`, `dispatch`), so listing it would add
+    // nothing but the risk of a refetch loop if one of those ever stops being
+    // stable. `includeKey` is a primitive, so no re-render can re-arm this
+    // effect on identity alone.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, conversationId, parentMessageId, includeKey]);
 
-  // Load more messages:
-  // - Main stream: fetch older messages `before` the oldest loaded message's id
-  // - Thread: fetch newer replies `after` the thread cursor's id (the newest
-  //   reply fetched in order — not the newest loaded, which may be a live
-  //   reply beyond a gap), merge
-  const loadOlder = useCallback(async () => {
-    if (loading || !hasMore) return;
-
-    if (isThread) {
-      const cursor = threadCursorRef.current;
-      if (!cursor || !parentMessageId || !projectId || !conversationId) return;
-
-      dispatch(setThreadLoading({ parentMessageId: parentMessageId, loading: true }));
-      try {
-        const {
-          data: newItems,
-          pagination: { hasMore: more },
-        } = await fetchMany({
-          conversationId,
-          parentMessageId,
-          after: cursor.id,
-          limit,
-          sortDir: "asc",
-          include,
-        });
-        dispatch(
-          mergeThreadReplies({
-            parentMessageId: parentMessageId,
-            messages: newItems,
-            hasMore: more,
-          })
-        );
-      } catch (err) {
-        handleError(err, "Failed to load more thread replies");
-      } finally {
-        dispatch(setThreadLoading({ parentMessageId: parentMessageId, loading: false }));
-      }
+  // The next page in reading order (older messages; newer thread replies), or
+  // a retry of the load that failed.
+  const loadMore = useCallback(async () => {
+    if (!projectId || !conversationId || status.inFlight) return;
+    if (status.failed === "first") {
+      await loadPage("open");
       return;
     }
+    const state = store.getState();
+    const more = isThread
+      ? selectThreadHasMore(parentMessageId!)(state)
+      : selectMessagesHasMore(conversationId)(state);
+    if (status.failed === "next" || more) await loadPage("next");
+  }, [projectId, conversationId, parentMessageId, isThread, status, store, loadPage]);
 
-    // Optimistic `temp-` messages have no server row to page from.
-    const oldest = mainMessagesRef.current.find((m) => !m.id.startsWith("temp-"));
-    if (!oldest) return;
-
-    dispatch(setMessagesLoading({ conversationId, loading: true }));
-    await fetchPage(oldest.id);
-    dispatch(setMessagesLoading({ conversationId, loading: false }));
-  }, [loading, hasMore, isThread, parentMessageId, projectId, conversationId, limit, include, fetchMany, dispatch, fetchPage]);
+  const refetch = useCallback(async () => {
+    if (!projectId || !conversationId) return;
+    await loadPage("refetch");
+  }, [projectId, conversationId, loadPage]);
 
   // Thread reconnect catch-up: fetch the replies sent while the socket was
   // down. Page forward from the newest reply fetched in order (by its id) until
   // the server has no more; with none fetched yet (an empty thread, or a first
   // load that failed), load the first page only, as on open, and leave the rest
-  // to `loadOlder`. A thread whose fetched run hasn't reached the end needs
-  // nothing: newer replies come in through `loadOlder`. If the server can't
+  // to `loadMore`. A thread whose fetched run hasn't reached the end needs
+  // nothing: newer replies come in through `loadMore`. If the server can't
   // page from the cursor (`chat/invalid-cursor`: that reply is gone), the
   // thread is reloaded from its first page, once. The main stream's catch-up
   // lives in ConversationProvider, which also re-joins the room; a thread
@@ -278,7 +322,7 @@ function useLiveChatMessages({
         } catch (err) {
           if (after === null || !isInvalidChatCursorError(err)) throw err;
           // Start the fetched run over, as on open: forgetting the cursor
-          // keeps the next `loadOlder` from paging from it again.
+          // keeps the next `loadMore` from paging from it again.
           dispatch(startThreadLoad({ parentMessageId }));
           try {
             merge(await fetchReplies(null));
@@ -326,7 +370,15 @@ function useLiveChatMessages({
     };
   }, [socket, isThread, catchUpReplies]);
 
-  return { messages, loading, hasMore, loadOlder };
+  return {
+    messages,
+    loading,
+    error,
+    // A failed load is still to do: `loadMore()` retries it.
+    hasMore: hasMore || error !== null,
+    loadMore,
+    refetch,
+  };
 }
 
 export default useLiveChatMessages;

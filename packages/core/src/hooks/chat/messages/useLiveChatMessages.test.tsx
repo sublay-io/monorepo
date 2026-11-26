@@ -161,7 +161,7 @@ describe("useLiveChatMessages", () => {
     expect(call.config?.params).toMatchObject({ sortDir: "asc", parentMessageId: "message-1" });
   });
 
-  it("thread loadOlder pages from the newest fetched reply, not a live reply beyond a gap", async () => {
+  it("thread loadMore pages from the newest fetched reply, not a live reply beyond a gap", async () => {
     const reply = (id: string, createdAt: string) =>
       makeChatMessage({ id, conversationId: "conversation-1", parentMessageId: "message-1", createdAt });
 
@@ -187,7 +187,7 @@ describe("useLiveChatMessages", () => {
       pagination: { hasMore: false },
     });
     await act(async () => {
-      await result.current.loadOlder();
+      await result.current.loadMore();
     });
 
     expect(axiosPrivate.calls("get")[1].config?.params.after).toBe("reply-1");
@@ -244,14 +244,14 @@ describe("useLiveChatMessages", () => {
       pagination: { hasMore: false },
     });
     await act(async () => {
-      await result.current.loadOlder();
+      await result.current.loadMore();
     });
 
     expect(axiosPrivate.calls("get")[2].config?.params.after).toBe("reply-2");
     expect(result.current.messages.map((m) => m.id)).toEqual(["reply-1", "reply-2", "reply-3", "reply-9"]);
   });
 
-  it("loadOlder fetches using the oldest loaded message as the before cursor", async () => {
+  it("loadMore fetches using the oldest loaded message as the before cursor", async () => {
     const oldest = makeChatMessage({ id: "message-1", createdAt: "2024-01-02T00:00:00.000Z" });
     const evenOlder = makeChatMessage({ id: "message-0", createdAt: "2024-01-01T00:00:00.000Z" });
 
@@ -274,7 +274,7 @@ describe("useLiveChatMessages", () => {
     });
 
     await act(async () => {
-      await result.current.loadOlder();
+      await result.current.loadMore();
     });
 
     expect(result.current.messages.map((m) => m.id)).toEqual(["message-0", "message-1"]);
@@ -284,7 +284,7 @@ describe("useLiveChatMessages", () => {
     expect(calls[1].config?.params).toMatchObject({ before: oldest.id });
   });
 
-  it("loadOlder never pages from an optimistic message", async () => {
+  it("loadMore never pages from an optimistic message", async () => {
     // Only an optimistic send is held, yet the server says there is history.
     const { result, store, axiosPrivate } = renderHookWithAxios(
       () => useLiveChatMessages({ conversationId: "conversation-1" }),
@@ -308,13 +308,13 @@ describe("useLiveChatMessages", () => {
       );
     });
     await act(async () => {
-      await result.current.loadOlder();
+      await result.current.loadMore();
     });
 
     expect(axiosPrivate.calls("get")).toHaveLength(1);
   });
 
-  it("loadOlder is a no-op when there is no more data", async () => {
+  it("loadMore is a no-op when there is no more data", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useLiveChatMessages({ conversationId: "conversation-1" }),
       {
@@ -329,7 +329,7 @@ describe("useLiveChatMessages", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => {
-      await result.current.loadOlder();
+      await result.current.loadMore();
     });
 
     expect(axiosPrivate.calls("get")).toHaveLength(1);

@@ -110,7 +110,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
           setConnection(body.connection as ConnectionRow);
         }
         console.error("Failed to send connection request:", error);
-        throw error;
+        throw toSublayError(error);
       }
     },
     [connectionStatus, loading, userId, user?.id, requestConnection]
@@ -125,7 +125,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
       setConnection(result);
     } catch (error) {
       console.error("Failed to accept connection request:", error);
-      throw error;
+      throw toSublayError(error);
     }
   }, [connectionStatus, connectionId, loading, acceptConnection]);
 
@@ -138,7 +138,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
       setConnection(result);
     } catch (error) {
       console.error("Failed to decline connection request:", error);
-      throw error;
+      throw toSublayError(error);
     }
   }, [connectionStatus, connectionId, loading, declineConnection]);
 
@@ -151,7 +151,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
       setConnection(null);
     } catch (error) {
       console.error("Failed to withdraw connection request:", error);
-      throw error;
+      throw toSublayError(error);
     }
   }, [connectionStatus, connectionId, loading, removeConnection]);
 
@@ -163,7 +163,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
       setConnection(null);
     } catch (error) {
       console.error("Failed to disconnect user:", error);
-      throw error;
+      throw toSublayError(error);
     }
   }, [connectionStatus, connectionId, loading, removeConnection]);
 
@@ -189,7 +189,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
       }
     } catch (error) {
       console.error("Failed to remove connection:", error);
-      throw error;
+      throw toSublayError(error);
     }
   }, [
     connectionStatus,

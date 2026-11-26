@@ -38,7 +38,7 @@ import type {
   DeleteCollectionResponse,
 } from "../../interfaces/models/Collection";
 import type { Entity } from "../../interfaces/models/Entity";
-import { rethrowAsSublayError } from "../../errors/SublayError";
+import { rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseCollectionsActionsValues {
   openCollection: (collection: Collection) => void;
@@ -300,7 +300,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         dispatch(removeCollectionEntity({ collectionId, entityId: entity.id }));
       }
       handleErrorUtil(err, "Failed to add entity to collection");
-      throw err;
+      throw toSublayError(err);
     }
 
     // Loaded entity lists fetched with `include=saved` show the save too,
@@ -351,7 +351,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         dispatch(insertCollectionEntityAt({ collectionId, entity: entityToRestore, index: originalIndex }));
       }
       handleErrorUtil(err, "Failed to remove entity from collection");
-      throw err;
+      throw toSublayError(err);
     }
 
     // Loaded entity lists fetched with `include=saved` show the removal too.

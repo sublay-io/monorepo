@@ -240,10 +240,14 @@ describe("useSwitchAccount", () => {
 
     axiosPublic.mockError("post", 403, { error: "Refresh token revoked" });
 
-    await expect(result.current.switchAccount({ userId: "user-2" })).rejects.toThrow();
+    const thrown = await result.current
+      .switchAccount({ userId: "user-2" })
+      .catch((e: unknown) => e);
 
     await waitFor(() => expect(result.current.switching).toBe(false));
     await waitFor(() => expect(result.current.error).not.toBeNull());
+    // The rejection is the very error the `error` field holds.
+    expect(thrown).toBe(result.current.error);
     // The typed transition error, as a SublayError with the server's answer.
     expect(result.current.error).toBeInstanceOf(AccountTransitionError);
     expect(result.current.error).toBeInstanceOf(SublayError);

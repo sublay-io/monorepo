@@ -17,7 +17,7 @@ import {
 } from "../../store/api/userApi";
 import { baseApi } from "../../store/api/baseApi";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
-import { toSublayErrorRecord, rethrowAsSublayError } from "../../errors/SublayError";
+import { toSublayErrorRecord, rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 import { SublayError } from "../../errors/SublayError";
 
 /**
@@ -111,7 +111,7 @@ export function useUserActions() {
         }
         
         dispatch(setError(toSublayErrorRecord(error)));
-        throw error;
+        throw toSublayError(error);
       } finally {
         dispatch(setUpdating(false));
       }

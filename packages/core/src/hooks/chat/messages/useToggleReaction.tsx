@@ -6,7 +6,7 @@ import { selectUser as selectAuthUser } from "../../../store/slices/authSlice";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
-import { SublayError } from "../../../errors/SublayError";
+import { SublayError, toSublayError } from "../../../errors/SublayError";
 
 export interface ToggleReactionParams {
   conversationId: string;
@@ -66,7 +66,7 @@ function useToggleReaction(): (
         return { reactionCounts, userReactions, delta };
       } catch (err) {
         handleError(err, "Failed to toggle reaction");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, currentUserId, axios, dispatch]

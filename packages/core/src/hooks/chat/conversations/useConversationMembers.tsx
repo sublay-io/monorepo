@@ -9,7 +9,7 @@ import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
 import { SpaceReputationContextParams } from "../../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
-import { SublayError } from "../../../errors/SublayError";
+import { SublayError, toSublayError } from "../../../errors/SublayError";
 
 export interface UseConversationMembersProps extends SpaceReputationContextParams {
   conversationId: string;
@@ -104,7 +104,7 @@ function useConversationMembers({
         return newMember;
       } catch (err) {
         handleError(err, "Failed to add member");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, conversationId, axios]
@@ -120,7 +120,7 @@ function useConversationMembers({
         setMembers((prev) => prev.filter((m) => m.userId !== userId));
       } catch (err) {
         handleError(err, "Failed to remove member");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, conversationId, axios]
@@ -134,7 +134,7 @@ function useConversationMembers({
       );
     } catch (err) {
       handleError(err, "Failed to leave conversation");
-      throw err;
+      throw toSublayError(err);
     }
   }, [projectId, conversationId, axios]);
 
@@ -171,7 +171,7 @@ function useConversationMembers({
         return updated;
       } catch (err) {
         handleError(err, "Failed to change member role");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, conversationId, axios]

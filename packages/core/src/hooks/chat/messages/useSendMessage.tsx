@@ -26,7 +26,7 @@ import {
   type FileListUpload,
   type ImageListUpload,
 } from "../../../utils/uploads";
-import { SublayError } from "../../../errors/SublayError";
+import { SublayError, toSublayError } from "../../../errors/SublayError";
 
 export interface SendMessageParams extends SpaceReputationContextParams {
   content?: string;
@@ -178,7 +178,7 @@ function useSendMessage({
       } catch (err) {
         dispatch(failOptimisticMessage({ conversationId, localId }));
         handleError(err, "Failed to send message");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, conversationId, spaceId, currentUser, axios, dispatch]

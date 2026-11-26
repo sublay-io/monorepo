@@ -28,7 +28,7 @@ import {
   markPushBindingsForRebind,
   pushIdentifiersEqual,
 } from "./reconcilePushBindings";
-import { SublayError, rethrowAsSublayError } from "../../errors/SublayError";
+import { SublayError, rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UsePushRegistrationValues {
   /**
@@ -218,7 +218,7 @@ function usePushRegistration(
       return true;
     } catch (error) {
       handleError(error, "Failed to register for push notifications");
-      throw error;
+      throw toSublayError(error);
     }
   }, [
     projectId,
@@ -270,7 +270,7 @@ function usePushRegistration(
       await persistAccountState();
     } catch (error) {
       handleError(error, "Failed to unregister from push notifications");
-      throw error;
+      throw toSublayError(error);
     }
   }, [
     projectId,

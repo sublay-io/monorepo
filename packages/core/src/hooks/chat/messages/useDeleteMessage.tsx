@@ -6,7 +6,7 @@ import { selectUser as selectAuthUser } from "../../../store/slices/authSlice";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
-import { SublayError } from "../../../errors/SublayError";
+import { SublayError, toSublayError } from "../../../errors/SublayError";
 
 export interface DeleteMessageParams {
   conversationId: string;
@@ -42,7 +42,7 @@ function useDeleteMessage(): (params: DeleteMessageParams) => Promise<void> {
         );
       } catch (err) {
         handleError(err, "Failed to delete message");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, axios, dispatch, currentUserId]

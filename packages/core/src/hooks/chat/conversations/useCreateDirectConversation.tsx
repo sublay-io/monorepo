@@ -5,7 +5,7 @@ import { Conversation } from "../../../interfaces/models/Conversation";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
-import { SublayError } from "../../../errors/SublayError";
+import { SublayError, toSublayError } from "../../../errors/SublayError";
 
 export interface CreateDirectConversationProps {
   userId: string;
@@ -46,7 +46,7 @@ function useCreateDirectConversation(): (
         return { conversation, created: response.status === 201 };
       } catch (err) {
         handleError(err, "Failed to create direct conversation");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, axios, dispatch]

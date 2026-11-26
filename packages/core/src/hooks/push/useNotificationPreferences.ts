@@ -59,7 +59,7 @@ function useNotificationPreferences(): UseNotificationPreferencesValues {
         await updateMutation({ projectId, disabledTypes }).unwrap().catch(rethrowAsSublayError);
       } catch (err) {
         handleError(err, "Failed to update notification preferences");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, user, updateMutation]

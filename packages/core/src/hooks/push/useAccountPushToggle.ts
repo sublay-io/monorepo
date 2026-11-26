@@ -146,8 +146,9 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
         // the server, and reverting it would be the one variant that does
         // misreport. The rethrow is what tells the caller to retry.
         handleError(err, "Failed to update push notifications for account");
-        setError(toSublayError(err));
-        throw err;
+        const failure = toSublayError(err);
+        setError(failure);
+        throw failure;
       } finally {
         setUpdating(false);
       }

@@ -28,7 +28,7 @@ import type { KeywordsFilters } from "../../interfaces/entity-filters/KeywordsFi
 import type { NsfwFilter } from "../../interfaces/NsfwFilter";
 import type { SpaceReputationContextObject } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
-import { SublayError, rethrowAsSublayError } from "../../errors/SublayError";
+import { SublayError, rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 
 interface FetchEntitiesOptions {
   page: number;
@@ -191,7 +191,7 @@ export function useEntityListActionsWithGuard() {
         dispatch(
           setEntityListError({ listId, error: "Failed to fetch entities" })
         );
-        throw err;
+        throw toSublayError(err);
       } finally {
         if (isCurrent()) dispatch(setEntityListLoading({ listId, loading: false }));
       }
@@ -235,7 +235,7 @@ export function useEntityListActionsWithGuard() {
         return newEntity;
       } catch (err) {
         handleErrorUtil(err, "Failed to create entity");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, createEntityMutation]
@@ -258,7 +258,7 @@ export function useEntityListActionsWithGuard() {
         dispatch(removeEntity({ listId, entityId: options.entityId }));
       } catch (err) {
         handleErrorUtil(err, "Failed to delete entity");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, deleteEntityMutation]

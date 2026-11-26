@@ -14,6 +14,7 @@ import {
 import { resetAccountTokenMints } from "./mintAccountAccessToken";
 import useAccountPushToggle from "./useAccountPushToggle";
 import { AccountTransitionError } from "../auth/accountTransition";
+import { SublayError } from "../../errors/SublayError";
 
 const DEVICE = { platform: "ios" as const, token: "device-token-1" };
 
@@ -178,6 +179,30 @@ describe("useAccountPushToggle", () => {
       store.getState().sublay.accounts.accounts["user-1"].pushEnabled,
     ).toBeUndefined();
     await waitFor(() => expect(result.current.error).toBeTruthy());
+  });
+
+  it("a failed storage write rejects with the same SublayError the error field holds", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { result, axiosPublic } = render();
+    axiosPublic.mockResponse("post", {});
+    const original = new Error("Keychain unavailable");
+    resetAccountStorage();
+    registerAccountStorage(
+      {
+        getAccountMap: vi.fn().mockResolvedValue(null),
+        setAccountMap: vi.fn().mockRejectedValue(original),
+        deleteAccountMap: vi.fn().mockResolvedValue(undefined),
+      },
+      "test-project",
+    );
+
+    const thrown = await result.current
+      .setAccountPushEnabled({ userId: "user-1", enabled: false })
+      .catch((e: unknown) => e);
+
+    expect(thrown).toBeInstanceOf(SublayError);
+    expect((thrown as SublayError).cause).toBe(original);
+    await waitFor(() => expect(result.current.error).toBe(thrown));
   });
 
   it("re-enables an account by binding first, then writing the flag", async () => {

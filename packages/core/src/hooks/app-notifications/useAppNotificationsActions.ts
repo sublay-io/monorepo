@@ -31,7 +31,7 @@ import {
 import { handleError } from "../../utils/handleError";
 import useProject from "../projects/useProject";
 import { useUser } from "../user";
-import { SublayError, rethrowAsSublayError } from "../../errors/SublayError";
+import { SublayError, rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseAppNotificationsActionsValues {
   /** The last load failure, shared by every hook showing the notifications. Cleared when the next load starts. */
@@ -102,7 +102,7 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
           dispatch(revertMarkAsReadLocally({ notificationIds: [notificationId] }));
         }
         handleError(error, "Failed to mark notification as read:");
-        throw error;
+        throw toSublayError(error);
       }
     },
     [dispatch, projectId, user, notifications, markNotificationAsReadMutation]
@@ -194,7 +194,7 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
     } catch (error) {
       dispatch(revertMarkAsReadLocally({ notificationIds: unreadIds, unreadCount }));
       handleError(error, "Failed to mark all notifications as read:");
-      throw error;
+      throw toSublayError(error);
     }
   }, [dispatch, projectId, user, notifications, unreadCount, markAllNotificationsAsReadMutation]);
 

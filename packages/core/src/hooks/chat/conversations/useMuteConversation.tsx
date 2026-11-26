@@ -7,7 +7,7 @@ import { applyOwnMute } from "../../../store/slices/chatSlice";
 import { handleError } from "../../../utils/handleError";
 import type { MuteDuration } from "../../../interfaces/MuteDuration";
 import type { ConversationMember } from "../../../interfaces/models/ConversationMember";
-import { SublayError, rethrowAsSublayError } from "../../../errors/SublayError";
+import { SublayError, rethrowAsSublayError, toSublayError } from "../../../errors/SublayError";
 
 export interface MuteConversationProps {
   conversationId: string;
@@ -61,7 +61,7 @@ function useMuteConversation(): UseMuteConversationValues {
         return currentMember;
       } catch (err) {
         handleError(err, "Failed to mute conversation");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, user, muteMutation, dispatch]

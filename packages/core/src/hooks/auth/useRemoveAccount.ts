@@ -145,8 +145,9 @@ export default function useRemoveAccount(): UseRemoveAccountReturn {
         }
       } catch (err) {
         handleError(err, "Failed to remove account");
-        setError(toSublayError(err));
-        throw err;
+        const failure = toSublayError(err);
+        setError(failure);
+        throw failure;
       } finally {
         setRemoving(false);
       }

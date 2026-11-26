@@ -7,7 +7,7 @@ import { Mention } from "../../../interfaces/models/Mention";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
-import { SublayError } from "../../../errors/SublayError";
+import { SublayError, toSublayError } from "../../../errors/SublayError";
 
 export interface EditMessageParams {
   conversationId: string;
@@ -44,7 +44,7 @@ function useEditMessage(): (params: EditMessageParams) => Promise<SentChatMessag
         return updated;
       } catch (err) {
         handleError(err, "Failed to edit message");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [projectId, axios, dispatch]

@@ -25,7 +25,7 @@ import type {
 } from "../../interfaces/models/Space";
 import type { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
-import { SublayError, rethrowAsSublayError } from "../../errors/SublayError";
+import { SublayError, rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 
 export interface FetchSpacesOptions {
   page: number;
@@ -139,7 +139,7 @@ export function useSpaceListActionsWithGuard() {
         dispatch(
           setSpaceListError({ listId, error: "Failed to fetch spaces" })
         );
-        throw err;
+        throw toSublayError(err);
       } finally {
         if (isCurrent()) dispatch(setSpaceListLoading({ listId, loading: false }));
       }
@@ -181,7 +181,7 @@ export function useSpaceListActionsWithGuard() {
           err
         );
         handleErrorUtil(err, "Failed to create space:");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, createSpaceMutation]
@@ -217,7 +217,7 @@ export function useSpaceListActionsWithGuard() {
           err
         );
         handleErrorUtil(err, "Failed to delete space:");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, deleteSpaceMutation]

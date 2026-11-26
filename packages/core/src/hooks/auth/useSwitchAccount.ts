@@ -89,8 +89,9 @@ export default function useSwitchAccount(): UseSwitchAccountReturn {
           previousActiveAccountId: activeAccountId,
         });
       } catch (err) {
-        setError(toSublayError(err));
-        throw err;
+        const failure = toSublayError(err);
+        setError(failure);
+        throw failure;
       } finally {
         setSwitching(false);
       }

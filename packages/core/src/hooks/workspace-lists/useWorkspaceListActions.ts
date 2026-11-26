@@ -22,7 +22,7 @@ import type {
   WorkspaceListRelation,
   WorkspaceListSortDir,
 } from "../../interfaces/models/Workspace";
-import { SublayError, rethrowAsSublayError } from "../../errors/SublayError";
+import { SublayError, rethrowAsSublayError, toSublayError } from "../../errors/SublayError";
 
 export interface FetchWorkspacesOptions {
   page: number;
@@ -130,7 +130,7 @@ export function useWorkspaceListActionsWithGuard() {
         dispatch(
           setWorkspaceListError({ listId, error: "Failed to fetch workspaces" })
         );
-        throw err;
+        throw toSublayError(err);
       } finally {
         if (isCurrent()) dispatch(setWorkspaceListLoading({ listId, loading: false }));
       }
@@ -188,7 +188,7 @@ export function useWorkspaceListActionsWithGuard() {
           err
         );
         handleErrorUtil(err, "Failed to create workspace:");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, createWorkspaceMutation, triggerFetchWorkspace]
@@ -217,7 +217,7 @@ export function useWorkspaceListActionsWithGuard() {
           err
         );
         handleErrorUtil(err, "Failed to delete workspace:");
-        throw err;
+        throw toSublayError(err);
       }
     },
     [dispatch, projectId, deleteWorkspaceMutation]

@@ -365,9 +365,8 @@ const entityListsSlice = createSlice({
       // Note: hasMore is set explicitly by the caller based on limit from hook props
     },
 
-    // Increment page for load more
-    // The page last loaded (set when a page lands, so a failed page is
-    // fetched again rather than skipped)
+    // The page last loaded: set when a page lands, so a failed page is
+    // fetched again rather than skipped
     setEntityListPage: (
       state,
       action: PayloadAction<{ listId: string; page: number }>
@@ -378,12 +377,6 @@ const entityListsSlice = createSlice({
       }
     },
 
-    incrementPage: (state, action: PayloadAction<string>) => {
-      const listId = action.payload;
-      if (state.lists[listId]) {
-        state.lists[listId].page += 1;
-      }
-    },
 
     // Set hasMore for entity list
     setEntityListHasMore: (
@@ -647,7 +640,6 @@ export const {
   updateFiltersAndSortConfig,
   setEntityListLoading,
   setEntityListEntities,
-  incrementPage,
   setEntityListPage,
   setEntityListHasMore,
   setEntityListError,

@@ -4,8 +4,7 @@ import reducer, {
   setProjectContext,
   setLimit,
   setNotificationTemplates,
-  resetNotifications,
-  loadMore,
+  setPage,
   setLoading,
   addNotifications,
   markAsReadLocally,
@@ -63,35 +62,9 @@ describe("appNotificationsSlice", () => {
     expect(s.unreadCount).toBe(5);
   });
 
-  it("resetNotifications clears notifications/page/hasMore/loading", () => {
-    let s = reducer(initial, addNotifications({
-      notifications: [makeNotification({ id: "n1" })],
-      hasMore: true,
-      isFirstPage: true,
-    }));
-    s = { ...s, page: 3, loading: true };
-    s = reducer(s, resetNotifications());
-    expect(s.notifications).toEqual([]);
-    expect(s.page).toBe(1);
-    expect(s.hasMore).toBe(true);
-    expect(s.loading).toBe(false);
-  });
-
-  describe("loadMore", () => {
-    it("increments page when hasMore and not loading", () => {
-      const s = reducer(initial, loadMore());
-      expect(s.page).toBe(2);
-    });
-
-    it("is a no-op when hasMore is false", () => {
-      const s = reducer({ ...initial, hasMore: false }, loadMore());
-      expect(s.page).toBe(1);
-    });
-
-    it("is a no-op while loading", () => {
-      const s = reducer({ ...initial, loading: true }, loadMore());
-      expect(s.page).toBe(1);
-    });
+  it("setPage sets the page last loaded", () => {
+    const s = reducer(initial, setPage(3));
+    expect(s.page).toBe(3);
   });
 
   describe("addNotifications", () => {

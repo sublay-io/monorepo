@@ -56,23 +56,8 @@ export const appNotificationsSlice = createSlice({
       state.notificationTemplates = action.payload;
     },
 
-    // Reset notifications (clear all and restart pagination)
-    resetNotifications: (state) => {
-      state.notifications = [];
-      state.page = 1;
-      state.hasMore = true;
-      state.loading = false;
-    },
-
-    // Load more notifications (increment page)
-    loadMore: (state) => {
-      if (state.hasMore && !state.loading) {
-        state.page += 1;
-      }
-    },
-
-    // The page last loaded (set when a page lands, so a failed page is
-    // fetched again rather than skipped)
+    // The page last loaded: set when a page lands, so a failed page is
+    // fetched again rather than skipped
     setPage: (state, action: PayloadAction<number>) => {
       state.page = action.payload;
     },
@@ -164,8 +149,6 @@ export const {
   setProjectContext,
   setLimit,
   setNotificationTemplates,
-  resetNotifications,
-  loadMore,
   setPage,
   setLoading,
   addNotifications,

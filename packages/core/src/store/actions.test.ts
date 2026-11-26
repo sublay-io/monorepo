@@ -7,11 +7,7 @@ import { initializeList as initializeEntityList } from "./slices/entityListsSlic
 import { initializeList as initializeSpaceList } from "./slices/spaceListsSlice";
 import { initializeList as initializeWorkspaceList } from "./slices/workspaceListsSlice";
 import { setCurrentCollection, resetCollections } from "./slices/collectionsSlice";
-import {
-  setUnreadCount,
-  resetNotifications,
-  loadMore,
-} from "./slices/appNotificationsSlice";
+import { setUnreadCount } from "./slices/appNotificationsSlice";
 import { initializeTableView } from "./slices/tablesSlice";
 import { fileLinksRefreshed, fileLinksUnavailable } from "./slices/fileLinksSlice";
 
@@ -104,25 +100,14 @@ describe("resetAccountScopedState", () => {
     expect(store.getState().sublay.tables.views).toEqual({});
   });
 
-  it("leaves the pre-existing per-slice reset actions working unchanged", () => {
-    // Both are publicly reachable through exported hooks
-    // (`useCollectionsActions` / `useAppNotificationsActions`), so the shared
-    // action must not have replaced them.
+  it("leaves the pre-existing per-slice reset action working unchanged", () => {
+    // Publicly reachable through an exported hook (`useCollectionsActions`),
+    // so the shared action must not have replaced it.
     const store = makeSublayStore();
 
     store.dispatch(setCurrentCollection({ id: "col-1", name: "Saved" } as never));
     store.dispatch(resetCollections());
     expect(store.getState().sublay.collections.currentCollectionId).toBeNull();
-
-    // `resetNotifications` is deliberately narrower than the account-scoped
-    // reset — it clears the list and paging but leaves `unreadCount` alone.
-    // That difference must survive.
-    store.dispatch(setUnreadCount(4));
-    store.dispatch(loadMore());
-    store.dispatch(resetNotifications());
-    expect(store.getState().sublay.appNotifications.notifications).toEqual([]);
-    expect(store.getState().sublay.appNotifications.page).toBe(1);
-    expect(store.getState().sublay.appNotifications.unreadCount).toBe(4);
   });
 
   it("resets the fileLinks slice, and moves on to a new generation", () => {

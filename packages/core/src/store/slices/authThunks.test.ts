@@ -350,6 +350,11 @@ describe("sign-up and sign-in rejections carry the server's error", () => {
       code: "auth/username-taken",
       param: "username",
       status: 409,
+      body: {
+        error: "Username already taken",
+        code: "auth/username-taken",
+        param: "username",
+      },
     });
   });
 
@@ -1051,7 +1056,7 @@ describe("account-management thunks — account switched mid-flight", () => {
     const result = await pending;
 
     expect(setPasswordThunk.rejected.match(result)).toBe(true);
-    expect(result.payload).toMatch(/active account changed/i);
+    expect((result.payload as { message: string }).message).toMatch(/active account changed/i);
     // The point of the guard: user-2's password was never touched.
     expect(axios.calls("post")).toHaveLength(0);
   });

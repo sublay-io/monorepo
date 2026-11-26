@@ -3,6 +3,7 @@ import { useSublayDispatch } from "../../store/hooks";
 import { confirmAccountDeletionThunk } from "../../store/slices/authThunks";
 import useProject from "../projects/useProject";
 import { SublayError } from "../../errors/SublayError";
+import { toAuthError } from "./useAuth";
 
 export interface ConfirmAccountDeletionProps {
   /** The one-time code emailed by `useRequestAccountDeletion`. */
@@ -39,7 +40,7 @@ function useConfirmAccountDeletion(): (
       );
 
       if (confirmAccountDeletionThunk.rejected.match(result)) {
-        throw new SublayError(result.payload as string);
+        throw toAuthError(result.payload);
       }
     },
     [projectId, dispatch]

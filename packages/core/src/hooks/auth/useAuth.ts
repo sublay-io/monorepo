@@ -25,11 +25,12 @@ import type {
 import { SublayError } from '../../errors/SublayError';
 
 /**
- * Turns a sign-up/sign-in rejection payload into the `Error` the hook throws,
- * carrying the server's `code` and, when present, the `param` and the
- * `verificationId`.
+ * Turns an auth thunk's rejection payload (an `AuthRejection`, or a plain
+ * message for a failure the SDK found itself) into the `SublayError` the hook
+ * throws, carrying the server's `code`, `status`, `param` and `body`, and the
+ * `verificationId` when present.
  */
-function toAuthError(payload: unknown): SublayAuthError {
+export function toAuthError(payload: unknown): SublayAuthError {
   const rejection = (
     payload && typeof payload === 'object' ? payload : { message: payload }
   ) as Partial<AuthRejection>;
@@ -39,6 +40,7 @@ function toAuthError(payload: unknown): SublayAuthError {
       code: rejection.code || undefined,
       param: rejection.param || undefined,
       status: typeof rejection.status === 'number' ? rejection.status : undefined,
+      body: rejection.body,
     }
   );
   if (rejection.verificationId) error.verificationId = rejection.verificationId;
@@ -194,7 +196,7 @@ export default function useAuth(): UseAuthValues {
     const result = await dispatch(signOutThunk({ projectId }));
     
     if (signOutThunk.rejected.match(result)) {
-      throw new SublayError(result.payload as string);
+      throw toAuthError(result.payload);
     }
   }, [dispatch, projectId]);
 
@@ -210,7 +212,7 @@ export default function useAuth(): UseAuthValues {
       }));
       
       if (changePasswordThunk.rejected.match(result)) {
-        throw new SublayError(result.payload as string);
+        throw toAuthError(result.payload);
       }
     },
     [dispatch, projectId]
@@ -228,7 +230,7 @@ export default function useAuth(): UseAuthValues {
       }));
 
       if (setPasswordThunk.rejected.match(result)) {
-        throw new SublayError(result.payload as string);
+        throw toAuthError(result.payload);
       }
     },
     [dispatch, projectId]
@@ -260,10 +262,9 @@ export default function useAuth(): UseAuthValues {
       return result.payload;
     }
 
-    throw new SublayError(
-      (typeof result.payload === "string" && result.payload) ||
-        "Failed to request a new access token"
-    );
+    throw result.payload
+      ? toAuthError(result.payload)
+      : new SublayError("Failed to request a new access token");
   }, [dispatch, projectId]);
 
   const handleSetRefreshToken = useCallback((token: React.SetStateAction<string | null>) => {

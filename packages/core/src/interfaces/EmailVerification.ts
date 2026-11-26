@@ -41,6 +41,8 @@ export interface AuthRejection {
   code?: string;
   /** The HTTP status, when the server answered. */
   status?: number;
+  /** The server's JSON error body as sent, when it answered with one. */
+  body?: Record<string, unknown>;
   /**
    * The failing input, when the server names one: a dot path such as
    * `email`, or the field another user already holds on a

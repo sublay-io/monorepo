@@ -3,6 +3,7 @@ import { useSublayDispatch } from "../../store/hooks";
 import { signOutAllThunk } from "../../store/slices/authThunks";
 import useProject from "../projects/useProject";
 import { SublayError } from "../../errors/SublayError";
+import { toAuthError } from "./useAuth";
 
 export interface UseSignOutAllReturn {
   signOutAll: () => Promise<void>;
@@ -20,7 +21,7 @@ export default function useSignOutAll(): UseSignOutAllReturn {
     const result = await dispatch(signOutAllThunk({ projectId }));
 
     if (signOutAllThunk.rejected.match(result)) {
-      throw new SublayError(result.payload as string);
+      throw toAuthError(result.payload);
     }
   }, [dispatch, projectId]);
 

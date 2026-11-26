@@ -3,6 +3,7 @@ import { act, waitFor } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
 import useAuth from "./useAuth";
+import { SublayError } from "../../errors/SublayError";
 import type { AuthUser } from "../../interfaces/models/User";
 
 afterEach(() => {
@@ -79,7 +80,14 @@ describe("useAuth", () => {
     expect(thrown).toBeInstanceOf(Error);
     expect(thrown).toMatchObject({
       code: "auth/email-not-verified",
+      status: 403,
       verificationId: "vid-2",
+      // The whole body as sent, verificationId included.
+      body: {
+        error: "Confirm your email to sign in.",
+        code: "auth/email-not-verified",
+        verificationId: "vid-2",
+      },
     });
     expect(axiosPublic.calls("post")[0].body).toMatchObject({
       emailVerification: { mode: "code" },
@@ -219,7 +227,40 @@ describe("useAuth", () => {
     });
     axiosPublic.mockError("post", 403, { error: "Refresh token revoked" });
 
-    await expect(result.current.requestNewAccessToken()).rejects.toThrow();
+    const err = await result.current.requestNewAccessToken().catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(SublayError);
+    expect(err).toMatchObject({
+      message: "Refresh token revoked",
+      status: 403,
+      body: { error: "Refresh token revoked" },
+    });
+  });
+
+  it("changePassword rejects with the server's code, status and body", async () => {
+    const { result, axiosPublic } = renderHookWithAxios(() => useAuth(), {
+      projectId: "project-1",
+      accessToken: "access-1",
+      refreshToken: "refresh-1",
+      user: { id: "user-1" } as AuthUser,
+    });
+    axiosPublic.mockError("post", 401, {
+      error: "The current password is wrong.",
+      code: "auth/wrong-password",
+      param: "password",
+    });
+
+    const err = await result.current
+      .changePassword({ password: "old", newPassword: "new" })
+      .catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(SublayError);
+    expect(err).toMatchObject({
+      message: "The current password is wrong.",
+      code: "auth/wrong-password",
+      param: "password",
+      status: 401,
+      body: { error: "The current password is wrong.", code: "auth/wrong-password", param: "password" },
+    });
   });
 
   it("requestNewAccessToken THROWS when there is no stored refresh token", async () => {

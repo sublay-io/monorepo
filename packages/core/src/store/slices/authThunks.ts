@@ -428,7 +428,9 @@ async function refuseAtAccountLimit({
 }
 
 /**
- * The rejection payload for sign-up and sign-in: the server's `error` text as
+ * The rejection payload of the auth thunks (sign-up, sign-in, sign-out,
+ * password changes, account deletion, token refresh, …) when a request
+ * failed: the server's `error` text as
  * the message (the transport's own message when the server sent none), plus
  * the server's error `code`, the `param` naming the failing input when the
  * server gives one, and — on a sign-in refused with `auth/email-not-verified`
@@ -441,6 +443,7 @@ function toAuthRejection(error: unknown): AuthRejection {
   if (failure.code !== undefined) rejection.code = failure.code;
   if (failure.param !== undefined) rejection.param = failure.param;
   if (failure.status !== undefined) rejection.status = failure.status;
+  if (failure.body !== undefined) rejection.body = failure.body;
   const verificationId = failure.body?.verificationId;
   if (typeof verificationId === "string") {
     rejection.verificationId = verificationId;
@@ -449,6 +452,13 @@ function toAuthRejection(error: unknown): AuthRejection {
 }
 
 const limitRejection = (): AuthRejection => ({ message: ACCOUNT_LIMIT_MESSAGE });
+
+/** The message of a rejection payload: an `AuthRejection` or a plain string. */
+function rejectionMessage(payload: unknown): string | undefined {
+  if (typeof payload === "string") return payload || undefined;
+  const message = (payload as { message?: unknown } | null | undefined)?.message;
+  return typeof message === "string" && message ? message : undefined;
+}
 
 // Async Thunks
 
@@ -678,9 +688,7 @@ export const signOutThunk = createAsyncThunk(
       return;
     } catch (error) {
       handleError(error, "Failed to log user out:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -724,9 +732,7 @@ export const confirmAccountDeletionThunk = createAsyncThunk(
       return;
     } catch (error) {
       handleError(error, "Failed to delete account:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -761,7 +767,7 @@ export interface RefreshRejectionMeta {
 export const requestNewAccessTokenThunk = createAsyncThunk<
   string,
   { projectId: string },
-  { rejectValue: string; rejectedMeta: RefreshRejectionMeta }
+  { rejectValue: string | AuthRejection; rejectedMeta: RefreshRejectionMeta }
 >(
   "auth/requestNewAccessToken",
   async (
@@ -810,10 +816,9 @@ export const requestNewAccessTokenThunk = createAsyncThunk<
       return result.accessToken;
     } catch (error) {
       handleError(error, "Request new access token error:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error",
-        { credentialRejected: isCredentialRejection(error) }
-      );
+      return rejectWithValue(toAuthRejection(error), {
+        credentialRejected: isCredentialRejection(error),
+      });
     }
   }
 );
@@ -864,9 +869,7 @@ export const verifyExternalUserThunk = createAsyncThunk(
       return result;
     } catch (error) {
       handleError(error, "Verify external user error:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     }
   }
 );
@@ -996,9 +999,7 @@ export const changePasswordThunk = createAsyncThunk(
       return;
     } catch (error) {
       handleError(error, "Failed to change password:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -1032,9 +1033,7 @@ export const setPasswordThunk = createAsyncThunk(
       return;
     } catch (error) {
       handleError(error, "Failed to set password:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -1131,9 +1130,7 @@ export const signOutAllThunk = createAsyncThunk(
       return;
     } catch (error) {
       handleError(error, "Failed to sign out all accounts:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -1270,7 +1267,7 @@ export const initializeAuthThunk = createAsyncThunk(
         !result.payload
       ) {
         throw new StoredSessionRestoreError(
-          (typeof result.payload === "string" && result.payload) ||
+          rejectionMessage(result.payload) ||
             "Could not restore the stored session.",
           requestNewAccessTokenThunk.rejected.match(result)
             ? Boolean(result.meta.credentialRejected)

@@ -39,6 +39,7 @@ import { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions"
 import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
 
 import { handleError } from "../../utils/handleError";
+import type { SublayError } from "../../errors/SublayError";
 
 export interface UseSpaceListProps {
   listId: string;
@@ -72,7 +73,7 @@ export interface UseSpaceListValues {
    * The last load failure, shared by every hook on this `listId`. Cleared
    * when the next load starts; `loadMore()` retries it.
    */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
 

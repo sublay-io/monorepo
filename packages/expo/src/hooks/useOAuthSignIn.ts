@@ -7,6 +7,8 @@ import {
   useSublaySelector,
   selectAccessToken,
   requestOAuthAuthorizationUrl,
+  SublayError,
+  toSublayError,
   parseOAuthRedirectUrl,
   handleOAuthRedirect,
   type OAuthRedirectParams,
@@ -21,7 +23,7 @@ export interface UseOAuthSignInReturn {
   /** No-op on mobile (the deep-link result is resolved inline). Always returns false. */
   handleOAuthCallback: () => boolean;
   isLoading: boolean;
-  error: string | null;
+  error: SublayError | null;
 }
 
 /**
@@ -50,20 +52,20 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
   const dispatch = useSublayDispatch();
   const accessToken = useSublaySelector(selectAccessToken);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   // Shared helper for both /authorize and /link endpoints
   const startOAuthFlow = useCallback(
     async (endpoint: "authorize" | "link", provider: OAuthProvider, redirectAfterAuth?: string) => {
       if (!projectId) {
-        setError("No projectId available.");
+        setError(new SublayError("No projectId available."));
         return;
       }
 
       // Unlike web, there is no window.location to default to — the app must
       // supply the custom-scheme deep link the browser should return to.
       if (!redirectAfterAuth) {
-        setError("redirectAfterAuth is required on mobile.");
+        setError(new SublayError("redirectAfterAuth is required on mobile."));
         return;
       }
 
@@ -109,12 +111,12 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
         if (redirectError) {
           setError(redirectError);
         } else if (!success) {
-          setError("OAuth sign-in failed: no tokens were returned.");
+          setError(new SublayError("OAuth sign-in failed: no tokens were returned."));
         }
 
         setIsLoading(false);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(toSublayError(err));
         setIsLoading(false);
       }
     },

@@ -20,6 +20,7 @@ import {
   useRestoreRowMutation,
   useUpdateRowMutation,
 } from "../../store/api/tablesApi";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export type UseTableOptions = Partial<TableViewState>;
 
@@ -36,7 +37,7 @@ export interface UseTableValues<T extends TableRow = TableRow> {
   rows: T[];
   pagination: PaginationMetadata | null;
   loading: boolean;
-  error: unknown;
+  error: SublayError | null;
   refetch: () => void;
 
   // Query controls (persisted in the tables slice).
@@ -227,7 +228,7 @@ export function useTable<T extends TableRow = TableRow>(
       // tableName change. A page/sort/filter change keeps the previous page
       // visible and stays false.
       loading: isFetching && shownPage === undefined,
-      error,
+      error: error ? toSublayError(error) : null,
       refetch,
       view,
       setView: update,

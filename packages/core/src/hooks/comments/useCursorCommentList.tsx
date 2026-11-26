@@ -5,6 +5,7 @@ import { ReactionType } from "../../interfaces/models/Reaction";
 import { CursorPaginatedResponse } from "../../interfaces/PaginatedResponse";
 import { useListEngine } from "../list/useListEngine";
 import { cursorPaging } from "../list/paging";
+import type { SublayError } from "../../errors/SublayError";
 
 export interface CommentListSort {
   sortBy: CommentsSortByOptions;
@@ -19,7 +20,7 @@ export interface CursorCommentListValues {
    * The last failure loading the list. Cleared when the next load starts.
    * `loadMore()` retries a failed load, including a failed first page.
    */
-  error: Error | null;
+  error: SublayError | null;
   hasMore: boolean;
   sortBy: CommentsSortByOptions;
   setSortBy: (newSortBy: CommentsSortByOptions) => void;

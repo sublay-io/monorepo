@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import useProject from "../projects/useProject";
 import { useUser } from "../user";
 import {
@@ -7,6 +7,7 @@ import {
 } from "../../store/api/notificationPreferencesApi";
 import { handleError } from "../../utils/handleError";
 import type { PushEventType } from "../../interfaces/PushEventType";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseNotificationPreferencesValues {
   /**
@@ -16,7 +17,7 @@ export interface UseNotificationPreferencesValues {
   disabledTypes: PushEventType[] | undefined;
   loading: boolean;
   updating: boolean;
-  error: unknown;
+  error: SublayError | null;
   refetch: () => void;
   /**
    * Replace the user's disabled-types set (upsert). Server-exact type names.
@@ -64,11 +65,16 @@ function useNotificationPreferences(): UseNotificationPreferencesValues {
     [projectId, user, updateMutation]
   );
 
+  const sublayError = useMemo(
+    () => (error ? toSublayError(error) : null),
+    [error]
+  );
+
   return {
     disabledTypes: data?.disabledTypes,
     loading,
     updating,
-    error,
+    error: sublayError,
     refetch,
     updatePreferences,
   };

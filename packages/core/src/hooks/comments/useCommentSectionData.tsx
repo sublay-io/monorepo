@@ -48,6 +48,7 @@ import {
 } from "../entities";
 import { isUUID } from "../../utils/isUUID";
 import { useStableObject } from "../useStableObject";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 /**
  * Whether an entity's id field is the one an id prop names. Compared as
@@ -179,7 +180,7 @@ export interface UseCommentSectionDataValues {
    * `loadMore()` retries a failed load, including a failed first page and a
    * failed entity lookup.
    */
-  error: Error | null;
+  error: SublayError | null;
   hasMore: boolean;
   submittingComment: boolean;
   /**
@@ -519,7 +520,7 @@ export function useCommentSectionDataInternal(
   const failedEntityKeyRef = useRef<string | null>(null);
   const [entityFetchFailure, setEntityFetchFailure] = useState<{
     key: string;
-    error: Error;
+    error: SublayError;
   } | null>(null);
 
   const submittingComment = useRef(false);
@@ -1157,7 +1158,7 @@ export function useCommentSectionDataInternal(
         failedEntityKeyRef.current = key;
         setEntityFetchFailure({
           key,
-          error: err instanceof Error ? err : new Error(String(err)),
+          error: toSublayError(err),
         });
         handleError(err, "Fetching entity failed");
       } finally {

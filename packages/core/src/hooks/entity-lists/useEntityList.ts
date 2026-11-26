@@ -41,6 +41,7 @@ import { AttachmentsFilters } from "../../interfaces/entity-filters/AttachmentsF
 import { KeywordsFilters } from "../../interfaces/entity-filters/KeywordsFilters";
 
 import { handleError } from "../../utils/handleError";
+import type { SublayError } from "../../errors/SublayError";
 
 /** A list filter value as an entity field: `"none"` and no filter both mean no value. */
 const noneToUnset = (value: string | null | undefined): string | undefined =>
@@ -79,7 +80,7 @@ export interface UseEntityListValues {
    * The last load failure, shared by every hook on this `listId`. Cleared
    * when the next load starts; `loadMore()` retries it.
    */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
 

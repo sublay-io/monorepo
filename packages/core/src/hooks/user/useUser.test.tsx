@@ -12,6 +12,7 @@ import {
 import { setUser as setAuthUser } from "../../store/slices/authSlice";
 import { setUser as setSliceUser, setError } from "../../store/slices/userSlice";
 import useUser from "./useUser";
+import { SublayError } from "../../errors/SublayError";
 
 let fetchHandle: FetchMockHandle;
 
@@ -104,10 +105,41 @@ describe("useUser", () => {
     });
   });
 
+  it("a refused update exposes the server's error as a SublayError", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(
+      jsonResponse(
+        { error: "That username is taken.", code: "user/username-taken", param: "username" },
+        409,
+      ),
+    );
+    const { result, store } = renderHookWithStore(() => useUser(), {
+      projectId: "test-project",
+    });
+    act(() => store.dispatch(setSliceUser(makeAuthUser({ id: "user-1", name: "Old" }))));
+
+    let thrown: unknown;
+    await act(async () => {
+      await result.current.updateUser({ username: "taken" }).catch((err) => {
+        thrown = err;
+      });
+    });
+    expect(thrown).toBeTruthy();
+
+    const error = result.current.error;
+    expect(error).toBeInstanceOf(SublayError);
+    expect(error?.message).toBe("That username is taken.");
+    expect(error?.code).toBe("user/username-taken");
+    expect(error?.param).toBe("username");
+    expect(error?.status).toBe(409);
+    // The same object on every read, with the original failure as its cause.
+    expect(error?.cause).toMatchObject({ status: 409 });
+  });
+
   it("clearError clears the error field", () => {
     const { result, store } = renderHookWithStore(() => useUser(), { projectId: "test-project" });
-    act(() => store.dispatch(setError("boom")));
-    expect(result.current.error).toBe("boom");
+    act(() => store.dispatch(setError({ message: "boom" })));
+    expect(result.current.error).toBeInstanceOf(SublayError);
+    expect(result.current.error?.message).toBe("boom");
 
     act(() => result.current.clearError());
     expect(result.current.error).toBeNull();

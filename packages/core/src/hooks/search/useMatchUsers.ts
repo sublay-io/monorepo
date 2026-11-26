@@ -3,6 +3,7 @@ import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { handleError } from "../../utils/handleError";
 import { User } from "../../interfaces/models/User";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface MatchFacetRef {
   id: string;
@@ -53,7 +54,7 @@ export type UseMatchUsersProps = UseMatchUsersCommonProps &
 export interface UseMatchUsersReturn {
   results: UserMatchResult[];
   loading: boolean;
-  error: string | null;
+  error: SublayError | null;
   match: (props: UseMatchUsersProps) => Promise<void>;
   reset: () => void;
 }
@@ -64,7 +65,7 @@ export default function useMatchUsers(): UseMatchUsersReturn {
 
   const [results, setResults] = useState<UserMatchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const match = useCallback(
     async ({
@@ -96,7 +97,8 @@ export default function useMatchUsers(): UseMatchUsersReturn {
         );
         setResults(response.data.results);
       } catch (err) {
-        setError(handleError(err, "Failed to match users"));
+        handleError(err, "Failed to match users");
+        setError(toSublayError(err));
       } finally {
         setLoading(false);
       }

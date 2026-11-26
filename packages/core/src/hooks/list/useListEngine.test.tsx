@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 
 import { useListEngine } from "./useListEngine";
 import { pageNumberPaging } from "./paging";
+import { SublayError } from "../../errors/SublayError";
 import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 
 type Item = { id: string };
@@ -123,6 +124,25 @@ describe("useListEngine", () => {
     await act(async () => queue[1].resolve(pageOf(["1"], false)));
     expect(result.current.items.map((i) => i.id)).toEqual(["1"]);
     expect(result.current.hasMore).toBe(false);
+  });
+
+  it("a refused page exposes the server's code, param and status", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { result, queue } = setup();
+    const original = {
+      message: "Request failed with status code 403",
+      response: { status: 403, data: { error: "Not allowed.", code: "space/forbidden", param: "spaceId" } },
+    };
+    await act(async () => queue[0].reject(original));
+
+    expect(result.current.error).toBeInstanceOf(SublayError);
+    expect(result.current.error).toMatchObject({
+      message: "Not allowed.",
+      code: "space/forbidden",
+      param: "spaceId",
+      status: 403,
+    });
+    expect(result.current.error?.cause).toBe(original);
   });
 
   it("a failed later page is retried as the same page", async () => {

@@ -8,11 +8,12 @@ import {
   activateStoredAccount,
   AccountTransitionError,
 } from "./accountTransition";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseSwitchAccountReturn {
   switchAccount: ({ userId }: { userId: string }) => Promise<void>;
   isSwitching: boolean;
-  error: string | null;
+  error: SublayError | null;
 }
 
 export default function useSwitchAccount(): UseSwitchAccountReturn {
@@ -24,7 +25,7 @@ export default function useSwitchAccount(): UseSwitchAccountReturn {
   const { projectId } = useProject();
   const activeAccountId = useSublaySelector(selectActiveAccountId);
   const [isSwitching, setIsSwitching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const switchAccount = useCallback(
     async ({ userId }: { userId: string }) => {
@@ -88,9 +89,7 @@ export default function useSwitchAccount(): UseSwitchAccountReturn {
           previousActiveAccountId: activeAccountId,
         });
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to switch account"
-        );
+        setError(toSublayError(err));
         throw err;
       } finally {
         setIsSwitching(false);

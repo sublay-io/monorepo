@@ -14,6 +14,7 @@ import useProject from "../projects/useProject";
 import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 import type { AuthUser, UserSuspension } from "../../interfaces/models/User";
 import type { UpdateUserParams } from "../../store/api/userApi";
+import { SublayError, fromSublayErrorRecord } from "../../errors/SublayError";
 
 export interface UseUserProps {}
 
@@ -21,7 +22,7 @@ export interface UseUserValues {
   user: AuthUser | null;
   loading: boolean;
   updating: boolean;
-  error: string | null;
+  error: SublayError | null;
 
   // Derived suspension state (matches the server's effective-suspension definition)
   isSuspended: boolean;
@@ -90,7 +91,11 @@ function useUser(_: UseUserProps = {}): UseUserValues {
   const authUser = useSublaySelector(selectAuthUser); // Fallback to auth user
   const loading = useSublaySelector(selectUserLoading);
   const updating = useSublaySelector(selectUserUpdating);
-  const error = useSublaySelector(selectUserError);
+  const errorRecord = useSublaySelector(selectUserError);
+  const error = useMemo(
+    () => (errorRecord ? fromSublayErrorRecord(errorRecord) : null),
+    [errorRecord],
+  );
   const currentProjectId = useSublaySelector(selectCurrentProjectId);
 
   // Get actions

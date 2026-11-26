@@ -17,6 +17,7 @@ import {
   appendCollectionEntities,
   selectCollectionEntities,
 } from "../../store/slices/collectionsSlice";
+import type { SublayError } from "../../errors/SublayError";
 
 export interface UseCollectionEntitiesWrapperProps extends TopCommentsParams {
   collectionId?: string | null; // Optional - defaults to current collection from Redux
@@ -32,7 +33,7 @@ export interface UseCollectionEntitiesWrapperValues {
   entities: Entity[];
   loading: boolean;
   /** The last load failure. Cleared when the next load starts; `loadMore()` retries it. */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
   sortBy: "createdAt" | "addedAt" | "top" | "hot";

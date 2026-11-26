@@ -4,6 +4,7 @@ import useSendMessage, {
   SendMessageParams,
   SendMessageResult,
 } from "./useSendMessage";
+import type { SublayError } from "../../../errors/SublayError";
 
 export interface UseMessageThreadProps {
   conversationId: string;
@@ -15,7 +16,7 @@ export interface UseMessageThreadValues {
   replies: ChatMessage[];
   loading: boolean;
   /** The last load failure. Cleared when the next load starts; `loadMore()` retries it. */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: newer replies, or a load that failed. */
   hasMore: boolean;
   /**

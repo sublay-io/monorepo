@@ -8,6 +8,7 @@ import { ChatMessage } from "../../interfaces/models/ChatMessage";
 import { User } from "../../interfaces/models/User";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 /**
  * A chat message as content search returns it: the stored message and its
@@ -44,7 +45,7 @@ export interface UseSearchContentProps extends SpaceReputationContextParams {
 export interface UseSearchContentReturn {
   results: ContentSearchResult[];
   loading: boolean;
-  error: string | null;
+  error: SublayError | null;
   search: (props: UseSearchContentProps) => Promise<void>;
   reset: () => void;
 }
@@ -55,7 +56,7 @@ export default function useSearchContent(): UseSearchContentReturn {
 
   const [results, setResults] = useState<ContentSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const search = useCallback(
     async ({ query, sourceTypes, spaceId, includeChildSpaces, conversationId, limit, spaceReputation }: UseSearchContentProps) => {
@@ -80,7 +81,8 @@ export default function useSearchContent(): UseSearchContentReturn {
         );
         setResults(response.data);
       } catch (err) {
-        setError(handleError(err, "Failed to search content"));
+        handleError(err, "Failed to search content");
+        setError(toSublayError(err));
       } finally {
         setLoading(false);
       }

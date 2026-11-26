@@ -31,10 +31,11 @@ import {
 import { handleError } from "../../utils/handleError";
 import useProject from "../projects/useProject";
 import { useUser } from "../user";
+import type { SublayError } from "../../errors/SublayError";
 
 export interface UseAppNotificationsActionsValues {
   /** The last load failure, shared by every hook showing the notifications. Cleared when the next load starts. */
-  error: Error | null;
+  error: SublayError | null;
   /**
    * Load the next page, or retry the load that failed (a failed first page
    * included). Does nothing while a page is loading or when there is nothing

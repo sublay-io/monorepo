@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { SublayState } from '../sublayReducers';
 import type { AuthUser } from '../../interfaces/models/User';
+import type { SublayErrorRecord } from '../../errors/SublayError';
 
 export interface UserState {
   // Current user data
@@ -13,8 +14,8 @@ export interface UserState {
   // Current project context
   currentProjectId?: string;
   
-  // Error state
-  error: string | null;
+  // Error state (a record: the store holds serializable values only)
+  error: SublayErrorRecord | null;
 }
 
 const initialState: UserState = {
@@ -57,7 +58,7 @@ const userSlice = createSlice({
     },
     
     // Error handling
-    setError: (state, action: PayloadAction<string | null>) => {
+    setError: (state, action: PayloadAction<SublayErrorRecord | null>) => {
       state.error = action.payload;
     },
     

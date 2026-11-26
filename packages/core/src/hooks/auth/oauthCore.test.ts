@@ -15,6 +15,7 @@ import {
   jsonResponse,
 } from "../../test-utils";
 import { armAuthGate, syncAuthGate, resetAuthGate } from "../../config/authGate";
+import { SublayError } from "../../errors/SublayError";
 
 /** Minimal unsigned JWT carrying a `sub` and a far-future `exp`. */
 function jwtFor(sub: string) {
@@ -230,6 +231,21 @@ describe("requestOAuthAuthorizationUrl", () => {
       }),
     ).rejects.toThrow("Unsupported provider");
   });
+
+  it("rejects with a SublayError carrying the response's code, param and status", async () => {
+    stubFetchMock(async () =>
+      jsonResponse({ error: "Unsupported provider", code: "oauth/invalid-provider", param: "provider" }, 400),
+    );
+
+    const err = await requestOAuthAuthorizationUrl({
+      projectId: "project-1",
+      endpoint: "authorize",
+      provider: "unknown" as never,
+      redirectAfterAuth: "https://app.example.com/done",
+    }).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(SublayError);
+    expect(err).toMatchObject({ code: "oauth/invalid-provider", param: "provider", status: 400 });
+  });
 });
 
 describe("handleOAuthRedirect", () => {
@@ -295,7 +311,11 @@ describe("handleOAuthRedirect", () => {
       url: "https://app.example.com/callback?error=access_denied&error_description=User+cancelled",
     });
 
-    expect(result).toEqual({ success: false, error: "User cancelled" });
+    expect(result.success).toBe(false);
+    // The query's `error` is the code, its description the message.
+    expect(result.error).toBeInstanceOf(SublayError);
+    expect(result.error?.message).toBe("User cancelled");
+    expect(result.error?.code).toBe("access_denied");
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 

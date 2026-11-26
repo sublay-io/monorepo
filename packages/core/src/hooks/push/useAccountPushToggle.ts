@@ -14,6 +14,7 @@ import { handleError } from "../../utils/handleError";
 import type { SublayState } from "../../store/sublayReducers";
 import { applyAccountPushBinding } from "./reconcilePushBindings";
 import { AccountTransitionError } from "../auth/accountTransition";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface SetAccountPushEnabledParams {
   /** Any account in the stored account map — it does not have to be active. */
@@ -36,7 +37,7 @@ export interface UseAccountPushToggleValues {
   /** Whether a given stored account currently wants push on this device. */
   isAccountPushEnabled: (userId: string) => boolean;
   isUpdating: boolean;
-  error: string | null;
+  error: SublayError | null;
 }
 
 /**
@@ -65,7 +66,7 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
   const { projectId } = useProject();
   const accounts = useSublaySelector(selectAccounts);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const setEnabled = useCallback(
     async ({ userId, enabled }: SetAccountPushEnabledParams) => {
@@ -145,11 +146,7 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
         // the server, and reverting it would be the one variant that does
         // misreport. The rethrow is what tells the caller to retry.
         handleError(err, "Failed to update push notifications for account");
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to update push notifications for account"
-        );
+        setError(toSublayError(err));
         throw err;
       } finally {
         setIsUpdating(false);

@@ -7,13 +7,30 @@ import { getAuthorizedToken } from "../../config/authGate";
 import { ContentSearchResult } from "./useSearchContent";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
-function safeParseJson(text: string): { error?: string; code?: string } | null {
+function safeParseJson(
+  text: string
+): { error?: unknown; code?: unknown; param?: unknown } | null {
   try {
-    return JSON.parse(text);
+    const parsed = JSON.parse(text);
+    return typeof parsed === "object" && parsed !== null ? parsed : null;
   } catch {
     return null;
   }
+}
+
+const textField = (value: unknown): string | undefined =>
+  typeof value === "string" && value ? value : undefined;
+
+/** A failed response as a `SublayError`: the body's `error`, `code` and `param`, and the status. */
+function responseError(status: number, text: string): SublayError {
+  const body = safeParseJson(text);
+  return new SublayError(textField(body?.error) ?? `Request failed (${status})`, {
+    code: textField(body?.code),
+    param: textField(body?.param),
+    status,
+  });
 }
 
 export interface UseAskContentProps extends SpaceReputationContextParams {
@@ -39,7 +56,7 @@ export interface UseAskContentReturn {
   streaming: boolean;
   /** True from the ask() call until the first token arrives (or an error occurs) */
   loading: boolean;
-  error: string | null;
+  error: SublayError | null;
   ask: (props: UseAskContentProps) => void;
   /** Aborts any in-flight stream and resets all state */
   reset: () => void;
@@ -84,7 +101,7 @@ export default function useAskContent(): UseAskContentReturn {
   const [sources, setSources] = useState<ContentSearchResult[]>([]);
   const [streaming, setStreaming] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   // Held across renders so reset() and unmount cleanup can abort an in-flight stream
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -183,7 +200,7 @@ export default function useAskContent(): UseAskContentReturn {
             const text = await response.text().catch(() => "");
             const parsed = safeParseJson(text);
             if (parsed?.code) {
-              setError(parsed.error ?? `Request failed (${authFailureStatus})`);
+              setError(responseError(authFailureStatus, text));
               setLoading(false);
               return;
             }
@@ -193,9 +210,12 @@ export default function useAskContent(): UseAskContentReturn {
               // presented, so the caller is genuinely signed out; a 403 means
               // one was presented and rejected, i.e. a session that lapsed.
               setError(
-                authFailureStatus === 401
-                  ? "You must be signed in to use AI search."
-                  : "Your session has expired. Please sign in again.",
+                new SublayError(
+                  authFailureStatus === 401
+                    ? "You must be signed in to use AI search."
+                    : "Your session has expired. Please sign in again.",
+                  { status: authFailureStatus },
+                ),
               );
               setLoading(false);
               return;
@@ -216,8 +236,10 @@ export default function useAskContent(): UseAskContentReturn {
             const parsed = safeParseJson(text);
             setError(
               parsed?.code
-                ? (parsed.error ?? "Request failed (401)")
-                : "You must be signed in to use AI search.",
+                ? responseError(401, text)
+                : new SublayError("You must be signed in to use AI search.", {
+                    status: 401,
+                  }),
             );
             setLoading(false);
             return;
@@ -225,20 +247,13 @@ export default function useAskContent(): UseAskContentReturn {
 
           if (!response.ok) {
             const text = await response.text().catch(() => "");
-            const message = (() => {
-              try {
-                return JSON.parse(text)?.error ?? `Request failed (${response.status})`;
-              } catch {
-                return `Request failed (${response.status})`;
-              }
-            })();
-            setError(message);
+            setError(responseError(response.status, text));
             setLoading(false);
             return;
           }
 
           if (!response.body) {
-            setError(
+            setError(new SublayError(
               "Streaming is not supported in this environment. " +
               "In React Native, install react-native-fetch-api, web-streams-polyfill@^3, " +
               "react-native-polyfill-globals, and text-encoding, then at app startup call the " +
@@ -246,7 +261,7 @@ export default function useAskContent(): UseAskContentReturn {
               "/readable-stream, and /fetch (in that order). " +
               "Prefer these over the all-in-one polyfillGlobals(), which also pulls the native " +
               "react-native-get-random-values and forces a dev-client rebuild."
-            );
+            ));
             setLoading(false);
             return;
           }
@@ -276,8 +291,13 @@ export default function useAskContent(): UseAskContentReturn {
               } else if (event === "done") {
                 setStreaming(false);
               } else if (event === "error") {
-                const parsed = JSON.parse(data) as { error: string };
-                setError(parsed.error);
+                const parsed = safeParseJson(data);
+                setError(
+                  new SublayError(textField(parsed?.error) ?? "The answer stream failed", {
+                    code: textField(parsed?.code),
+                    param: textField(parsed?.param),
+                  }),
+                );
                 setStreaming(false);
               }
             }
@@ -287,7 +307,7 @@ export default function useAskContent(): UseAskContentReturn {
           setStreaming(false);
         } catch (err) {
           if ((err as Error).name === "AbortError") return; // user called reset()
-          setError("An unexpected error occurred");
+          setError(toSublayError(err));
           setStreaming(false);
           setLoading(false);
         }

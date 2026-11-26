@@ -18,11 +18,12 @@ import {
   isUnbindFailure,
   warnPushUnbindSkipped,
 } from "../../utils/unbindFailure";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseRemoveAccountReturn {
   removeAccount: ({ userId }: { userId: string }) => Promise<void>;
   isRemoving: boolean;
-  error: string | null;
+  error: SublayError | null;
 }
 
 export default function useRemoveAccount(): UseRemoveAccountReturn {
@@ -33,7 +34,7 @@ export default function useRemoveAccount(): UseRemoveAccountReturn {
   // handle, which is why the identifier has a Redux home at all.
   const deviceIdentifier = useSublaySelector(selectDeviceIdentifier);
   const [isRemoving, setIsRemoving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const removeAccount = useCallback(
     async ({ userId }: { userId: string }) => {
@@ -144,9 +145,7 @@ export default function useRemoveAccount(): UseRemoveAccountReturn {
         }
       } catch (err) {
         handleError(err, "Failed to remove account");
-        setError(
-          err instanceof Error ? err.message : "Failed to remove account"
-        );
+        setError(toSublayError(err));
         throw err;
       } finally {
         setIsRemoving(false);

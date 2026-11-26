@@ -1,3 +1,5 @@
+import { SublayError } from "./SublayError";
+
 /**
  * Thrown when a write is blocked because the acting user is suspended.
  *
@@ -11,7 +13,11 @@
  */
 export const SUSPENDED_ERROR_CODE = "user/suspended";
 
-export class SuspendedError extends Error {
+/**
+ * A {@link SublayError} with `code: "user/suspended"` and `status: 403`, plus
+ * the suspension's `reason` and `endDate`.
+ */
+export class SuspendedError extends SublayError {
   /** Always `"user/suspended"` — matches the server's response `code`. */
   readonly code: typeof SUSPENDED_ERROR_CODE;
   /** Human-readable reason for the suspension, if the moderator provided one. */
@@ -23,12 +29,19 @@ export class SuspendedError extends Error {
     message,
     reason,
     endDate,
+    cause,
   }: {
     message?: string;
     reason: string | null;
     endDate: string | null;
+    /** The original error (the HTTP client's 403). */
+    cause?: unknown;
   }) {
-    super(message ?? "This account is suspended.");
+    super(message ?? "This account is suspended.", {
+      code: SUSPENDED_ERROR_CODE,
+      status: 403,
+      cause,
+    });
     this.name = "SuspendedError";
     this.code = SUSPENDED_ERROR_CODE;
     this.reason = reason;

@@ -37,6 +37,7 @@ import type {
 } from "../../interfaces/models/Workspace";
 
 import { handleError } from "../../utils/handleError";
+import type { SublayError } from "../../errors/SublayError";
 
 export interface UseWorkspaceListProps {
   listId: string;
@@ -60,7 +61,7 @@ export interface UseWorkspaceListValues {
    * The last load failure, shared by every hook on this `listId`. Cleared
    * when the next load starts; `loadMore()` retries it.
    */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
 

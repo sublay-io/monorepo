@@ -3,12 +3,13 @@ import { act, waitFor } from "@testing-library/react";
 
 import { jsonResponse, renderHookWithStore, type FetchMockHandle } from "./rtkQueryHarness";
 import { resetAccountScopedState } from "../store/actions";
+import type { SublayError } from "../errors/SublayError";
 
 /** What a store-backed list (useEntityList / useSpaceList / useWorkspaceList) exposes to these tests. */
 export interface StoreListView {
   ids: string[];
   loading: boolean;
-  error: Error | null;
+  error: SublayError | null;
   hasMore: boolean;
   loadMore: () => Promise<void>;
   refetch: () => Promise<void>;

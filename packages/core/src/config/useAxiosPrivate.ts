@@ -68,6 +68,7 @@ const useAxiosPrivate = (): AxiosInstance => {
               message: data?.error,
               reason: data?.reason ?? null,
               endDate: data?.endDate ?? null,
+              cause: error,
             })
           );
         }

@@ -3,7 +3,7 @@ import { useStore } from "react-redux";
 import type { Store } from "@reduxjs/toolkit";
 import type { SublayState } from "../../store/sublayReducers";
 import { handleError } from "../../utils/handleError";
-import { toError } from "../../utils/toError";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 /**
  * The load bookkeeping of one store-backed list (an entity list, the
@@ -31,7 +31,7 @@ export class SharedListStatus {
   failed: "first" | "next" | null = null;
   /** The `kind` the failed load was run with (see `runSharedListLoad`), so a retry repeats it. */
   failedKind: string | null = null;
-  private error: Error | null = null;
+  private error: SublayError | null = null;
   private listeners = new Set<() => void>();
 
   subscribe = (listener: () => void) => {
@@ -65,7 +65,7 @@ export class SharedListStatus {
     this.setError(null);
   }
 
-  setError(error: Error | null) {
+  setError(error: SublayError | null) {
     if (error === this.error) return;
     this.error = error;
     this.listeners.forEach((listener) => listener());
@@ -117,7 +117,7 @@ export function getSharedListStatus(store: SublayStore, key: string): SharedList
 /** The shared status of the list `key` in this provider's store, and its current error. */
 export function useSharedListStatus(key: string): {
   status: SharedListStatus;
-  error: Error | null;
+  error: SublayError | null;
 } {
   const store = useStore<{ sublay: SublayState }>();
   const status = useMemo(() => getSharedListStatus(store, key), [store, key]);
@@ -175,7 +175,7 @@ export async function runSharedListLoad(
     if (!isCurrent()) return;
     status.failed = first ? "first" : "next";
     status.failedKind = kind ?? status.failed;
-    status.setError(toError(err));
+    status.setError(toSublayError(err));
     if (errorLabel !== null) handleError(err, errorLabel);
   } finally {
     status.end(token);

@@ -5,6 +5,8 @@ import {
   useSublaySelector,
   selectAccessToken,
   requestOAuthAuthorizationUrl,
+  SublayError,
+  toSublayError,
   handleOAuthRedirect,
   type OAuthProvider,
 } from "@sublay/core";
@@ -17,7 +19,7 @@ export interface UseOAuthSignInReturn {
   /** Call on the callback page to extract tokens from the URL fragment. */
   handleOAuthCallback: () => boolean;
   isLoading: boolean;
-  error: string | null;
+  error: SublayError | null;
 }
 
 /**
@@ -40,13 +42,13 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
   const dispatch = useSublayDispatch();
   const accessToken = useSublaySelector(selectAccessToken);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   // Shared helper for both /authorize and /link endpoints
   const startOAuthFlow = useCallback(
     async (endpoint: "authorize" | "link", provider: OAuthProvider, redirectAfterAuth?: string) => {
       if (!projectId) {
-        setError("No projectId available.");
+        setError(new SublayError("No projectId available."));
         return;
       }
 
@@ -74,8 +76,8 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
         // Redirect the browser to Sublay, which forwards it to the provider.
         // isLoading intentionally stays true since we're navigating away.
         window.location.href = authorizationUrl;
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(toSublayError(err));
         setIsLoading(false);
       }
     },

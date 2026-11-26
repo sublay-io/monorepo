@@ -3,11 +3,12 @@ import { useCallback, useMemo } from "react";
 import useProject from "../projects/useProject";
 import type { TableRow } from "../../interfaces/models/Table";
 import { useFetchTableRowQuery } from "../../store/api/tablesApi";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseTableRowValues<T extends TableRow = TableRow> {
   row: T | null;
   loading: boolean;
-  error: unknown;
+  error: SublayError | null;
   refetch: () => void;
 }
 
@@ -97,7 +98,7 @@ export function useTableRow<T extends TableRow = TableRow>(
       // RTK Query only reports it when it has no data, which this already
       // covers.
       loading: isFetching && row === null,
-      error,
+      error: error ? toSublayError(error) : null,
       refetch: safeRefetch,
     };
   }, [currentData, isFetching, error, safeRefetch]);

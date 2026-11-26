@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface OAuthIdentity {
   id: string;
@@ -19,7 +20,7 @@ export interface UseOAuthIdentitiesReturn {
   fetchIdentities: () => Promise<void>;
   unlinkIdentity: ({ identityId }: { identityId: string }) => Promise<void>;
   isLoading: boolean;
-  error: string | null;
+  error: SublayError | null;
 }
 
 function useOAuthIdentities(): UseOAuthIdentitiesReturn {
@@ -28,7 +29,7 @@ function useOAuthIdentities(): UseOAuthIdentitiesReturn {
   const [identities, setIdentities] = useState<OAuthIdentity[]>([]);
   const [hasPassword, setHasPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<SublayError | null>(null);
 
   const fetchIdentities = useCallback(async () => {
     if (!projectId) return;
@@ -38,8 +39,8 @@ function useOAuthIdentities(): UseOAuthIdentitiesReturn {
       const response = await axios.get(`/${projectId}/oauth/identities`);
       setIdentities(response.data.identities);
       setHasPassword(Boolean(response.data.hasPassword));
-    } catch (err: any) {
-      setError(err.response?.data?.error || err.message);
+    } catch (err) {
+      setError(toSublayError(err));
     } finally {
       setIsLoading(false);
     }
@@ -53,8 +54,8 @@ function useOAuthIdentities(): UseOAuthIdentitiesReturn {
       try {
         await axios.delete(`/${projectId}/oauth/identities/${identityId}`);
         setIdentities((prev) => prev.filter((i) => i.id !== identityId));
-      } catch (err: any) {
-        setError(err.response?.data?.error || err.message);
+      } catch (err) {
+        setError(toSublayError(err));
       } finally {
         setIsLoading(false);
       }

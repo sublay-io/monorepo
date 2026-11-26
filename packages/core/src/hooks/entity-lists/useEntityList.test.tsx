@@ -10,6 +10,7 @@ import {
 } from "../../test-utils";
 import { describeStoreListContract } from "../../test-utils/storeListContract";
 import useEntityList from "./useEntityList";
+import { SublayError } from "../../errors/SublayError";
 
 let fetchHandle: FetchMockHandle;
 
@@ -479,6 +480,25 @@ describe("useEntityList — the list contract", () => {
     expect(result.current.loading).toBe(false);
     expect(pageParam(2).get("userId")).toBe("user-b");
     expect(pageParam(2).get("page")).toBe("1");
+  });
+
+  it("a refused page exposes the server's error as a SublayError", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    fetchHandle.fetchMock.mockResolvedValueOnce(
+      jsonResponse(
+        { error: "limit must be at most 100.", code: "request/invalid", param: "limit" },
+        400,
+      ),
+    );
+    const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+    act(() => result.current.fetchEntities({}));
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(SublayError));
+    expect(result.current.error?.message).toBe("limit must be at most 100.");
+    expect(result.current.error?.code).toBe("request/invalid");
+    expect(result.current.error?.param).toBe("limit");
+    expect(result.current.error?.status).toBe(400);
   });
 
   it("a failed first page sets error and loadMore retries page 1", async () => {

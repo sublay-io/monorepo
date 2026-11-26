@@ -23,7 +23,7 @@ import {
   CommentsSortByOptions,
 } from "../../interfaces/CommentsSortByOptions";
 import { handleError } from "../../utils/handleError";
-import { toError } from "../../utils/toError";
+import { SublayError, toSublayError } from "../../errors/SublayError";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import {
   CommentStore,
@@ -75,7 +75,7 @@ export interface UseEntityCommentsValues {
    * The last failure loading the list. Cleared when the next load starts.
    * `loadMore()` retries a failed load, including a failed first page.
    */
-  error: Error | null;
+  error: SublayError | null;
   hasMore: boolean;
   sortBy: CommentsSortByOptions;
   setSortBy: (newSortBy: CommentsSortByOptions) => void;
@@ -196,7 +196,7 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
     entityId ?? null,
   );
   const [loadedLoading, setLoading] = useState(true);
-  const [loadedError, setError] = useState<Error | null>(null);
+  const [loadedError, setError] = useState<SublayError | null>(null);
   const [loadedHasMore, setHasMore] = useState(true);
   const storeIsCurrent = !!entityId && storeEntityId === entityId;
   const store = useMemo(
@@ -304,7 +304,7 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
       if (reset && keep) refetchFailedRef.current = true;
       hasMoreRef.current = true;
       setHasMore(true);
-      setError(toError(err));
+      setError(toSublayError(err));
       reportBudgetError(err);
       handleError(err, "Failed to load comments:");
     } finally {

@@ -112,7 +112,7 @@ describe("useSpaceData", () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.space).toBeNull();
-    expect(result.current.error).toBe("Failed to fetch space");
+    expect(result.current.error?.status).toBe(500);
   });
 
   it("joins the space, then loads it again for the server's permissions", async () => {
@@ -189,7 +189,10 @@ describe("useSpaceData", () => {
       await result.current.joinSpace();
     });
 
-    expect(result.current.error).toBe("Failed to join space");
+    // The server's message and code, not a generic one.
+    expect(result.current.error?.message).toBe("You are banned from this space.");
+    expect(result.current.error?.code).toBe("space/banned");
+    expect(result.current.error?.status).toBe(403);
     expect(result.current.space).toEqual(space);
     expect(axiosPrivate.calls("get")).toHaveLength(1);
   });
@@ -270,7 +273,8 @@ describe("useSpaceData", () => {
       await result.current.leaveSpace();
     });
 
-    expect(result.current.error).toBe("Failed to leave space");
+    expect(result.current.error?.message).toBe("Space membership required");
+    expect(result.current.error?.code).toBe("space/membership-required");
     expect(result.current.space).toEqual(space);
     expect(axiosPrivate.calls("get")).toHaveLength(1);
   });
@@ -293,7 +297,7 @@ describe("useSpaceData", () => {
     await act(async () => {
       await result.current.joinSpace();
     });
-    expect(result.current.error).toBe("Failed to refresh space");
+    expect(result.current.error?.message).toBe("Internal error");
 
     axiosPrivate.mockResponse("post", membershipRecord("active"), 200);
     axiosPrivate.mockResponse("get", fresh);
@@ -419,7 +423,7 @@ describe("useSpaceData", () => {
     });
 
     expect(result.current.space).toEqual(space);
-    expect(result.current.error).toBe("Failed to refresh space");
+    expect(result.current.error?.message).toBe("Internal error");
   });
 
   it("updates the space via updateSpace, keeping the server's permissions and the hierarchy", async () => {

@@ -29,6 +29,7 @@ import useProject from "../../projects/useProject";
 import useFetchConversationPreview from "./useFetchConversationPreview";
 import { CursorPaginatedResponse } from "../../../interfaces/PaginatedResponse";
 import { appendImageSlot, type ImageSlotUpload } from "../../../utils/uploads";
+import type { SublayError } from "../../../errors/SublayError";
 
 export interface UseConversationsProps {
   types?: ConversationType[];
@@ -53,7 +54,7 @@ export interface UseConversationsValues {
   conversations: ConversationPreview[];
   loading: boolean;
   /** The last load failure, shared by every hook showing the inbox. Cleared when the next load starts; `loadMore()` retries it. */
-  error: Error | null;
+  error: SublayError | null;
   /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
   /**

@@ -17,6 +17,7 @@ import {
 } from "../../store/api/userApi";
 import { baseApi } from "../../store/api/baseApi";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { toSublayErrorRecord } from "../../errors/SublayError";
 
 /**
  * Redux-powered hook that provides current user management actions
@@ -108,8 +109,7 @@ export function useUserActions() {
           dispatch(setUser(originalUser));
         }
         
-        const errorMessage = error instanceof Error ? error.message : 'Failed to update user';
-        dispatch(setError(errorMessage));
+        dispatch(setError(toSublayErrorRecord(error)));
         throw error;
       } finally {
         dispatch(setUpdating(false));

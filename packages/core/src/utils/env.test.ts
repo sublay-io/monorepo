@@ -81,6 +81,15 @@ describe("in a browser bundle", () => {
     return module.exports;
   }
 
+  it("reads NODE_ENV as the exact text every bundler replaces", () => {
+    // esbuild also replaces `process?.env?.NODE_ENV` and `["NODE_ENV"]`;
+    // webpack's DefinePlugin doesn't, so the plain form is required.
+    const code = readFileSync(join(__dirname, "env.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/.*$/gm, "");
+    expect(code).toMatch(/process!?\.env!?\.NODE_ENV/);
+  });
+
   it("sees development and production", async () => {
     const dev = await bundleFor("development");
     expect(dev.isDevelopment()).toBe(true);

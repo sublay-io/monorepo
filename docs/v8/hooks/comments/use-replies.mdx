@@ -67,7 +67,7 @@ loadMore({ limit: 25 });       // e.g. a "show all" button
 
 Replies are always sorted by the section's reply sort (the provider's `replySortBy` / `replySortDir` / `replySortByReaction`, which default to the section's sort), so loading more continues in the same order as the pre-loaded replies.
 
-A request can return at most 500 comments (see [Request size limit](/v8/api-reference/comments/fetch-many-comments#request-size-limit)). If the **default** first-load nesting would go over it, `useReplies` lowers the depth until it fits and logs a warning in development. A `replyDepth` you pass explicitly is sent as-is.
+A request can return at most 500 comments (see [Request size limit](/v8/api-reference/comments/fetch-many-comments#request-size-limit)). If the **default** first-load nesting would go over it, `useReplies` lowers the depth until it fits and, outside production builds (in development and in test runs), logs a warning. A `replyDepth` you pass explicitly is sent as-is.
 
 ## Props
 

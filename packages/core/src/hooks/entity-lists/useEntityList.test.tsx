@@ -490,10 +490,9 @@ describe("useEntityList — the list contract", () => {
     expect(warn).not.toHaveBeenCalled();
     await waitFor(() => expect(result.current.loading).toBe(false));
     unmount();
-    vi.unstubAllGlobals();
   });
 
-  it("doesn't warn outside development", async () => {
+  it("doesn't warn in production", async () => {
     vi.stubEnv("NODE_ENV", "production");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));

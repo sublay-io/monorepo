@@ -1,6 +1,8 @@
+// @vitest-environment node
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { transformWithEsbuild } from "vite";
 import { isDevelopment, isProduction } from "./env";
 
 describe("build-mode detection", () => {
@@ -55,18 +57,37 @@ describe("build-mode detection", () => {
   });
 });
 
-// vitest always has a real `process`, so the behaviour tests above can't see
-// the browser-bundle bug: bundlers only replace the exact text
-// `process.env.NODE_ENV`, and a `typeof process` guard is false in a browser.
-describe("env.ts source", () => {
-  const source = readFileSync(join(__dirname, "env.ts"), "utf8");
-  const code = source.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+// vitest always has a real `process`, so the tests above can't see the
+// browser-bundle bug. This one builds env.ts the way a web bundler does
+// (replacing the text `process.env.NODE_ENV`) and runs it where there is no
+// `process` at all, so any guard on `process` existing would fail it.
+describe("in a browser bundle", () => {
+  async function bundleFor(nodeEnv: string) {
+    const source = readFileSync(join(__dirname, "env.ts"), "utf8");
+    const { code } = await transformWithEsbuild(source, "env.ts", {
+      loader: "ts",
+      format: "cjs",
+      define: { "process.env.NODE_ENV": JSON.stringify(nodeEnv) },
+    });
+    const module = { exports: {} as Record<string, () => boolean> };
+    // Shadow `process` and `globalThis`: a browser has neither a `process`
+    // object nor a `process` property on its global.
+    new Function("process", "globalThis", "module", "exports", code)(
+      undefined,
+      {},
+      module,
+      module.exports,
+    );
+    return module.exports;
+  }
 
-  it("reads NODE_ENV as literal text bundlers replace", () => {
-    expect(code).toMatch(/process!?\.env!?\.NODE_ENV/);
-  });
+  it("sees development and production", async () => {
+    const dev = await bundleFor("development");
+    expect(dev.isDevelopment()).toBe(true);
+    expect(dev.isProduction()).toBe(false);
 
-  it("does not guard the read on a `process` object existing", () => {
-    expect(code).not.toMatch(/typeof\s+process/);
+    const prod = await bundleFor("production");
+    expect(prod.isDevelopment()).toBe(false);
+    expect(prod.isProduction()).toBe(true);
   });
 });

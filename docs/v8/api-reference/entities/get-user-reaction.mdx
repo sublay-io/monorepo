@@ -8,7 +8,7 @@ description: "Get the authenticated user's reaction on an entity"
   **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
 
-Returns the authenticated user's current reaction on the specified entity, or `null` if they have not reacted. An entity that doesn't exist, is in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)), or whose author has blocked the user answers `404 entity/not-found`.
+Returns the authenticated user's current reaction on the specified entity, or `null` if they have not reacted. An entity that doesn't exist, is in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)), or whose author has blocked the user answers `404 entity/not-found`. The block rule requires the `moderation` bundle.
 
 **Authentication required.**
 

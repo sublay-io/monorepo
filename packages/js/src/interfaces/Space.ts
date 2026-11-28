@@ -23,7 +23,7 @@ export interface SpaceMemberPermissions {
 export interface SpacePreview {
   id: string;
   shortId: string;
-  name: string | null;
+  name: string;
   slug: string | null;
   avatarFileId: string | null;
   visibility: SpaceVisibility;
@@ -38,7 +38,7 @@ export interface Space {
   id: string;
   shortId: string;
   slug: string | null;
-  name: string | null;
+  name: string;
   description: string | null;
   avatarFileId: string | null;
   bannerFileId: string | null;
@@ -113,7 +113,7 @@ export interface CheckMyMembershipResponse {
 export interface VisibleSpaceBreadcrumbEntry {
   id: string;
   shortId: string;
-  name: string | null;
+  name: string;
   slug: string | null;
   avatarFileId: string | null;
   visibility: SpaceVisibility;

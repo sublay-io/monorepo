@@ -17,7 +17,7 @@ Updates a space. Only the space's admin can update it. Send `multipart/form-data
 All fields are optional. Only provided fields are updated.
 
 <ParamField body="name" type="string">
-  Updated display name. 3–100 characters.
+  Updated display name: 3–100 characters after trimming. Leave it out to keep the current name. It can't be cleared: `null` returns `400 space/invalid-body` with `param: "name"`.
 </ParamField>
 
 <ParamField body="slug" type="string">
@@ -86,6 +86,12 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
     Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
     { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params", "param": "spaceId" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Name — 400">
+    `name` was sent as `null` (a space can't lose its name) or isn't 3–100 characters after trimming. Nothing is updated.
+    ```json
+    { "error": "name: A space must have a name", "code": "space/invalid-body", "param": "name" }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">

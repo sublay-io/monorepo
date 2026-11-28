@@ -14,8 +14,9 @@ import {
 
 export interface UpdateSpaceProps {
   spaceId: string;
+  /** 3–100 characters after trimming; leave it out to keep the name. A name can't be cleared. */
+  name?: string;
   // `null` clears it, on a call without a file.
-  name?: string | null;
   slug?: string | null;
   description?: string | null;
   readingPermission?: ReadingPermission;

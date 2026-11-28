@@ -193,12 +193,12 @@ describe("useUpdateSpace", () => {
     await act(async () => {
       await result.current({
         spaceId: "space-1",
-        update: { name: null, slug: null, description: null },
+        update: { slug: null, description: null },
       });
     });
 
     const [call] = axiosPrivate.calls("patch");
-    expect(call.body).toEqual({ name: null, slug: null, description: null });
+    expect(call.body).toEqual({ slug: null, description: null });
   });
 
   it("sends removeFileIds alone as JSON", async () => {

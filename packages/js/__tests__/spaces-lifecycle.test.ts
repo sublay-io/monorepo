@@ -71,13 +71,13 @@ describe("js-sdk spaces (lifecycle) — request shaping", () => {
     await expect(
       updateSpace(client, {
         spaceId: "s1",
-        name: null,
+        description: null,
         avatarFile: {
           file: new File(["a"], "a.png", { type: "image/png" }),
           options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
         },
       })
-    ).rejects.toThrow("`name: null` can't be sent with a file");
+    ).rejects.toThrow("`description: null` can't be sent with a file");
     expect(projectInstance.patch).not.toHaveBeenCalled();
   });
 

@@ -19,8 +19,8 @@ export interface CreateSpaceProps {
    * be an admin of the parent).
    */
   actingUserId: string;
-  // `null` is the same as leaving the field out.
-  name?: string | null;
+  /** Required: 3–100 characters after trimming. Every space has a name. */
+  name: string;
   slug?: string | null;
   description?: string | null;
   readingPermission?: ReadingPermission;

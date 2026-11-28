@@ -83,11 +83,11 @@ function SpaceDirectory() {
 </ResponseField>
 
 <ResponseField name="createSpace" type="function">
-  Create a new space and insert it into the list. Every field is optional; `null` is the same as leaving a field out. Resolves with the created space plus `memberPermissions` (see [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions)), or `undefined` if the request failed.
+  Create a new space and insert it into the list. `name` is required (3–100 characters after trimming); every other field is optional, and `null` is the same as leaving it out. Resolves with the created space plus `memberPermissions` (see [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions)), or `undefined` if the request failed.
 
   ```ts
   createSpace(props: {
-    name?: string | null;
+    name: string;
     slug?: string | null;
     description?: string | null;
     readingPermission?: "anyone" | "members";

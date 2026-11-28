@@ -8,8 +8,8 @@ Creates a new space. The authenticated user is automatically added as an admin. 
 
 ## Body Parameters
 
-<ParamField body="name" type="string">
-  Display name for the space. Must be 3–100 characters.
+<ParamField body="name" type="string" required>
+  Display name for the space: 3–100 characters after leading and trailing whitespace is trimmed. Every space has a name; leaving it out, or sending `null`, returns `400 space/invalid-body`.
 </ParamField>
 
 <ParamField body="slug" type="string">
@@ -62,6 +62,15 @@ Returns the created [Space](/v7/data-models/space) object with `membersCount`, `
   <Accordion title="Auth Required — 401">
     ```json
     { "error": "Authentication required to create a space.", "code": "space/auth-required" }
+    ```
+  </Accordion>
+  <Accordion title="Missing or Invalid Name — 400">
+    Every space has a name. `name` was left out, sent as `null`, or isn't 3–100 characters after trimming (an empty or whitespace-only name included). Over multipart, a missing `name` form field is the same as leaving it out.
+    ```json
+    { "error": "name: A space must have a name", "code": "space/invalid-body" }
+    ```
+    ```json
+    { "error": "name: Space name must be at least 3 characters", "code": "space/invalid-body" }
     ```
   </Accordion>
   <Accordion title="Slug Taken — 409">

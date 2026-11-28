@@ -42,8 +42,8 @@ function SpaceSettings({ spaceId }: { spaceId: string }) {
   Fields to update. All fields are optional.
 
   <Expandable title="update fields">
-    <ParamField path="name" type="string | null">
-      New display name (3–100 characters). Pass `null` to remove it.
+    <ParamField path="name" type="string">
+      New display name (3–100 characters after trimming). Leave it out to keep the current name; a name can't be removed.
     </ParamField>
     <ParamField path="slug" type="string | null">
       New URL slug. Pass `null` to remove it.
@@ -82,7 +82,7 @@ function SpaceSettings({ spaceId }: { spaceId: string }) {
 </ParamField>
 
 <Warning>
-  With `avatarFile` or `bannerFile`, the request is `multipart/form-data`, which can't carry `null`. A `null` field next to a file throws before anything is sent (`` `name: null` can't be sent with a file ``); clear the field in a separate call without a file.
+  With `avatarFile` or `bannerFile`, the request is `multipart/form-data`, which can't carry `null`. A `null` field next to a file throws before anything is sent (`` `slug: null` can't be sent with a file ``); clear the field in a separate call without a file.
 </Warning>
 
 ## Returns

@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/comments/:commentId/reactions/me"
 description: "Get the authenticated user's reaction on a comment"
 ---
 
-Returns the authenticated user's current reaction on the specified comment, or `null` if they have not reacted. A comment on an entity in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) answers `404 comment/not-found`.
+Returns the authenticated user's current reaction on the specified comment, or `null` if they have not reacted. A comment on an entity in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) answers `404 comment/not-found`. A comment a moderator removed still answers with the user's reaction: it stays theirs to see and to [remove](/v8/api-reference/comments/remove-reaction).
 
 **Authentication required.**
 

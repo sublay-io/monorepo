@@ -4,6 +4,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import {
   resetAxiosMocks,
   makeChatMessage,
+  makeConversation,
   makeConversationPreview,
   makePreviewLastMessage,
   makeAuthUser,
@@ -16,6 +17,8 @@ import {
   selectTypingUsers,
   selectConversationList,
   selectSocketConnected,
+  selectConversation,
+  setConversation,
   setConversationList,
   setThreadReplies,
   setUnreadSummary,
@@ -991,5 +994,100 @@ describe("ChatProvider — thread replies", () => {
     });
     expect(replyOne().userDeletedAt).toBe("2024-01-03T00:00:00.000Z");
     expect(replyOne().content).toBeNull();
+  });
+});
+
+describe("ChatProvider — conversation:updated", () => {
+  const avatar = { id: "file-2", originalPath: "https://api.example/files/a.webp?exp=1&sig=s" } as any;
+
+  async function renderWithConversation() {
+    const rendered = renderChatProvider("token-1");
+    await waitFor(() => expect(rendered.axiosPrivate.calls("get")).toHaveLength(1));
+    act(() => {
+      rendered.store.dispatch(
+        setConversationList([
+          makeConversationPreview({ id: "c1", name: "Old" }),
+          makeConversationPreview({ id: "c2", name: "Other" }),
+        ]),
+      );
+      rendered.store.dispatch(
+        setConversation(makeConversation({ id: "c1", name: "Old", avatarFileId: "file-1" })),
+      );
+    });
+    return rendered;
+  }
+
+  it("applies the changed fields to the inbox row and the loaded conversation it names", async () => {
+    const { store } = await renderWithConversation();
+
+    act(() => {
+      fakeSocket.trigger("conversation:updated", {
+        conversationId: "c1",
+        name: "Renamed",
+        postingPermission: "team",
+      });
+    });
+
+    const row = selectConversationList(store.getState()).find((c) => c.id === "c1")!;
+    expect(row).toMatchObject({ name: "Renamed", postingPermission: "team" });
+    expect(selectConversation("c1")(store.getState())).toMatchObject({
+      name: "Renamed",
+      postingPermission: "team",
+      avatarFileId: "file-1",
+    });
+    // Another conversation is untouched.
+    expect(selectConversationList(store.getState()).find((c) => c.id === "c2")!.name).toBe("Other");
+  });
+
+  it("puts a new avatar's File on the loaded conversation, and clears it when the avatar is removed", async () => {
+    const { store } = await renderWithConversation();
+
+    act(() => {
+      fakeSocket.trigger("conversation:updated", {
+        conversationId: "c1",
+        avatarFileId: "file-2",
+        avatarFile: avatar,
+      });
+    });
+    expect(selectConversation("c1")(store.getState())).toMatchObject({
+      avatarFileId: "file-2",
+      avatarFile: avatar,
+    });
+    const row = selectConversationList(store.getState()).find((c) => c.id === "c1")!;
+    expect(row.avatarFileId).toBe("file-2");
+
+    act(() => {
+      fakeSocket.trigger("conversation:updated", {
+        conversationId: "c1",
+        avatarFileId: null,
+        avatarFile: null,
+      });
+    });
+    expect(selectConversation("c1")(store.getState())).toMatchObject({
+      avatarFileId: null,
+      avatarFile: null,
+    });
+  });
+
+  it("updates an inbox row whose conversation isn't loaded", async () => {
+    const { store } = await renderWithConversation();
+
+    act(() => {
+      fakeSocket.trigger("conversation:updated", { conversationId: "c2", description: "About" });
+    });
+
+    expect(selectConversationList(store.getState()).find((c) => c.id === "c2")!.description).toBe("About");
+    expect(selectConversation("c2")(store.getState())).toBeNull();
+  });
+
+  it("ignores a payload that doesn't name the conversation", async () => {
+    const { store } = await renderWithConversation();
+    const before = store.getState().sublay.chat;
+
+    act(() => {
+      fakeSocket.trigger("conversation:updated", { name: "Renamed" });
+    });
+
+    expect(store.getState().sublay.chat).toBe(before);
   });
 });

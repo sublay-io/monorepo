@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { SocketChatMessage } from "../../types/socket";
+import type { SocketChatMessage, SocketConversationPatch } from "../../types/socket";
 import { resetAccountScopedState } from "../actions";
 import type {
   Conversation,
@@ -399,6 +399,18 @@ function advanceCursor(
 
 // Not exported directly — use the actions below and the default reducer export.
 // Exporting the slice itself causes TS4023 due to immer's internal WritableNonArrayDraft type.
+/**
+ * Drop a held `avatarFile` that is no longer the conversation's avatar: a
+ * read without `avatarFile` (Fetch Conversation, a preview) merges over a File
+ * held from an earlier update or event, and must not keep a replaced or
+ * removed avatar's File next to the new `avatarFileId`.
+ */
+function dropStaleAvatarFile(target: Partial<Conversation>): void {
+  if (target.avatarFile && target.avatarFile.id !== target.avatarFileId) {
+    delete target.avatarFile;
+  }
+}
+
 const chatSlice = createSlice({
   name: "chat",
   initialState,
@@ -422,6 +434,7 @@ const chatSlice = createSlice({
         ...state.conversations[id].data,
         ...conversation,
       };
+      dropStaleAvatarFile(state.conversations[id].data!);
       state.conversations[id].loading = false;
       state.conversations[id].error = null;
 
@@ -431,6 +444,7 @@ const chatSlice = createSlice({
       );
       if (previewIndex !== -1) {
         Object.assign(state.conversationList.items[previewIndex], conversation);
+        dropStaleAvatarFile(state.conversationList.items[previewIndex] as Partial<Conversation>);
       }
     },
 
@@ -497,6 +511,28 @@ const chatSlice = createSlice({
     },
 
     /**
+     * Apply a `conversation:updated` event to the inbox row and to the loaded
+     * conversation, whichever are held. `avatarFile` goes only where a File is
+     * kept (the loaded conversation, or a row that already holds one); the
+     * list's order doesn't change.
+     */
+    applyConversationUpdate(state, action: PayloadAction<SocketConversationPatch>) {
+      const { conversationId, avatarFile, ...fields } = action.payload;
+      const targets: Array<Partial<Conversation>> = [];
+      const preview = state.conversationList.items.find((c) => c.id === conversationId);
+      if (preview) targets.push(preview as Partial<Conversation>);
+      const data = state.conversations[conversationId]?.data;
+      if (data) targets.push(data);
+      for (const target of targets) {
+        Object.assign(target, fields);
+        if (avatarFile !== undefined && (target === data || "avatarFile" in target)) {
+          target.avatarFile = avatarFile;
+        }
+        dropStaleAvatarFile(target);
+      }
+    },
+
+    /**
      * Insert a full ConversationPreview into the inbox list. If a preview with
      * the same id already exists, patch it in place (idempotent — no duplicate,
      * no positional change unless lastMessageAt changed). On a fresh insert the
@@ -537,6 +573,7 @@ const chatSlice = createSlice({
         ...state.conversations[preview.id].data,
         ...preview,
       };
+      dropStaleAvatarFile(state.conversations[preview.id].data!);
     },
 
     /**
@@ -1175,6 +1212,7 @@ export const {
   setConversationListHasMore,
   setConversationListCursor,
   upsertConversationPreview,
+  applyConversationUpdate,
   insertConversationPreview,
   forgetCurrentMember,
   removeConversationPreview,

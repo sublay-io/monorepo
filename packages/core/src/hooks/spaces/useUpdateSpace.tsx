@@ -18,8 +18,9 @@ import { SublayError } from "../../errors/SublayError";
 export interface UpdateSpaceProps {
   spaceId: string;
   update: Partial<{
+    /** 3–100 characters after trimming. A name can't be cleared. */
+    name: string;
     // `null` clears it, on an update without a file.
-    name: string | null;
     slug: string | null;
     description: string | null;
     /** A new avatar image, replacing the current one. */

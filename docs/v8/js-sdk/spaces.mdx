@@ -22,8 +22,8 @@ const space = await sublay.spaces.createSpace({
 });
 ```
 
-<ParamField body="name" type="string | null">
-  Display name for the space (3–100 characters). Left out or `null`, the space has no name.
+<ParamField body="name" type="string" required>
+  Display name for the space: 3–100 characters after trimming. Every space has a name; without one the server returns `400 space/invalid-body`.
 </ParamField>
 
 <ParamField body="slug" type="string | null">
@@ -313,8 +313,8 @@ const space = await sublay.spaces.updateSpace({
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="name" type="string | null">
-  New display name. `null` clears it.
+<ParamField body="name" type="string">
+  New display name (3–100 characters after trimming). Leave it out to keep the current name; a name can't be cleared.
 </ParamField>
 
 <ParamField body="slug" type="string | null">

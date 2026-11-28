@@ -44,8 +44,8 @@ const space = await createSpace({
 
 ## Parameters
 
-<ParamField path="name" type="string | null">
-  Optional display name for the space. 3–100 characters. A space can have no name; `null` is the same as leaving it out.
+<ParamField path="name" type="string" required>
+  Display name for the space: 3–100 characters after trimming. Every space has a name; without one the server returns `400 space/invalid-body`.
 </ParamField>
 
 <ParamField path="slug" type="string | null">

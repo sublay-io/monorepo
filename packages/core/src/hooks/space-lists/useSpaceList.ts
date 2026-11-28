@@ -59,8 +59,8 @@ export interface SpaceListFetchSpacesProps {
 }
 
 export interface SpaceListCreateSpaceProps {
-  // `null` is the same as leaving the field out.
-  name?: string | null;
+  /** Required: 3–100 characters after trimming. Every space has a name. */
+  name: string;
   slug?: string | null;
   description?: string | null;
   // Space images are multipart-only on the server; set them with

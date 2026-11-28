@@ -10,8 +10,8 @@ Creates a new space. Its creator — the signed-in user, or the user a service k
 
 ## Body Parameters
 
-<ParamField body="name" type="string">
-  Display name for the space. Must be 3–100 characters.
+<ParamField body="name" type="string" required>
+  Display name for the space: 3–100 characters after leading and trailing whitespace is trimmed. Every space has a name; leaving it out, or sending `null`, returns `400 space/invalid-body` with `param: "name"`.
 </ParamField>
 
 <ParamField body="slug" type="string">
@@ -75,6 +75,15 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
 <AccordionGroup>
   <Accordion title="Not signed in — 401 / 403">
     Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error.
+  </Accordion>
+  <Accordion title="Missing or Invalid Name — 400">
+    Every space has a name. `name` was left out, sent as `null`, or isn't 3–100 characters after trimming (an empty or whitespace-only name included). Over multipart, a missing `name` form field is the same as leaving it out.
+    ```json
+    { "error": "name: A space must have a name", "code": "space/invalid-body", "param": "name" }
+    ```
+    ```json
+    { "error": "name: Space name must be at least 3 characters", "code": "space/invalid-body", "param": "name" }
+    ```
   </Accordion>
   <Accordion title="Missing User ID — 400">
     A service key sent no `actingUserId`. A space needs a creator.

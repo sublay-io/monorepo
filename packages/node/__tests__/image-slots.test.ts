@@ -178,7 +178,7 @@ describe("node-sdk image slots — a null field can't travel with a file", () =>
 
   it("leaves a null field out of a create's multipart body (null there means none)", async () => {
     const { client, projectInstance } = makeClient();
-    await createSpace(client, { actingUserId: "u1", slug: null, parentSpaceId: null, avatarFile });
+    await createSpace(client, { actingUserId: "u1", name: "Space", slug: null, parentSpaceId: null, avatarFile });
     await signUp(client, { email: "a@b.co", password: "pw", name: null, avatarFile });
     const spaceForm = projectInstance.post.mock.calls[0][1] as FormData;
     const signUpForm = projectInstance.post.mock.calls[1][1] as FormData;

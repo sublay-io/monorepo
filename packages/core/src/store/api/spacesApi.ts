@@ -19,8 +19,8 @@ import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 
 interface CreateSpaceParams {
   projectId: string;
-  // `null` is the same as leaving the field out.
-  name?: string | null;
+  /** Required: 3–100 characters after trimming. Every space has a name. */
+  name: string;
   slug?: string | null;
   description?: string | null;
   // No avatar/banner here: the server dropped URL-string image fields in

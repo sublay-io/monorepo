@@ -171,8 +171,8 @@ describe("useSpaceListActions", () => {
       );
     });
 
-    it("creates a space without a name, sending nsfw and visibility", async () => {
-      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ id: "s1", name: null }, 201));
+    it("creates a space, sending nsfw and visibility", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ id: "s1", name: "Feed Space" }, 201));
       const { result, store } = renderHookWithStore(() => useSpaceListActions(), {
         projectId: "test-project",
       });
@@ -181,14 +181,14 @@ describe("useSpaceListActions", () => {
       await act(async () => {
         await result.current.createSpace({
           listId: "feed",
-          name: null,
+          name: "Feed Space",
           nsfw: true,
           visibility: "unlisted",
         });
       });
 
       expect(JSON.parse(fetchHandle.calls()[0].body as string)).toEqual({
-        name: null,
+        name: "Feed Space",
         nsfw: true,
         visibility: "unlisted",
       });

@@ -18,7 +18,7 @@ The API returns three space shapes depending on context:
 | `id` | `string` | Unique space identifier (UUID). |
 | `shortId` | `string` | Short human-readable ID for the space (URL-safe, generated automatically). |
 | `slug` | `string \| null` | Optional URL-friendly slug. Unique per project when set. |
-| `name` | `string \| null` | Display name of the space (3–100 characters). `null` when the space was created without one. |
+| `name` | `string` | Display name of the space (3–100 characters). Every space has one. |
 | `description` | `string \| null` | Optional description (up to 1,000 characters). |
 | `userId` | `string \| null` | ID of the space creator/owner. A child space's `userId` is its root space's creator, and that user is the space creator in every rule that names one. |
 | `avatarFileId` | `string \| null` | ID of the space's avatar image file. Set by uploading `avatarFile` on create or update; cleared by listing it in `removeFileIds` on [Update Space](/v8/api-reference/spaces/update-space). |
@@ -58,7 +58,7 @@ A minimal space shape used only as an embedded reference — never returned dire
 |----------|------|-------------|
 | `id` | `string` | Space UUID. |
 | `shortId` | `string` | Short identifier. |
-| `name` | `string \| null` | Display name. |
+| `name` | `string` | Display name. |
 | `slug` | `string \| null` | URL slug. |
 | `avatarFileId` | `string \| null` | Avatar file ID. |
 | `visibility` | `"public" \| "unlisted" \| "private"` | Listing/discoverability level. |

@@ -17,7 +17,7 @@ Updates a space. Only the space's admin can update it. Supports multipart form d
 All fields are optional. Only provided fields are updated.
 
 <ParamField body="name" type="string">
-  Updated display name. 3–100 characters.
+  Updated display name: 3–100 characters after trimming. Leave it out to keep the current name. It can't be cleared: `null` returns `400 space/invalid-body`.
 </ParamField>
 
 <ParamField body="slug" type="string">
@@ -63,6 +63,12 @@ Returns the updated [SpaceDetailed](/v7/data-models/space) object.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Name — 400">
+    `name` was sent as `null` (a space can't lose its name) or isn't 3–100 characters after trimming. Nothing is updated.
+    ```json
+    { "error": "name: A space must have a name", "code": "space/invalid-body" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Space not found.", "code": "space/not-found" }

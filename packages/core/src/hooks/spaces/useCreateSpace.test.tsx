@@ -95,18 +95,6 @@ describe("useCreateSpace", () => {
     });
   });
 
-  it("creates a space without a name", async () => {
-    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateSpace());
-    axiosPrivate.mockResponse("post", makeSpace({ name: null }), 201);
-
-    await act(async () => {
-      await result.current({});
-    });
-
-    const [call] = axiosPrivate.calls("post");
-    expect(call.body).toEqual({});
-  });
-
   it("leaves `null` fields out of a multipart create", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useCreateSpace());
     axiosPrivate.mockResponse("post", makeSpace(), 201);
@@ -114,7 +102,7 @@ describe("useCreateSpace", () => {
     const file = new File(["binary"], "avatar.png", { type: "image/png" });
     await act(async () => {
       await result.current({
-        name: null,
+        name: "Design",
         slug: null,
         description: null,
         parentSpaceId: null,
@@ -129,6 +117,7 @@ describe("useCreateSpace", () => {
       "avatarFile",
       "avatarFile.options",
       "metadata",
+      "name",
       "nsfw",
     ]);
     expect(formData.get("nsfw")).toBe("true");

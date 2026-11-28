@@ -24,7 +24,7 @@ export type PaginationMeta = PaginationMetadata;
 export interface SpacePreview {
   id: string;
   shortId: string;
-  name: string | null;
+  name: string;
   slug: string | null;
   avatarFileId: string | null;
   visibility: SpaceVisibility;
@@ -42,7 +42,7 @@ export interface Space {
   slug: string | null;
 
   // Display info
-  name: string | null;
+  name: string;
   description: string | null;
   avatarFileId: string | null;
   bannerFileId: string | null;

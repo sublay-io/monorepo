@@ -15,8 +15,8 @@ import {
 import { SublayError } from "../../errors/SublayError";
 
 export interface CreateSpaceProps {
-  // `null` is the same as leaving the field out.
-  name?: string | null;
+  /** Required: 3–100 characters after trimming. Every space has a name. */
+  name: string;
   slug?: string | null;
   description?: string | null;
   /** The space's avatar image: the file plus its processing options. */

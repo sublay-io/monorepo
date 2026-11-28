@@ -36,7 +36,7 @@ function CustomSpaceLoader({ listId }: { listId: string }) {
 </ResponseField>
 
 <ResponseField name="createSpace" type="({ listId, ...props }: { listId: string } & CreateSpaceProps) => Promise<SpaceWithPermissions | undefined>">
-  Create a space and insert it into the given list's state. `props` takes the same fields as [useSpaceList](/v8/hooks/space-lists/use-space-list)'s `createSpace` (every one optional, `name` included). Resolves with the created space plus `memberPermissions`; a failed request rejects.
+  Create a space and insert it into the given list's state. `props` takes the same fields as [useSpaceList](/v8/hooks/space-lists/use-space-list)'s `createSpace` (`name` required, every other field optional). Resolves with the created space plus `memberPermissions`; a failed request rejects.
 </ResponseField>
 
 <ResponseField name="deleteSpace" type="({ listId, spaceId }: { listId: string; spaceId: string }) => Promise<void>">

@@ -4,7 +4,7 @@ import { SpaceVisibility } from "./models/Space";
 export interface VisibleSpaceBreadcrumbEntry {
   id: string;
   shortId: string;
-  name: string | null;
+  name: string;
   slug: string | null;
   avatarFileId: string | null;
   visibility: SpaceVisibility;

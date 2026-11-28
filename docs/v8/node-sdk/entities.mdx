@@ -592,7 +592,7 @@ const { data, pagination } = await sublay.entities.fetchReactions({
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The user to list as: reactions from users they are block-edged with are left out, as for their own access token. Omit it for the anonymous view.
+  The user to list as, exactly as their own access token: reactions from users they are block-edged with are left out, and an entity whose author blocked them fails with `404 entity/not-found`. Omit it for the anonymous view.
 </ParamField>
 
 <ParamField body="reactionType" type="ReactionType">
@@ -638,3 +638,5 @@ const { reactionType } = await sublay.entities.getUserReaction({
 </ParamField>
 
 **Returns** — `Promise<{ reactionType: ReactionType | null }>`
+
+If the entity's author has blocked the user, this fails with `404 entity/not-found`.

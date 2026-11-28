@@ -2,6 +2,7 @@ import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { Comment } from "../../interfaces/models/Comment";
 import { handleError } from "../../utils/handleError";
+import { isProduction } from "../../utils/env";
 import { SublayError, toSublayError } from "../../errors/SublayError";
 import useFetchManyComments from "./useFetchManyComments";
 import { isUUID } from "../../utils/isUUID";
@@ -16,7 +17,6 @@ import {
 import {
   COMMENT_REPLY_BUDGET,
   fitReplyDepthToBudget,
-  isDevBuild,
 } from "../../helpers/commentThreadConfig";
 
 export interface UseRepliesProps {
@@ -144,7 +144,7 @@ function useReplies({
         replyDepth = depthProp;
       } else {
         replyDepth = fitReplyDepthToBudget(pageLimit, ctx.replyDepth, ctx.replyLimit);
-        if (replyDepth < ctx.replyDepth && isDevBuild()) {
+        if (replyDepth < ctx.replyDepth && !isProduction()) {
           console.warn(
             `[Sublay] useReplies: lowered replyDepth from ${ctx.replyDepth} to ${replyDepth} so a ${pageLimit}-reply load stays within the ${COMMENT_REPLY_BUDGET}-comment request limit. Pass replyDepth explicitly to override.`,
           );

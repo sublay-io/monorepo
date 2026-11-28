@@ -1,4 +1,4 @@
-import { isDevBuild } from "../helpers/commentThreadConfig";
+import { isProduction } from "./env";
 
 /**
  * Development builds only: warns when a list fetch (`fetchEntities`,
@@ -14,7 +14,7 @@ export function warnStrayFetchKeys(
   /** How many arguments the call received. */
   argCount = 1
 ): void {
-  if (!isDevBuild()) return;
+  if (isProduction()) return;
   if (argCount > 1) {
     console.warn(
       `[Sublay] ${fn} takes one object, { ${allowed.join(", ")} }, and got ${argCount} arguments; ` +

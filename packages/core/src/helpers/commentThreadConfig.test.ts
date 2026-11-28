@@ -1,6 +1,5 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
-  isDevBuild,
   commentWorstCaseRows,
   fitReplyDepthToBudget,
   resolveReplySort,
@@ -47,30 +46,5 @@ describe("budget", () => {
     expect(commentWorstCaseRows(10, 5, 2)).toBe(630);
     expect(commentWorstCaseRows(10, 2, 3)).toBe(130);
     expect(fitReplyDepthToBudget(10, 5, 3)).toBe(3);
-  });
-});
-
-describe("isDevBuild", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.unstubAllEnvs();
-  });
-
-  it("follows NODE_ENV when there is no __DEV__", () => {
-    vi.stubEnv("NODE_ENV", "development");
-    expect(isDevBuild()).toBe(true);
-    vi.stubEnv("NODE_ENV", "test");
-    expect(isDevBuild()).toBe(true);
-    vi.stubEnv("NODE_ENV", "production");
-    expect(isDevBuild()).toBe(false);
-  });
-
-  it("follows React Native's __DEV__ when it is set", () => {
-    vi.stubEnv("NODE_ENV", "development");
-    vi.stubGlobal("__DEV__", false);
-    expect(isDevBuild()).toBe(false);
-    vi.stubEnv("NODE_ENV", "production");
-    vi.stubGlobal("__DEV__", true);
-    expect(isDevBuild()).toBe(true);
   });
 });

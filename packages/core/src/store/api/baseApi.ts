@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { getApiBaseUrl } from "../../utils/env";
+import { BASE_URL } from "../../config/axios";
 import { getAuthorizedToken } from "../../config/authGate";
 import { serializeQueryParams } from "../../utils/queryParams";
 
@@ -16,7 +16,7 @@ interface StateWithSublay {
 // Base query that uses the current project context and auth
 const createBaseQuery = () => {
   return fetchBaseQuery({
-    baseUrl: getApiBaseUrl(),
+    baseUrl: BASE_URL,
     // `null` and `undefined` params are left out (the default would send
     // `null` as the string "null", which the API refuses on its filters).
     paramsSerializer: serializeQueryParams,

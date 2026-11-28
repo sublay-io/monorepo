@@ -1,111 +1,59 @@
-// Environment detection utility for cross-platform compatibility
-// Works with both traditional React apps and Vite-based apps
+// Build-mode detection, for every platform the SDK runs on.
+//
+// Both checks read `process.env.NODE_ENV` written out literally: bundlers
+// (Vite, webpack, Next.js, Metro) replace that exact text with a string at
+// build time, so it works in browser bundles where no `process` object exists.
+// A guard such as `typeof process !== "undefined"` would be false there and
+// hide the value, so the read is wrapped in try/catch instead. When nothing
+// replaced it and there is no `process` (an unbundled browser script), React
+// Native's `__DEV__` is the fallback, and with neither the build counts as
+// production.
 
 declare const process:
   | { env?: Record<string, string | undefined> }
   | undefined;
 
-// Helper function to safely access Vite's import.meta.env
-function getViteEnv(): Record<string, any> | null {
+/** `process.env.NODE_ENV` as the bundler or runtime provides it, or undefined. */
+function readNodeEnv(): string | undefined {
   try {
-    // Use dynamic access to avoid TypeScript import.meta issues
-    const globalThis_ = globalThis as any;
-    if (typeof window !== 'undefined' && globalThis_.__vite_env) {
-      return globalThis_.__vite_env;
-    }
-
-    // Try to access import.meta via eval to avoid compile-time issues
-    if (typeof window !== 'undefined') {
-      try {
-        const importMeta = new Function('return typeof import !== "undefined" && import.meta')();
-        if (importMeta && importMeta.env) {
-          return importMeta.env;
-        }
-      } catch {
-        // Ignore errors when import.meta is not available
-      }
-    }
-
-    return null;
+    // The `!`s are type-only: the emitted text stays `process.env.NODE_ENV`.
+    const value = process!.env!.NODE_ENV;
+    return typeof value === "string" ? value : undefined;
   } catch {
-    return null;
+    return undefined;
   }
 }
 
-/**
- * Safe way to check if we're in development mode
- * Works with both Node.js process.env and Vite import.meta.env
- */
-export function isDevelopment(): boolean {
-  // Check if we have process.env (Node.js or bundler that provides it)
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env.NODE_ENV === 'development';
-  }
-
-  // Check Vite environment
-  const viteEnv = getViteEnv();
-  if (viteEnv) {
-    return viteEnv.MODE === 'development';
-  }
-
-  // Fallback to false (assume production for safety)
-  return false;
+/** React Native's `__DEV__` global, when it is defined. */
+function readDevGlobal(): boolean | undefined {
+  const dev = (globalThis as { __DEV__?: unknown }).__DEV__;
+  return typeof dev === "boolean" ? dev : undefined;
 }
 
 /**
- * Safe way to check if we're in production mode
+ * True in a production build. False in development and test runs.
+ *
+ * The SDK shows its warnings (misuse, wasteful props, server rejections a
+ * developer should fix) whenever this is false, so they also show in tests.
+ * With no way to tell, the build counts as production.
  */
 export function isProduction(): boolean {
-  // Check if we have process.env (Node.js or bundler that provides it)
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env.NODE_ENV === 'production';
-  }
-
-  // Check Vite environment
-  const viteEnv = getViteEnv();
-  if (viteEnv) {
-    return viteEnv.MODE === 'production';
-  }
-
-  // Fallback to true (assume production for safety)
+  const nodeEnv = readNodeEnv();
+  if (nodeEnv !== undefined) return nodeEnv === "production";
+  const dev = readDevGlobal();
+  if (dev !== undefined) return !dev;
   return true;
 }
 
 /**
- * Get API base URL from environment variables
- * Supports both REACT_APP_ and VITE_ prefixes
+ * True only while developing (`NODE_ENV` is `"development"`, or React Native's
+ * `__DEV__` when `NODE_ENV` is unavailable). False in test runs and production.
+ *
+ * The SDK's debugging aids (logging failed requests, Redux DevTools) turn on
+ * only when this is true.
  */
-export function getApiBaseUrl(): string {
-  // Check process.env (traditional React apps)
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env.REACT_APP_API_BASE_URL || 'https://api.sublay.io/v8';
-  }
-
-  // Check Vite environment
-  const viteEnv = getViteEnv();
-  if (viteEnv) {
-    return viteEnv.VITE_API_BASE_URL || 'https://api.sublay.io/v8';
-  }
-
-  // Fallback to default
-  return 'https://api.sublay.io/v8';
-}
-
-/**
- * Get any environment variable with fallback
- * Tries both VITE_ and REACT_APP_ prefixes
- */
-export function getEnvVar(name: string, defaultValue: string = ''): string {
-  // Check process.env
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env[`REACT_APP_${name}`] || process.env[`VITE_${name}`] || defaultValue;
-  }
-
-  // Check Vite environment
-  const viteEnv = getViteEnv();
-  if (viteEnv) {
-    return viteEnv[`VITE_${name}`] || viteEnv[`REACT_APP_${name}`] || defaultValue;
-  }
-
-  return defaultValue;
+export function isDevelopment(): boolean {
+  const nodeEnv = readNodeEnv();
+  if (nodeEnv !== undefined) return nodeEnv === "development";
+  return readDevGlobal() === true;
 }

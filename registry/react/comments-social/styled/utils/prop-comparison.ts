@@ -1,5 +1,5 @@
 // Utility functions for prop comparison and stability checks
-import { isDevelopment } from "@sublay/react-js";
+import { isProduction } from "@sublay/react-js";
 
 /**
  * Performs deep equality check for nested objects and arrays
@@ -45,7 +45,7 @@ export function deepEqual(obj1: any, obj2: any): boolean {
 }
 
 /**
- * Development-only function to warn about prop changes
+ * Warns about prop changes outside production builds (development and tests)
  */
 export function warnPropChanges(
   componentName: string,
@@ -53,7 +53,7 @@ export function warnPropChanges(
   nextProps: Record<string, any>,
   propNames: string[]
 ): void {
-  if (!isDevelopment()) {
+  if (isProduction()) {
     return;
   }
 

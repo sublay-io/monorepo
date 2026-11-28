@@ -93,27 +93,6 @@ export function resolveReplySort(
 }
 
 /**
- * True in development builds: React Native's `__DEV__` when it is set,
- * otherwise `process.env.NODE_ENV !== "production"`.
- *
- * The `process.env.NODE_ENV` read is written out literally, on purpose:
- * webpack, Vite, CRA and Next replace that exact text at build time, while a
- * guarded lookup (`typeof process !== "undefined" && process.env`) is false in
- * a browser bundle, where there is no `process` object, and so reported every
- * web build as production. The try/catch covers a runtime with no `process`
- * and no build-time replacement.
- */
-export function isDevBuild(): boolean {
-  const dev = (globalThis as { __DEV__?: unknown }).__DEV__;
-  if (typeof dev === "boolean") return dev;
-  try {
-    return process.env.NODE_ENV !== "production";
-  } catch {
-    return false;
-  }
-}
-
-/**
  * `replySortByReaction` as it may be sent: the server only accepts it when the
  * effective reply sort (`replySortBy`, defaulting to the request's `sortBy`)
  * is `top`, and rejects the request otherwise.

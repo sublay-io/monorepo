@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { rootReducer } from "./rootReducer";
 import { customMiddleware } from "./middleware";
 import { baseApi } from "./api/baseApi";
-import { isProduction } from "../utils/env";
+import { isDevelopment } from "../utils/env";
 
 // Configure the Redux store
 export const store = configureStore({
@@ -46,8 +46,8 @@ export const store = configureStore({
       // Add custom middleware
       .concat(customMiddleware),
   
-  // Enable Redux DevTools in development
-  devTools: !isProduction(),
+  // Redux DevTools is a debugging aid: on only while developing, not in tests
+  devTools: isDevelopment(),
 });
 
 // Export types

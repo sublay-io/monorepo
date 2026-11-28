@@ -41,7 +41,7 @@ Returns the updated [Workspace](/v8/data-models/workspace) object.
     The acting user can see the workspace but is neither its owner nor an owner of a workspace above it.
   </Accordion>
   <Accordion title="Not Found — 404">
-    The workspace doesn't exist, or the acting user has no relation to it (not its owner, an ancestor owner, a member or a reach-holder): the two answer alike, with the same body [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) gives.
+    The workspace doesn't exist, or the acting user has no relation to it (not its owner, an ancestor owner, a member or a reach-holder): the two answer alike, with the same body [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) gives. Also returned when it was deleted while this request was being handled (for example by a concurrent delete). A successful response always carries the workspace.
     ```json
     { "error": "Workspace not found.", "code": "workspace/not-found" }
     ```

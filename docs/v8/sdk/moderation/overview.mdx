@@ -37,9 +37,10 @@ When user A blocks user B, the effects are **mutual** (both directions) unless n
 |---------|-------------------|
 | **Follows** | Any existing follow in either direction is removed immediately. Neither can follow the other going forward. |
 | **Connections** | Any existing connection is removed and any pending request in either direction is cancelled. Neither can send a new request to the other. |
-| **Direct messages (1:1)** | Neither can start a new 1:1 conversation with the other. An existing 1:1 is frozen — history is retained and remains readable, but no new messages, edits, reactions, or deletes go through in either direction. |
+| **Direct messages (1:1)** | Neither can start a new 1:1 conversation with the other. An existing 1:1 is frozen — history is retained and remains readable, but no new messages, edits, reactions, or deletes go through in either direction: they answer `403 chat/conversation-read-only`. |
 | **Group / space conversations** | Untouched. Both remain members of any shared group/space conversation and continue to see each other's messages there. |
 | **Commenting and comment reactions (asymmetric)** | B can't comment on A's entities, reply to A's comments, quote A, react to A's comments, or react to any comment on A's entities — these fail as "not found". B also can't edit their own earlier comment on A's entity or under A's comment; deleting it, and removing their own reaction, still work. A — the blocker — can still comment on B's entities and reply to, quote and react to B's comments; it's A's own choice, and B isn't notified. |
+| **Spaces** | Neither can add the other to a space. |
 | **Entity reactions and reputation grants** | Neither can react to the other's entities or grant reputation on the other's comments. |
 | **Entities** | Entities authored by a block-edged user are hidden from the other's entity lists by default (see [content-list opt-in](#content-list-opt-in)). |
 | **Comment threads** | Threads keep everyone's comments in place so other people's replies aren't lost. For A, B's comments come back in full, marked `isAuthorBlocked: true` — your app decides whether to collapse, offer "show anyway", or hide them. For B, A's comments are neutral placeholders marked `isUnavailable: true`, with no author or content (see [Comment → Blocked authors](/v8/data-models/comment#blocked-authors)). |
@@ -61,7 +62,9 @@ Comment threads don't take `blockedFilter`: they always keep comments in place, 
 
 ### Non-disclosure
 
-A block is invisible to the blocked user. There is no notification, no "you have been blocked" state, and no distinguishable error — a blocked interaction fails exactly like ordinary unavailability (user/content not found or unavailable), never revealing that a block exists, who set it, or in which direction it runs. The block-status read is **outbound-only**: a user can only ever learn whether *they* block someone, never whether someone blocks *them*. A user's block list is private to that user.
+A block is invisible to the blocked user. There is no notification, no "you have been blocked" state, and no distinguishable error. A request a block refuses gets exactly the answer it would get if the user or content didn't exist: the same status, code and text that endpoint gives for a missing target (`follow/user-not-found`, `space/user-not-found`, `entity/not-found`, …). It never reveals that a block exists, who set it, or in which direction it runs.
+
+The one place that answer can't apply is a frozen 1:1 conversation, which both users can still see and read. A write there answers `403 chat/conversation-read-only` ("Messages can't be sent in this conversation."), which says only that the conversation takes no writes, not why or who. The block-status read is **outbound-only**: a user can only ever learn whether *they* block someone, never whether someone blocks *them*. A user's block list is private to that user.
 
 ### Block SDK surfaces
 

@@ -86,6 +86,12 @@ An author self-delete also [closes](/v8/api-reference/reports/create-report) the
     { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
     ```
   </Accordion>
+  <Accordion title="Conversation Read-Only — 403">
+    A direct conversation between two users where one has blocked the other. It stays readable, but takes no deletes. The response doesn't say why.
+    ```json
+    { "error": "Messages can't be sent in this conversation.", "code": "chat/conversation-read-only" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     No message has this ID in the conversation, or it was already deleted, or it was already removed and the caller isn't its author.
     ```json

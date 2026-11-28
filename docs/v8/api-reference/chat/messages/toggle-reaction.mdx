@@ -12,6 +12,8 @@ In a space chat, the caller must also be an active member of the chat's space an
 
 Reacting is refused while the caller is banned. Banned in the space itself: `403 chat/not-a-member` (a ban ends the space membership and the chat membership). An active member of the space who is banned in a space above it: `403 chat/banned`.
 
+In a direct conversation where one of the two users has blocked the other, reacting answers `403 chat/conversation-read-only`. The conversation stays readable.
+
 The `emoji` must be exactly one grapheme cluster (a single visible character, including multi-codepoint emoji like `👨‍👩‍👧`).
 
 ## Path Parameters
@@ -101,6 +103,12 @@ The `emoji` must be exactly one grapheme cluster (a single visible character, in
     Also returned in a space chat to anyone who isn't an active member of its space or can't see it, including someone banned in the space itself.
     ```json
     { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
+  <Accordion title="Conversation Read-Only — 403">
+    A direct conversation between two users where one has blocked the other. It stays readable, but takes no reactions. The response doesn't say why.
+    ```json
+    { "error": "Messages can't be sent in this conversation.", "code": "chat/conversation-read-only" }
     ```
   </Accordion>
   <Accordion title="Banned — 403">

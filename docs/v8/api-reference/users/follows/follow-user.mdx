@@ -76,7 +76,7 @@ Returns HTTP `201` with the created [follow row](/v8/data-models/follow#followro
     { "error": "No user with this actingUserId exists in this project.", "code": "follow/user-not-found" }
     ```
 
-    Otherwise, the user to follow doesn't exist:
+    Otherwise, the user to follow doesn't exist, or one of the two users has blocked the other. Both get the same answer:
 
     ```json
     {

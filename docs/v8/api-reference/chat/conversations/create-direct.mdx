@@ -48,6 +48,7 @@ Returns a [Conversation](/v8/data-models/conversation) object with `type: "direc
     ```
   </Accordion>
   <Accordion title="Invalid Member — 400 Bad Request">
+    The target user doesn't exist, or one of the two users has blocked the other. Both get the same answer.
     ```json
     { "error": "Target user does not belong to this project.", "code": "chat/invalid-member" }
     ```

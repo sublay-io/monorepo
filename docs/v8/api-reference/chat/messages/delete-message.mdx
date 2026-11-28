@@ -15,6 +15,8 @@ A message that's already deleted can't be deleted or removed again, and a remove
 
 The caller must be either the message author or an active group `admin`. An admin who left or was removed can still delete their own messages, but not other members'.
 
+In a direct conversation where one of the two users has blocked the other, deleting answers `403 chat/conversation-read-only`. The conversation stays readable.
+
 ## Path Parameters
 
 <ParamField path="conversationId" type="string" required>
@@ -84,6 +86,12 @@ An author self-delete also [closes](/v8/api-reference/reports/create-report) the
   <Accordion title="Forbidden — 403 (not a member)">
     ```json
     { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
+  <Accordion title="Conversation Read-Only — 403">
+    A direct conversation between two users where one has blocked the other. It stays readable, but takes no deletes. The response doesn't say why.
+    ```json
+    { "error": "Messages can't be sent in this conversation.", "code": "chat/conversation-read-only" }
     ```
   </Accordion>
   <Accordion title="Not Found — 404">

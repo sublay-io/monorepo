@@ -102,7 +102,7 @@ Returns HTTP `201` with the created [connection row](/v8/data-models/connection#
     { "error": "No user with this actingUserId exists in this project.", "code": "connection/user-not-found" }
     ```
 
-    Otherwise, the user to connect with doesn't exist:
+    Otherwise, the user to connect with doesn't exist, or one of the two users has blocked the other. Both get the same answer:
 
     ```json
     {

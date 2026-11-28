@@ -12,6 +12,8 @@ In a space chat, the caller must also be an active member of the chat's space an
 
 Editing is refused while the caller is banned. Banned in the space itself: `403 chat/not-a-member` (a ban ends the space membership and the chat membership). An active member of the space who is banned in a space above it: `403 chat/banned`.
 
+In a direct conversation where one of the two users has blocked the other, editing answers `403 chat/conversation-read-only`. The conversation stays readable.
+
 ## Path Parameters
 
 <ParamField path="conversationId" type="string" required>
@@ -98,6 +100,12 @@ Returns the updated [ChatMessage](/v8/data-models/chat-message), with `editedAt`
     Also returned to someone who left, was removed or was banned: editing needs an active membership, like sending. In a space chat, also returned to anyone who isn't an active member of its space or can't see it.
     ```json
     { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
+  <Accordion title="Conversation Read-Only — 403">
+    A direct conversation between two users where one has blocked the other. It stays readable, but takes no edits. The response doesn't say why.
+    ```json
+    { "error": "Messages can't be sent in this conversation.", "code": "chat/conversation-read-only" }
     ```
   </Accordion>
   <Accordion title="Banned — 403">

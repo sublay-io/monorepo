@@ -5,7 +5,7 @@ description: "The block row and block status shapes for one user blocking anothe
 
 A block record represents a directed edge where one user (the blocker) has blocked another (the blocked). A block simply exists or doesn't — there is no status column. Blocks are part of the trust & safety [moderation bundle](/v8/sdk/moderation/overview#blocking); the table is provisioned only in projects that have that bundle installed.
 
-Blocks are **private to the blocker** — only the blocker can read their own block list, and the block-status read is outbound-only, so the block is never disclosed to the blocked user.
+Blocks are **private to the blocker** — only the blocker can read their own block list, and the block-status read is outbound-only, so the block is never disclosed to the blocked user. A request a block refuses answers exactly as if the user or content didn't exist. The exception is a write in a frozen 1:1 conversation, which both users can still read: it answers `403 chat/conversation-read-only` (see [Non-disclosure](/v8/sdk/moderation/overview#non-disclosure)).
 
 ## BlockRow
 

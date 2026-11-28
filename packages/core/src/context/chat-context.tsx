@@ -22,6 +22,7 @@ import type {
 import {
   upsertMessage,
   upsertConversationPreview,
+  applyConversationUpdate,
   insertConversationPreview,
   forgetCurrentMember,
   removeConversationPreview,
@@ -33,7 +34,6 @@ import {
   markMessageDeleted,
   markMessageRemoved,
   updateGrants,
-  setConversation,
   setUnreadSummary,
   selectConversationList,
 } from "../store/slices/chatSlice";
@@ -41,7 +41,6 @@ import useAxiosPrivate from "../config/useAxiosPrivate";
 import useFetchConversationPreview from "../hooks/chat/conversations/useFetchConversationPreview";
 import type { ChatMessage } from "../interfaces/models/ChatMessage";
 import type {
-  Conversation,
   ConversationPreview,
   ConversationPreviewLastMessage,
   ConversationType,
@@ -137,13 +136,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   useEffect(() => {
     messagesRef.current = allMessages;
   }, [allMessages]);
-
-  // Fresh snapshot of conversations for conversation:updated merging
-  const conversationsRef = useRef<Record<string, { data: Conversation | null }>>({});
-  const allConversations = useSublaySelector((state: any) => state.sublay.chat.conversations as Record<string, { data: Conversation | null }>);
-  useEffect(() => {
-    conversationsRef.current = allConversations;
-  }, [allConversations]);
 
   // Fresh snapshot of the loaded inbox list — socket handlers consult this to
   // decide whether a conversation is already represented (loaded) or needs a
@@ -563,15 +555,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     });
 
     // ── conversation:updated ────────────────────────────────────────────────
-    // The payload doesn't name the conversation yet (server-hosted#443), so
-    // this only applies once it carries an `id`.
+    // A rename, description, avatar or posting-permission change: applied to
+    // the inbox row and the loaded conversation, whichever are held.
     socket.on("conversation:updated", (patch) => {
-      const id = (patch as { id?: string }).id;
-      if (!id) return;
-      const existing = conversationsRef.current[id]?.data;
-      if (existing) {
-        dispatch(setConversation({ ...existing, ...patch }));
-      }
+      if (!patch?.conversationId) return;
+      dispatch(applyConversationUpdate(patch));
     });
 
     // ── conversation:created ────────────────────────────────────────────────

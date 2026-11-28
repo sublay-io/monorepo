@@ -1390,6 +1390,34 @@ describe("chatSlice — conversation writes merge into what's held", () => {
     expect(data.memberCount).toBe(5);
   });
 
+  it("setConversation drops a held avatarFile that is no longer the avatar, and keeps one that still is", () => {
+    const file = { id: "file-1" } as any;
+    const held = () =>
+      baseState({
+        conversations: {
+          "conversation-1": {
+            data: makeConversation({ id: "conversation-1", avatarFileId: "file-1", avatarFile: file }),
+            loading: false,
+            error: null,
+          },
+        },
+      });
+    // A refetch (no `avatarFile` key) after the avatar was replaced or removed.
+    for (const avatarFileId of ["file-2", null]) {
+      const state = reducer(held(), setConversation(makeConversation({ id: "conversation-1", avatarFileId })));
+      expect("avatarFile" in state.conversations["conversation-1"].data!).toBe(false);
+    }
+    // A refetch while the avatar is the same.
+    const same = reducer(held(), setConversation(makeConversation({ id: "conversation-1", avatarFileId: "file-1" })));
+    expect(same.conversations["conversation-1"].data!.avatarFile).toEqual(file);
+    // A preview naming another avatar.
+    const viaPreview = reducer(
+      held(),
+      insertConversationPreview(makeConversationPreview({ id: "conversation-1", avatarFileId: "file-2" })),
+    );
+    expect("avatarFile" in viaPreview.conversations["conversation-1"].data!).toBe(false);
+  });
+
   it("forgetCurrentMember removes the held currentMember key", () => {
     const state0 = baseState({
       conversations: {

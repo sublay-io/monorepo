@@ -54,6 +54,21 @@ All fields are optional. Only provided fields are updated.
 
 Returns the updated [Conversation](/v8/data-models/conversation) object, with `avatarFile` populated if set.
 
+## Real-time event
+
+When the request sets at least one field, every active member of the conversation connected to chat receives a `conversation:updated` socket event naming the conversation and carrying each field the request set, as stored:
+
+```json
+{
+  "conversationId": "3f6c…",
+  "name": "Design team",
+  "avatarFileId": "9b2f…",
+  "avatarFile": { "id": "9b2f…", "originalPath": "https://…?exp=…&sig=…", "linksExpireAt": "…", "image": { "…": "…" } }
+}
+```
+
+`avatarFileId` and `avatarFile` are there only when the avatar changed: `avatarFile` is the new avatar's [File](/v8/data-models/file), the same as this response's, or `null` when the avatar was removed. Its links are signed and expire like any File's ([File links](/v8/data-models/file#file-links)). The SDK's `ChatProvider` applies the event for you ([Real-time Features](/v8/sdk/chat/real-time)).
+
 ## Error Responses
 
 <AccordionGroup>

@@ -38,11 +38,16 @@ export type SocketConversationMember = Omit<
 >;
 
 /**
- * The fields an update changed, as `conversation:updated` sends them. The
- * payload doesn't name the conversation (server-hosted#443).
+ * A conversation update, as `conversation:updated` sends it: the
+ * conversation's id and each field the update set. `avatarFile` comes with
+ * `avatarFileId` whenever the avatar changed: the new File, or `null` once the
+ * avatar is removed.
  */
-export type SocketConversationPatch = Partial<
-  Pick<Conversation, "name" | "description" | "avatarFileId" | "postingPermission">
+export type SocketConversationPatch = { conversationId: string } & Partial<
+  Pick<
+    Conversation,
+    "name" | "description" | "avatarFileId" | "avatarFile" | "postingPermission"
+  >
 >;
 
 // This is a hand-maintained mirror of the server's own copy (server

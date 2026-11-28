@@ -181,7 +181,7 @@ function CommentThread({ comment }) {
 
 The same `CommentThread` works without `replyDepth`: every comment then starts with no replies loaded, and the first click fetches them. `useReplies` continues from whatever is already loaded and nests on a comment's first load — see [`useReplies`](/v8/hooks/comments/use-replies) for the details.
 
-Each page can return at most 500 comments, nested replies included (`limit × (1 + replyLimit + … + replyLimit^replyDepth)`). The section sends its props as given; a combination over the limit lands in `error`, and a development build logs which values to lower.
+Each page can return at most 500 comments, nested replies included (`limit × (1 + replyLimit + … + replyLimit^replyDepth)`). The section sends its props as given; a combination over the limit lands in `error`, and outside production builds (in development and in test runs) the SDK logs which values to lower.
 
 Show counts from `repliesCount` (for example "12 replies") and drive "load more" buttons from `hasMore`.
 

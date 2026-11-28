@@ -94,7 +94,7 @@ function CommentList({ entityId }: { entityId: string }) {
   Related data to populate, at every level. `"files"` adds the comment's images and files (requires the `files-images` bundle). Default: `"user"`.
 </ParamField>
 
-A page can return at most 500 comments, nested replies included (see [Request size limit](/v8/api-reference/comments/fetch-many-comments#request-size-limit)). The hook sends `limit`, `replyDepth` and `replyLimit` as given; a combination over the limit fails with an error in `error`, and a development build logs which values to lower.
+A page can return at most 500 comments, nested replies included (see [Request size limit](/v8/api-reference/comments/fetch-many-comments#request-size-limit)). The hook sends `limit`, `replyDepth` and `replyLimit` as given; a combination over the limit fails with an error in `error`, and outside production builds (in development and in test runs) the SDK logs which values to lower.
 
 ## Return Values
 

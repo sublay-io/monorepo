@@ -1,0 +1,102 @@
+// @vitest-environment node
+import { describe, it, expect, afterEach, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { transformWithEsbuild } from "vite";
+import { isDevelopment, isProduction } from "./env";
+
+describe("build-mode detection", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it("follows NODE_ENV", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    expect(isDevelopment()).toBe(true);
+    expect(isProduction()).toBe(false);
+
+    // Tests: warnings on (not production), debugging aids off.
+    vi.stubEnv("NODE_ENV", "test");
+    expect(isDevelopment()).toBe(false);
+    expect(isProduction()).toBe(false);
+
+    vi.stubEnv("NODE_ENV", "production");
+    expect(isDevelopment()).toBe(false);
+    expect(isProduction()).toBe(true);
+  });
+
+  it("counts an unset NODE_ENV as not production, and not development", () => {
+    vi.stubEnv("NODE_ENV", undefined);
+    expect(isProduction()).toBe(false);
+    expect(isDevelopment()).toBe(false);
+  });
+
+  it("prefers NODE_ENV over React Native's __DEV__", () => {
+    // React Native's test preset sets __DEV__ to true while NODE_ENV is "test".
+    vi.stubEnv("NODE_ENV", "test");
+    vi.stubGlobal("__DEV__", true);
+    expect(isDevelopment()).toBe(false);
+    expect(isProduction()).toBe(false);
+  });
+
+  it("falls back to __DEV__, then to production, when NODE_ENV is unavailable", () => {
+    vi.stubGlobal("process", undefined);
+
+    vi.stubGlobal("__DEV__", true);
+    expect(isDevelopment()).toBe(true);
+    expect(isProduction()).toBe(false);
+
+    vi.stubGlobal("__DEV__", false);
+    expect(isDevelopment()).toBe(false);
+    expect(isProduction()).toBe(true);
+
+    vi.stubGlobal("__DEV__", undefined);
+    expect(isDevelopment()).toBe(false);
+    expect(isProduction()).toBe(true);
+  });
+});
+
+// vitest always has a real `process`, so the tests above can't see the
+// browser-bundle bug. This one builds env.ts the way a web bundler does
+// (replacing the text `process.env.NODE_ENV`) and runs it where there is no
+// `process` at all, so any guard on `process` existing would fail it.
+describe("in a browser bundle", () => {
+  async function bundleFor(nodeEnv: string) {
+    const source = readFileSync(join(__dirname, "env.ts"), "utf8");
+    const { code } = await transformWithEsbuild(source, "env.ts", {
+      loader: "ts",
+      format: "cjs",
+      define: { "process.env.NODE_ENV": JSON.stringify(nodeEnv) },
+    });
+    const module = { exports: {} as Record<string, () => boolean> };
+    // Shadow `process` and `globalThis`: a browser has neither a `process`
+    // object nor a `process` property on its global.
+    new Function("process", "globalThis", "module", "exports", code)(
+      undefined,
+      {},
+      module,
+      module.exports,
+    );
+    return module.exports;
+  }
+
+  it("reads NODE_ENV as the exact text every bundler replaces", () => {
+    // esbuild also replaces `process?.env?.NODE_ENV` and `["NODE_ENV"]`;
+    // webpack's DefinePlugin doesn't, so the plain form is required.
+    const code = readFileSync(join(__dirname, "env.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/.*$/gm, "");
+    expect(code).toMatch(/process!?\.env!?\.NODE_ENV/);
+  });
+
+  it("sees development and production", async () => {
+    const dev = await bundleFor("development");
+    expect(dev.isDevelopment()).toBe(true);
+    expect(dev.isProduction()).toBe(false);
+
+    const prod = await bundleFor("production");
+    expect(prod.isDevelopment()).toBe(false);
+    expect(prod.isProduction()).toBe(true);
+  });
+});

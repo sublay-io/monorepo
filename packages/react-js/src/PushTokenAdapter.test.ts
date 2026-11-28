@@ -13,7 +13,7 @@ const { mockFetch, mockSubscribe, mockGetKey, mockRequestPermission } =
   });
 
 vi.mock("@sublay/core", () => ({
-  getApiBaseUrl: () => "https://api.sublay.io/v8",
+  handleError: vi.fn(),
 }));
 
 // Provide a consistent subscription shape

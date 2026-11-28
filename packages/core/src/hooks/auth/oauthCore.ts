@@ -15,9 +15,7 @@ import { SublayError, toSublayError, sublayErrorFromResponse } from "../../error
  * session) and any navigation/URL cleanup.
  */
 
-// Single source of truth for the API base URL. Matches the web hook's prior
-// hardcoded value exactly — do NOT swap in `getApiBaseUrl()`, which is
-// env-aware and would diverge from the web hook's production-only behavior.
+// The API base URL the OAuth flows use: always the production API.
 export const OAUTH_BASE_URL = "https://api.sublay.io/v8";
 
 /** The OAuth providers Sublay can sign a user in with or link to an account. */

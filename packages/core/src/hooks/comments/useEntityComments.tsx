@@ -23,6 +23,7 @@ import {
   CommentsSortByOptions,
 } from "../../interfaces/CommentsSortByOptions";
 import { handleError } from "../../utils/handleError";
+import { isProduction } from "../../utils/env";
 import { SublayError, toSublayError } from "../../errors/SublayError";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import {
@@ -36,7 +37,6 @@ import {
   COMMENT_REPLY_BUDGET,
   CommentSortTrio,
   DEFAULT_COMMENT_REPLY_LIMIT,
-  isDevBuild,
   resolveReplySort,
   sendableReplySortByReaction,
 } from "../../helpers/commentThreadConfig";
@@ -135,7 +135,7 @@ export const CommentSectionInternalContext =
 /** Dev-mode hint when the section's own request is over the server's row budget. */
 function reportBudgetError(err: unknown) {
   const data = toSublayError(err).body;
-  if (data?.code === "comment/reply-budget-exceeded" && isDevBuild()) {
+  if (data?.code === "comment/reply-budget-exceeded" && !isProduction()) {
     console.error(
       `[Sublay] This comment section's request could return up to ${String(
         data.requestedRows ?? "?",

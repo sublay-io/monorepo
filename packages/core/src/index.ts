@@ -18,12 +18,7 @@ export { getUserName } from "./helpers/getUserName";
 // request from separate sort state without sending a refused sortDir.
 export { oneWaySortFields, isOneWaySort } from "./helpers/oneWaySorts";
 export type { OneWaySort, WithOneWaySortDir } from "./interfaces/OneWaySortParams";
-export {
-  isDevelopment,
-  isProduction,
-  getApiBaseUrl,
-  getEnvVar,
-} from "./utils/env";
+export { isDevelopment, isProduction } from "./utils/env";
 export {
   buildSpaceReputationParams,
   type BuildSpaceReputationParamsInput,

@@ -3,8 +3,9 @@ import type {
   PushDeviceIdentifier,
   PushDeviceContext,
 } from "@sublay/core";
-import { getApiBaseUrl } from "@sublay/core";
 import { subscribeToWebPushIdentifierChanges } from "./webPushRotation";
+
+const API_BASE_URL = "https://api.sublay.io/v8";
 
 // Converts a URL-safe Base64 string (VAPID key format) to a Uint8Array,
 // required by PushManager.subscribe({ applicationServerKey: ... }).
@@ -39,7 +40,7 @@ export const webPushTokenAdapter: PushTokenAdapter = {
     // unauthenticated so the browser can call pushManager.subscribe() before
     // the user has signed in.
     const res = await fetch(
-      `${getApiBaseUrl()}/${projectId}/push-notifications/vapid-public-key`
+      `${API_BASE_URL}/${projectId}/push-notifications/vapid-public-key`
     );
     if (!res.ok) return null;
 

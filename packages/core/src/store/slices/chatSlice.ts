@@ -397,8 +397,6 @@ function advanceCursor(
 
 // ─── Slice ───────────────────────────────────────────────────────────────────
 
-// Not exported directly — use the actions below and the default reducer export.
-// Exporting the slice itself causes TS4023 due to immer's internal WritableNonArrayDraft type.
 /**
  * Drop a held `avatarFile` that is no longer the conversation's avatar: a
  * read without `avatarFile` (Fetch Conversation, a preview) merges over a File
@@ -411,6 +409,8 @@ function dropStaleAvatarFile(target: Partial<Conversation>): void {
   }
 }
 
+// Not exported directly — use the actions below and the default reducer export.
+// Exporting the slice itself causes TS4023 due to immer's internal WritableNonArrayDraft type.
 const chatSlice = createSlice({
   name: "chat",
   initialState,

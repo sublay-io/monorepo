@@ -1,4 +1,6 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { isDevelopment, isProduction } from "./env";
 
 describe("build-mode detection", () => {
@@ -44,5 +46,21 @@ describe("build-mode detection", () => {
     vi.stubGlobal("__DEV__", undefined);
     expect(isDevelopment()).toBe(false);
     expect(isProduction()).toBe(true);
+  });
+});
+
+// vitest always has a real `process`, so the behaviour tests above can't see
+// the browser-bundle bug: bundlers only replace the exact text
+// `process.env.NODE_ENV`, and a `typeof process` guard is false in a browser.
+describe("env.ts source", () => {
+  const source = readFileSync(join(__dirname, "env.ts"), "utf8");
+  const code = source.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("reads NODE_ENV as literal text bundlers replace", () => {
+    expect(code).toMatch(/process!?\.env!?\.NODE_ENV/);
+  });
+
+  it("does not guard the read on a `process` object existing", () => {
+    expect(code).not.toMatch(/typeof\s+process/);
   });
 });

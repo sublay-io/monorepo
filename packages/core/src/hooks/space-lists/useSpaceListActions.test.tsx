@@ -171,7 +171,7 @@ describe("useSpaceListActions", () => {
       );
     });
 
-    it("creates a space without a name, sending nsfw and visibility", async () => {
+    it("creates a space, sending nsfw and visibility", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ id: "s1", name: "Feed Space" }, 201));
       const { result, store } = renderHookWithStore(() => useSpaceListActions(), {
         projectId: "test-project",

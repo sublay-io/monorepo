@@ -14,7 +14,9 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
   Authentication is optional — the endpoint works without a token. When the
   caller is signed in, reactions from users with a block between them and the
   caller, in either direction, are excluded from both the results and the
-  count. Block filtering requires the `moderation` bundle.
+  count. If the entity's author has blocked the caller, the call fails with
+  `404 entity/not-found`, as for an entity that doesn't exist. Block filtering
+  requires the `moderation` bundle.
 </Note>
 
 ## Usage Example

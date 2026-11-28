@@ -15,6 +15,8 @@ A message that's already deleted can't be deleted or removed again, and a remove
 
 The caller must be either the message author or an active group `admin`. An admin who left or was removed can still delete their own messages, but not other members'.
 
+In a direct conversation where one of the two users has blocked the other, deleting answers `403 chat/conversation-read-only`. The conversation stays readable.
+
 ## Path Parameters
 
 <ParamField path="conversationId" type="string" required>

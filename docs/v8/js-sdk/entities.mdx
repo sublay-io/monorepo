@@ -527,6 +527,8 @@ const { data, pagination } = await sublay.entities.fetchReactions({
 
 **Returns** — `Promise<{ data: Reaction[]; pagination: { page: number; pageSize: number; totalPages: number; totalItems: number; hasMore: boolean } }>`
 
+Reactions from users block-edged with the signed-in user are left out. If the entity's author has blocked the user, this fails with `404 entity/not-found`.
+
 ---
 
 ### getUserReaction
@@ -545,3 +547,5 @@ const { reactionType } = await sublay.entities.getUserReaction({
 </ParamField>
 
 **Returns** — `Promise<{ reactionType: ReactionType | null }>`
+
+If the entity's author has blocked the user, this fails with `404 entity/not-found`.

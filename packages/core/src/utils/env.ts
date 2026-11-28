@@ -7,18 +7,22 @@
 // hide the value, so the read is wrapped in try/catch instead. When nothing
 // replaced it and there is no `process` (an unbundled browser script), React
 // Native's `__DEV__` is the fallback, and with neither the build counts as
-// production.
+// production. A `process` whose NODE_ENV is unset (a Node server started
+// without it) counts as not production, as it does for React.
 
 declare const process:
   | { env?: Record<string, string | undefined> }
   | undefined;
 
-/** `process.env.NODE_ENV` as the bundler or runtime provides it, or undefined. */
-function readNodeEnv(): string | undefined {
+/**
+ * `process.env.NODE_ENV` as the bundler or runtime provides it: a string, or
+ * `null` when it can be read but is unset, or `undefined` when it can't be read.
+ */
+function readNodeEnv(): string | null | undefined {
   try {
     // The `!`s are type-only: the emitted text stays `process.env.NODE_ENV`.
     const value = process!.env!.NODE_ENV;
-    return typeof value === "string" ? value : undefined;
+    return typeof value === "string" ? value : null;
   } catch {
     return undefined;
   }
@@ -35,7 +39,8 @@ function readDevGlobal(): boolean | undefined {
  *
  * The SDK shows its warnings (misuse, wasteful props, server rejections a
  * developer should fix) whenever this is false, so they also show in tests.
- * With no way to tell, the build counts as production.
+ * An unset NODE_ENV counts as not production; with no way to tell at all, the
+ * build counts as production.
  */
 export function isProduction(): boolean {
   const nodeEnv = readNodeEnv();

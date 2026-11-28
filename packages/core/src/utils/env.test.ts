@@ -24,6 +24,12 @@ describe("build-mode detection", () => {
     expect(isProduction()).toBe(true);
   });
 
+  it("counts an unset NODE_ENV as not production, and not development", () => {
+    vi.stubEnv("NODE_ENV", undefined);
+    expect(isProduction()).toBe(false);
+    expect(isDevelopment()).toBe(false);
+  });
+
   it("prefers NODE_ENV over React Native's __DEV__", () => {
     // React Native's test preset sets __DEV__ to true while NODE_ENV is "test".
     vi.stubEnv("NODE_ENV", "test");

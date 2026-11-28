@@ -460,8 +460,7 @@ describe("useEntityList — the list contract", () => {
     expect(params.get("limit")).toBe("3");
   });
 
-  it("warns in development about keys fetchEntities doesn't take", async () => {
-    vi.stubGlobal("__DEV__", true);
+  it("warns outside production about keys fetchEntities doesn't take", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
